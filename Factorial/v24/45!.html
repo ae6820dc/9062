@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<title>45! v24</title>
+<style>
+  :root{
+    --bg:#0f1420; --tile-on:#7be0d6; --tile-off:#213047;
+    --ink:#e8eef8; --muted:#9fb3c8; --digit-ink:#e7f0ff;
+  }
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;
+    display:flex;flex-direction:column;align-items:center;
+    -webkit-tap-highlight-color:transparent}
+  h1{font-size:18px;font-weight:800;margin:10px 0 8px}
+  #frame{display:flex;flex-direction:column;align-items:center}
+  .hud{width:100%;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;color:var(--muted);font-size:20px;padding:0 4px}
+  .row{display:flex;align-items:baseline;gap:8px;min-width:0}
+  .row .label{white-space:nowrap}
+  #boardsHex{display:block;width:100%;overflow-x:auto;white-space:nowrap;padding-bottom:2px;border-bottom:1px dashed rgba(231,240,255,.2)}
+  canvas{display:block;position:relative}
+  .bar{width:100%;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+  button{margin:12px 0 6px;padding:12px 18px;border:none;border-radius:12px;
+    background:var(--tile-off);color:var(--digit-ink);font-size:16px;font-weight:800;
+    touch-action:manipulation;user-select:none;min-width:120px}
+  .btn-on{background:var(--tile-on)!important;color:#0a1320!important}
+  .panel{display:flex;align-items:center;gap:10px;font-size:14px;opacity:.95}
+  .panel label{white-space:nowrap}
+  input[type=range]{width:220px}
+  .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;background:#1c2436;padding:2px 6px;border-radius:6px}
+  .tiny{font-size:12px;opacity:.8}
+  @media (max-width:420px){.hud{font-size:18px;gap:5px;padding:0 2px}h1{font-size:16px}button{font-size:15px}.panel{font-size:13px}input[type=range]{width:180px}}
+  .hud, .hud .label, #onCount, #total, #boardsHex .real{color:var(--ink);font-weight:800}
+</style>
+</head>
+<body>
+<h1>45! v24</h1>
+<div id="frame">
+  <div class="hud" id="hud">
+    <div class="row"><span class="label">On:</span> <b id="onCount">0</b>/<b id="total">45</b></div>
+    <div class="row">
+      <span class="label">Boards:</span>
+      <div id="boardsHex"><span class="real">0</span></div>
+    </div>
+    <div class="row tiny"><span class="label">Mode:</span> <span id="modeName">Full Permutation (lexicographic)</span></div>
+  </div>
+  <canvas id="stage" aria-label="5×9 kapcsolgatható rács"></canvas>
+  <div class="bar">
+    <button aria-pressed="false" id="autoBtn">Auto</button>
+    <div class="panel">
+      <label for="speed">Speed:</label>
+      <input id="speed" type="range" min="0" max="9" step="1"/>
+      <span id="speedVal" class="kbd">0.5 s</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(()=>{
+  const COLS=5, ROWS=9, TOTAL=COLS*ROWS;
+  const DPR=Math.max(1, Math.min(window.devicePixelRatio||1, 2));
+  const canvas=document.getElementById('stage');
+  const ctx=canvas.getContext('2d');
+  const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const COLORS={ BG:css('--bg'), ON:css('--tile-on'), OFF:css('--tile-off'), DIGIT_INK:css('--digit-ink') };
+  const grid={ cols:COLS, rows:ROWS, size:0, pad:10 };
+  let matrix=[], onCount=0, boards="0", locked=true; // locked=true → no manual input
+
+  const elOn=document.getElementById('onCount');
+  const elBoards=document.getElementById('boardsHex');
+  const hud=document.getElementById('hud');
+  const frame=document.getElementById('frame');
+  const btnAuto=document.getElementById('autoBtn');
+  const speedRange=document.getElementById('speed');
+  const speedVal=document.getElementById('speedVal');
+
+  const STORAGE_KEY='45v24_perm_state';
+  const AUTO_KEY='45v24_perm_auto';
+
+  // ---- Canvas fitting
+  function fitCanvas(){
+    const outer=18, h1=document.querySelector('h1'), bar=document.querySelector('.bar');
+    const h1H=h1?.getBoundingClientRect().height||0;
+    const hudH=hud?.getBoundingClientRect().height||0;
+    const barH=bar?.getBoundingClientRect().height||0;
+    const safetyY=18;
+    const maxW=Math.max(320, window.innerWidth-outer*2);
+    const maxH=Math.max(260, window.innerHeight-(h1H+hudH+barH+safetyY+outer*2));
+    grid.pad=Math.round(Math.max(10, Math.min(18, Math.min(maxW,maxH)*0.025)));
+    const sizeFromW=Math.floor((maxW-(grid.pad*(grid.cols+1)))/grid.cols);
+    const sizeFromH=Math.floor((maxH-(grid.pad*(grid.rows+1)))/grid.rows);
+    const MAX_TILE=Math.min(96, Math.floor(window.innerWidth/5));
+    grid.size=Math.min(MAX_TILE, Math.max(24, Math.min(sizeFromW,sizeFromH)));
+    const cssW=grid.cols*(grid.size+grid.pad)+grid.pad;
+    const cssH=grid.rows*(grid.size+grid.pad)+grid.pad;
+    frame.style.width=cssW+'px';
+    canvas.style.width=cssW+'px'; canvas.style.height=cssH+'px';
+    canvas.width=Math.round(cssW*DPR); canvas.height=Math.round(cssH*DPR);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    draw();
+  }
+
+  // ---- State persistence
+  function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({matrix,onCount,boards,lehmer})); }catch(e){} }
+  function loadState(){
+    try{
+      const s=localStorage.getItem(STORAGE_KEY);
+      if(s){
+        const st=JSON.parse(s);
+        if(st && Array.isArray(st.matrix) && st.matrix.length===ROWS){
+          matrix=st.matrix; onCount=st.onCount||0; boards=st.boards||"0";
+          if(Array.isArray(st.lehmer) && st.lehmer.length===TOTAL){ lehmer=st.lehmer.map(x=>x|0); }
+          return;
+        }
+      }
+    }catch(e){}
+    matrix=Array.from({length:ROWS},()=>Array(COLS).fill(false)); onCount=0; boards="0";
+  }
+
+  // ---- Drawing
+  function rr(x,y,w,h,r){ const a=Math.min(r,w/2,h/2);
+    ctx.beginPath(); ctx.moveTo(x+a,y); ctx.arcTo(x+w,y,x+w,y+h,a);
+    ctx.arcTo(x+w,y+h,x,y+h,a); ctx.arcTo(x,y+h,x,y,a); ctx.arcTo(x,y,x+w,y,a); ctx.closePath();
+  }
+  function drawHex(cx,cy,txt,isOn){
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='700 '+Math.max(16,Math.floor(grid.size*0.42))+'px Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial';
+    ctx.fillStyle=isOn?'#0a1320':COLORS.DIGIT_INK;
+    ctx.fillText(txt,cx,cy);
+  }
+  function draw(){
+    ctx.fillStyle=COLORS.BG; ctx.fillRect(0,0,canvas.width/DPR,canvas.height/DPR);
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        const idx=r*COLS+c;
+        const hex=idx.toString(16).toUpperCase().padStart(2,'0');
+        const x=c*(grid.size+grid.pad)+grid.pad, y=r*(grid.size+grid.pad)+grid.pad;
+        rr(x,y,grid.size,grid.size,12);
+        const on=matrix[r][c]; ctx.fillStyle=on?COLORS.ON:COLORS.OFF; ctx.fill();
+        drawHex(x+grid.size/2, y+grid.size/2, hex, on);
+      }
+    }
+  }
+
+  // ---- Big int add (decimal string)
+  function bigAdd(a,b){
+    let res='',carry=0,i=a.length-1,j=b.length-1;
+    while(i>=0||j>=0||carry){
+      const da=i>=0?(a.charCodeAt(i)-48):0, db=j>=0?(b.charCodeAt(j)-48):0;
+      const s=da+db+carry; res=(s%10)+res; carry=(s/10)|0; i--; j--;
+    }
+    let k=0; while(k<res.length-1 && res[k]==='0') k++; return res.slice(k);
+  }
+
+  function renderBoards(v){ elBoards.innerHTML='<span class="real">'+v+'</span>'; requestAnimationFrame(()=>{ elBoards.scrollLeft=elBoards.scrollWidth; }); }
+  function syncHUD(){ elOn.textContent=String(onCount); document.getElementById('total').textContent=String(TOTAL); renderBoards(boards); saveState(); }
+
+  // ===================================================================
+  //                 FULL PERMUTATION ENGINE (LEXICOGRAPHIC)
+  // ===================================================================
+  let lehmer = new Array(TOTAL).fill(0); // start at first permutation
+  loadState();
+  if(!Array.isArray(lehmer) || lehmer.length!==TOTAL) lehmer = new Array(TOTAL).fill(0);
+
+  function lehmerToPermutation(leh){
+    const pool = Array.from({length:TOTAL}, (_,i)=>i);
+    const out = new Array(TOTAL);
+    for(let i=0;i<TOTAL;i++){
+      const idx = leh[i];
+      out[i] = pool.splice(idx,1)[0];
+    }
+    return out;
+  }
+  function incrementLehmer(leh){
+    for(let i=TOTAL-1;i>=0;i--){
+      const base = TOTAL - i; // 1..TOTAL
+      leh[i] += 1;
+      if(leh[i] < base){ return leh; } else { leh[i] = 0; }
+    }
+    return leh; // wrap to zero
+  }
+
+  // ===================================================================
+  //                         AUTO CYCLE
+  // ===================================================================
+  let autoOn=true; // default ON
+  let autoSpeedIndex=4;
+  function loadAuto(){
+    try{
+      const s=localStorage.getItem(AUTO_KEY);
+      if(!s) return;
+      const st=JSON.parse(s);
+      if(typeof st.autoOn==='boolean') autoOn=st.autoOn;
+      if(typeof st.autoSpeedIndex==='number') autoSpeedIndex=Math.max(0,Math.min(9,st.autoSpeedIndex));
+    }catch(e){}
+  }
+  function saveAuto(){ try{ localStorage.setItem(AUTO_KEY, JSON.stringify({autoOn,autoSpeedIndex})); }catch(e){} }
+  function speedIndexToMs(i){ return 100 + i*100; }
+  function updateSpeedUI(){ speedRange.value=String(autoSpeedIndex); speedVal.textContent=(speedIndexToMs(autoSpeedIndex)/1000).toFixed(1)+' s'; }
+  btnAuto.addEventListener('click', ()=>{ autoOn=!autoOn; btnAuto.classList.toggle('btn-on',autoOn); btnAuto.setAttribute('aria-pressed',String(autoOn)); saveAuto(); if(autoOn) startAuto(); });
+  speedRange.addEventListener('input', ()=>{ autoSpeedIndex=parseInt(speedRange.value||'4',10); updateSpeedUI(); saveAuto(); });
+
+  let order = lehmerToPermutation(lehmer);
+  let pos = 0;
+  let ticker=null, running=false;
+  let phase = 0; // 0 = filling, 1 = erasing
+
+  function prepareOrder(){ order = lehmerToPermutation(lehmer); pos=0; }
+
+  function startAuto(){ if(running) return; running=true; stepAuto(); }
+  function stopAuto(){ running=false; if(ticker){ clearTimeout(ticker); ticker=null; } }
+
+  function stepAuto(){
+    if(!autoOn){ stopAuto(); return; }
+    const delay = speedIndexToMs(autoSpeedIndex);
+
+    if(phase===0){
+      // filling
+      if(onCount < TOTAL){
+        const idx = order[pos++];
+        const r = (idx / COLS) | 0, c = (idx % COLS);
+        if(!matrix[r][c]){ matrix[r][c]=true; onCount++; syncHUD(); draw(); }
+        if(pos >= order.length) pos = 0;
+        ticker = setTimeout(stepAuto, delay);
+        return;
+      } else {
+        // to erase phase, count board
+        boards = bigAdd(boards, '1'); syncHUD();
+        phase = 1; ticker = setTimeout(stepAuto, delay); return;
+      }
+    } else {
+      // erasing
+      if(onCount > 0){
+        // erase in reverse order for visual symmetry
+        pos = (pos-1+order.length)%order.length;
+        const idx = order[pos];
+        const r = (idx / COLS) | 0, c = (idx % COLS);
+        if(matrix[r][c]){ matrix[r][c]=false; onCount--; syncHUD(); draw(); }
+        ticker = setTimeout(stepAuto, delay);
+        return;
+      } else {
+        // next permutation
+        phase = 0;
+        incrementLehmer(lehmer); saveState();
+        prepareOrder();
+        ticker = setTimeout(stepAuto, delay);
+        return;
+      }
+    }
+  }
+
+  // ---- Bootstrap
+  function init(){
+    document.getElementById('total').textContent=String(TOTAL);
+    draw(); syncHUD();
+    fitCanvas();
+    loadAuto(); updateSpeedUI();
+    btnAuto.classList.toggle('btn-on',autoOn); btnAuto.setAttribute('aria-pressed',String(autoOn));
+    prepareOrder();
+    if(autoOn) startAuto();
+  }
+
+  window.addEventListener('resize', fitCanvas);
+  window.addEventListener('orientationchange', fitCanvas);
+  const ro=new ResizeObserver(()=>fitCanvas()); ro.observe(hud); ro.observe(elBoards);
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(fitCanvas); }
+
+  if(!matrix || !matrix.length){ matrix=Array.from({length:ROWS},()=>Array(COLS).fill(false)); }
+  init();
+  requestAnimationFrame(fitCanvas); setTimeout(fitCanvas,0); setTimeout(fitCanvas,50); setTimeout(fitCanvas,150);
+})();</script>
+</body>
+</html>
