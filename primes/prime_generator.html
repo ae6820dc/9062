@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prímgenerátor</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #f5f7fa 0%, #e9edf5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            border-radius: 48px;
+            padding: 40px 35px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), 0 8px 16px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        h1 {
+            font-weight: 600;
+            font-size: 2.2rem;
+            color: #1a2639;
+            margin-top: 0;
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        h1 small {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #3e4a5e;
+            background: #d0d9e9;
+            padding: 4px 14px;
+            border-radius: 60px;
+            letter-spacing: 0.3px;
+        }
+        .sub {
+            color: #3d4a5e;
+            margin-bottom: 28px;
+            font-size: 1.05rem;
+            border-left: 4px solid #3b6ea5;
+            padding-left: 18px;
+            background: #eef3fc;
+            border-radius: 0 20px 20px 0;
+            line-height: 1.4;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 14px 16px;
+            margin-bottom: 20px;
+            background: #f0f4fe;
+            padding: 18px 22px;
+            border-radius: 60px;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.02), 0 4px 12px rgba(0, 20, 40, 0.08);
+        }
+        .controls label {
+            font-weight: 500;
+            color: #1f2a3f;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .controls input[type="text"] {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 60px;
+            background: white;
+            font-size: 0.95rem;
+            font-weight: 500;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            transition: 0.15s;
+            border: 1px solid transparent;
+            width: 150px;
+        }
+        .controls input[type="text"]:focus {
+            outline: none;
+            border-color: #2b5b8a;
+            box-shadow: 0 0 0 4px rgba(43, 91, 138, 0.15);
+        }
+        .controls input[type="text"]:hover {
+            background: #fafcff;
+        }
+        .controls input[type="text"].small {
+            width: 80px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-left: auto;
+        }
+        .btn {
+            border: none;
+            background: white;
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #1f2a3f;
+            cursor: pointer;
+            transition: 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0,0,0,0.04);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.3px;
+        }
+        .btn-primary {
+            background: #1f3a5f;
+            color: white;
+            box-shadow: 0 8px 18px rgba(26, 55, 96, 0.25);
+            border: 1px solid #1f3a5f;
+        }
+        .btn-primary:hover {
+            background: #2b4a75;
+            transform: scale(1.02);
+            box-shadow: 0 10px 22px rgba(26, 55, 96, 0.3);
+        }
+        .btn-primary:active {
+            transform: scale(0.96);
+        }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            pointer-events: none;
+            transform: none;
+        }
+        .btn-secondary {
+            background: #eef2f9;
+            border: 1px solid #cdd7e6;
+        }
+        .btn-secondary:hover {
+            background: #e2e8f2;
+            border-color: #a3b3cc;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            border: 1px solid #dc3545;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .btn-purple {
+            background: #6f42c1;
+            color: white;
+            border: 1px solid #6f42c1;
+            box-shadow: 0 8px 18px rgba(111, 66, 193, 0.25);
+        }
+        .btn-purple:hover {
+            background: #5a32a3;
+            transform: scale(1.02);
+        }
+        .btn-purple:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            padding: 0 6px 12px 6px;
+            font-size: 0.95rem;
+            color: #2b3b54;
+            border-bottom: 2px dashed #cdd9ec;
+            margin-bottom: 12px;
+        }
+        .info-bar span:first-child {
+            font-weight: 500;
+        }
+        .info-bar strong {
+            color: #0a1a2e;
+            font-size: 1.1rem;
+        }
+        .status-box {
+            background: #eef3fc;
+            border-radius: 28px;
+            padding: 20px 24px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border: 1px solid #dce3ef;
+            margin-top: 6px;
+        }
+        .status-box .status-icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+        .status-box .status-text {
+            font-size: 1.1rem;
+            color: #1a2639;
+            font-weight: 500;
+        }
+        .status-box .status-detail {
+            font-size: 0.9rem;
+            color: #4a5a72;
+            margin-top: 4px;
+        }
+        .progress-container {
+            width: 100%;
+            background: #e9ecef;
+            border-radius: 60px;
+            height: 28px;
+            margin: 12px 0 18px 0;
+            overflow: hidden;
+            display: none;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .progress-container.active {
+            display: block;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #1f3a5f, #3b7cb8);
+            border-radius: 60px;
+            width: 0%;
+            transition: width 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .download-area {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .download-area .btn {
+            flex: 1;
+            justify-content: center;
+            padding: 14px 24px;
+            font-size: 1.1rem;
+            min-width: 200px;
+        }
+        .footer-actions {
+            margin-top: 12px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .footer-actions .btn {
+            background: transparent;
+            border: 1px solid #bcc9de;
+            color: #1f2f47;
+            padding: 6px 18px;
+            font-size: 0.85rem;
+        }
+        .footer-actions .btn:hover {
+            background: #e6edf9;
+            border-color: #8da1be;
+        }
+        .error-msg {
+            color: #b13e3e;
+            background: #ffebee;
+            border-radius: 60px;
+            padding: 6px 18px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        .success-msg {
+            color: #0d6e3e;
+            background: #d4edda;
+            border-radius: 60px;
+            padding: 6px 18px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        .warning-msg {
+            color: #856404;
+            background: #fff3cd;
+            border-radius: 60px;
+            padding: 6px 18px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        .storage-info {
+            font-size: 0.8rem;
+            color: #5a6a82;
+            text-align: right;
+            margin-top: 8px;
+            padding: 4px 12px;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 28px 18px; }
+            .controls { border-radius: 32px; padding: 16px; flex-direction: column; align-items: stretch; }
+            .btn-group { margin-left: 0; justify-content: center; }
+            h1 { font-size: 1.8rem; }
+            .controls input[type="text"] { width: 100%; }
+            .controls input[type="text"].small { width: 80px; }
+            .download-area .btn { min-width: 140px; font-size: 0.95rem; padding: 12px 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            ⚡ Prímgenerátor
+            <small>2539</small>
+        </h1>
+        <div class="sub">
+            977
+        </div>
+
+        <div class="controls">
+            <label>
+                <span>📌 A =</span>
+                <input type="text" id="fromInput" value="2" style="width:150px;">
+            </label>
+            <label>
+                <span>📌 B =</span>
+                <input type="text" id="toInput" value="100000" placeholder="üres = +1000" style="width:150px;">
+            </label>
+            <label>
+                <span>🔢 C =</span>
+                <input type="text" id="countInput" value="" class="small" style="width:80px;" placeholder="0=mind">
+                <span style="font-size:0.8rem;color:#5a6a82;">(0 = mind)</span>
+            </label>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="searchBtn">⚡ Generálás</button>
+                <button class="btn btn-danger" id="stopBtn" style="display:none;">⏹️ Megállítás</button>
+            </div>
+        </div>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar" id="progressBar">0%</div>
+        </div>
+
+        <div class="info-bar">
+            <span>🔹 Találat: <strong id="primeCount">0</strong> prím</span>
+            <span>⏱️ <span id="timeDisplay">–</span></span>
+            <span>💾 <span id="memoryDisplay">0 KB</span></span>
+        </div>
+
+        <div class="status-box" id="statusBox">
+            <div class="status-icon">⏳</div>
+            <div class="status-text">Várakozás...</div>
+            <div class="status-detail">Adj meg paramétereket és kattints a Generálás gombra</div>
+        </div>
+
+        <div class="download-area">
+            <button class="btn btn-purple" id="downloadHtmlBtn" disabled>
+                🌐 HTML letöltés
+            </button>
+        </div>
+
+        <div class="footer-actions">
+            <button class="btn btn-secondary" id="clearBtn">🗑️ Törlés</button>
+        </div>
+
+        <div id="messageContainer" style="margin-top: 12px;"></div>
+        <div class="storage-info" id="storageInfo">💾 Az utolsó állapot elmentve</div>
+    </div>
+
+    <script>
+        (function() {
+            // DOM elemek
+            const fromInput = document.getElementById('fromInput');
+            const toInput = document.getElementById('toInput');
+            const countInput = document.getElementById('countInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const downloadHtmlBtn = document.getElementById('downloadHtmlBtn');
+            const primeCountEl = document.getElementById('primeCount');
+            const timeDisplayEl = document.getElementById('timeDisplay');
+            const memoryDisplayEl = document.getElementById('memoryDisplay');
+            const messageContainer = document.getElementById('messageContainer');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const storageInfoEl = document.getElementById('storageInfo');
+            const statusBox = document.getElementById('statusBox');
+
+            // Állapot
+            let currentPrimes = [];
+            let isSearching = false;
+            let stopRequested = false;
+            let hasLoadedFromStorage = false;
+            let searchTimeout = null;
+
+            // --- Tárolás kezelése ---
+            const STORAGE_KEY = 'primeSearchState';
+
+            function saveState() {
+                try {
+                    const state = {
+                        from: fromInput.value,
+                        to: toInput.value,
+                        count: countInput.value,
+                        primes: currentPrimes.slice(0, 10000),
+                        timestamp: Date.now(),
+                        hasData: currentPrimes.length > 0
+                    };
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                    storageInfoEl.textContent = '💾 Állapot elmentve: ' + new Date().toLocaleTimeString();
+                } catch (e) {
+                    try {
+                        const state = {
+                            from: fromInput.value,
+                            to: toInput.value,
+                            count: countInput.value,
+                            primes: [],
+                            timestamp: Date.now(),
+                            hasData: false
+                        };
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                    } catch (e2) {}
+                }
+            }
+
+            function loadState() {
+                try {
+                    const saved = localStorage.getItem(STORAGE_KEY);
+                    if (!saved) return false;
+
+                    const state = JSON.parse(saved);
+                    
+                    if (state.from) fromInput.value = state.from;
+                    if (state.to !== undefined) toInput.value = state.to;
+                    if (state.count !== undefined) countInput.value = state.count;
+
+                    if (state.hasData && state.primes && state.primes.length > 0) {
+                        currentPrimes = state.primes;
+                        updateStatus('✅', 'Betöltve!', `${currentPrimes.length} prím a memóriában`);
+                        updateStats();
+                        downloadHtmlBtn.disabled = false;
+                        storageInfoEl.textContent = '💾 Betöltve: ' + new Date(state.timestamp).toLocaleTimeString();
+                        hasLoadedFromStorage = true;
+                        return true;
+                    }
+                    
+                    storageInfoEl.textContent = '💾 Beállítások betöltve (üres lista)';
+                    hasLoadedFromStorage = true;
+                    return false;
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            function clearState() {
+                try {
+                    localStorage.removeItem(STORAGE_KEY);
+                    storageInfoEl.textContent = '🗑️ Állapot törölve';
+                    hasLoadedFromStorage = false;
+                } catch (e) {}
+            }
+
+            // Segédfüggvények
+            function showMessage(msg, type = 'error') {
+                const className = type === 'error' ? 'error-msg' : (type === 'warning' ? 'warning-msg' : 'success-msg');
+                messageContainer.innerHTML = `<div class="${className}">${msg}</div>`;
+                if (type === 'error') {
+                    setTimeout(() => { messageContainer.innerHTML = ''; }, 5000);
+                }
+            }
+
+            function clearMessages() {
+                messageContainer.innerHTML = '';
+            }
+
+            function updateStatus(icon, text, detail) {
+                statusBox.querySelector('.status-icon').textContent = icon;
+                statusBox.querySelector('.status-text').textContent = text;
+                statusBox.querySelector('.status-detail').textContent = detail || '';
+            }
+
+            function updateStats() {
+                primeCountEl.textContent = currentPrimes.length;
+                const approxSize = currentPrimes.join(',').length / 1024;
+                memoryDisplayEl.textContent = approxSize < 1 ? '< 1 KB' : Math.round(approxSize) + ' KB';
+                downloadHtmlBtn.disabled = currentPrimes.length === 0;
+            }
+
+            // --- GYORS PRÍMTESZT (optimalizált) ---
+            function isPrimeFast(n) {
+                if (n < 2) return false;
+                if (n === 2 || n === 3) return true;
+                if (n % 2 === 0 || n % 3 === 0) return false;
+                
+                // Csak 6k ± 1 alakú számokat vizsgálunk
+                const limit = Math.sqrt(n);
+                for (let i = 5; i <= limit; i += 6) {
+                    if (n % i === 0 || n % (i + 2) === 0) return false;
+                }
+                return true;
+            }
+
+            // --- GYORS SZITA ALGORITMUS (tartományos keresésre) ---
+            function sievePrimes(from, to) {
+                const fromNum = parseInt(from);
+                const toNum = parseInt(to);
+                const size = toNum - fromNum + 1;
+                
+                // Ha kicsi a tartomány, használjuk az egyszerű tesztet
+                if (size < 100000) {
+                    const primes = [];
+                    for (let i = fromNum; i <= toNum; i++) {
+                        if (stopRequested) return primes;
+                        if (isPrimeFast(i)) primes.push(String(i));
+                    }
+                    return primes;
+                }
+                
+                // Nagy tartomány -> szita
+                const sieve = new Uint8Array(size);
+                sieve.fill(1);
+                
+                const limit = Math.sqrt(toNum);
+                for (let i = 2; i <= limit; i++) {
+                    if (stopRequested) break;
+                    const start = Math.max(i * i, Math.ceil(fromNum / i) * i);
+                    for (let j = start; j <= toNum; j += i) {
+                        if (stopRequested) break;
+                        sieve[j - fromNum] = 0;
+                    }
+                }
+                
+                const primes = [];
+                for (let i = 0; i < size; i++) {
+                    if (stopRequested) break;
+                    const num = fromNum + i;
+                    if (sieve[i] === 1 && num >= 2) {
+                        primes.push(String(num));
+                    }
+                }
+                return primes;
+            }
+
+            // --- Keresés aszinkron (gyors) ---
+            function searchPrimesAsync(from, to, count) {
+                return new Promise((resolve, reject) => {
+                    from = from.replace(/,/g, '');
+                    to = to.replace(/,/g, '');
+                    
+                    const fromNum = parseInt(from);
+                    const toNum = parseInt(to);
+                    
+                    if (isNaN(fromNum) || fromNum < 2) {
+                        reject('A kezdőértéknek legalább 2-nek kell lennie!');
+                        return;
+                    }
+                    if (isNaN(toNum) || toNum < fromNum) {
+                        reject('A végértéknek nagyobbnak kell lennie, mint a kezdőérték!');
+                        return;
+                    }
+                    
+                    const rangeSize = toNum - fromNum + 1;
+                    if (rangeSize > 100000000) {
+                        if (!confirm(`A tartomány nagyon nagy (${rangeSize.toLocaleString()} szám). Ez hosszú ideig tarthat! Folytatod?`)) {
+                            reject('Felhasználó megszakította a keresést.');
+                            return;
+                        }
+                    }
+                    
+                    if (count < 0) {
+                        reject('A darabszám nem lehet negatív!');
+                        return;
+                    }
+
+                    stopRequested = false;
+                    isSearching = true;
+                    searchBtn.disabled = true;
+                    stopBtn.style.display = 'inline-flex';
+                    progressContainer.classList.add('active');
+                    progressBar.style.width = '0%';
+                    progressBar.textContent = '0%';
+                    clearMessages();
+                    updateStatus('⏳', 'Generálás folyamatban...', 'Prímek keresése (gyors szita)');
+
+                    const startTime = performance.now();
+                    
+                    // Web Worker helyett setTimeout-al töredezzük
+                    setTimeout(() => {
+                        let primes = [];
+                        let progress = 0;
+                        
+                        try {
+                            // Szita használata
+                            primes = sievePrimes(from, to);
+                            
+                            // Ha van darabszám korlát
+                            if (count > 0 && primes.length > count) {
+                                primes = primes.slice(0, count);
+                            }
+                            
+                            const endTime = performance.now();
+                            const elapsed = ((endTime - startTime) / 1000).toFixed(2);
+                            
+                            isSearching = false;
+                            searchBtn.disabled = false;
+                            stopBtn.style.display = 'none';
+                            progressContainer.classList.remove('active');
+                            progressBar.style.width = '100%';
+                            progressBar.textContent = '100%';
+                            
+                            resolve({ primes, elapsed, searchedTo: to });
+                        } catch (error) {
+                            reject(error);
+                        }
+                    }, 10);
+                });
+            }
+
+            // Keresés indítása
+            async function handleSearch() {
+                if (isSearching) {
+                    showMessage('Már folyamatban van egy keresés!', 'error');
+                    return;
+                }
+
+                let from = fromInput.value.trim();
+                let to = toInput.value.trim();
+                let count = countInput.value.trim();
+
+                if (from === '') {
+                    showMessage('Add meg a kezdőértéket!', 'error');
+                    return;
+                }
+
+                let effectiveCount = 0;
+                if (count === '') {
+                    effectiveCount = 0;
+                } else {
+                    const parsedCount = parseInt(count);
+                    if (isNaN(parsedCount) || parsedCount < 0) {
+                        showMessage('Érvényes darabszámot adj meg!', 'error');
+                        return;
+                    }
+                    effectiveCount = parsedCount;
+                }
+
+                let effectiveTo = to;
+                let usedDefaultTo = false;
+                const fromNum = parseInt(from);
+                
+                if (to === '') {
+                    if (effectiveCount === 0) {
+                        effectiveTo = String(fromNum + 1000);
+                        usedDefaultTo = true;
+                    } else {
+                        effectiveTo = String(fromNum + 1000000);
+                        usedDefaultTo = true;
+                    }
+                    toInput.value = effectiveTo;
+                } else if (parseInt(to) <= fromNum) {
+                    if (effectiveCount === 0) {
+                        effectiveTo = String(fromNum + 1000);
+                        usedDefaultTo = true;
+                    } else {
+                        effectiveTo = String(fromNum + 1000000);
+                        usedDefaultTo = true;
+                    }
+                    toInput.value = effectiveTo;
+                }
+
+                clearMessages();
+                downloadHtmlBtn.disabled = true;
+
+                try {
+                    const result = await searchPrimesAsync(from, effectiveTo, effectiveCount);
+                    currentPrimes = result.primes;
+                    timeDisplayEl.textContent = `⏱️ ${result.elapsed} másodperc`;
+                    updateStats();
+                    updateStatus('✅', 'Generálás kész!', `${currentPrimes.length} prím találva`);
+                    
+                    let msg = `✅ Keresés kész! ${currentPrimes.length} prím találva. (${result.elapsed} mp)`;
+                    if (effectiveCount > 0 && currentPrimes.length >= effectiveCount) {
+                        msg = `✅ Találva ${currentPrimes.length} prím (elértük a ${effectiveCount} darabos limitet). (${result.elapsed} mp)`;
+                    }
+                    showMessage(msg, 'success');
+                    saveState();
+                } catch (error) {
+                    if (error === 'Keresés megszakítva.' || error === 'Felhasználó megszakította a keresést.') {
+                        showMessage('⏹️ Keresés megszakítva.', 'error');
+                        updateStatus('⏹️', 'Megszakítva', `${currentPrimes.length} prím találva eddig`);
+                        if (currentPrimes.length > 0) {
+                            updateStats();
+                            downloadHtmlBtn.disabled = false;
+                            saveState();
+                        }
+                    } else {
+                        showMessage(`❌ Hiba: ${error}`, 'error');
+                        updateStatus('❌', 'Hiba!', error);
+                    }
+                    isSearching = false;
+                    searchBtn.disabled = false;
+                    stopBtn.style.display = 'none';
+                    progressContainer.classList.remove('active');
+                }
+            }
+
+            // Megállítás
+            function stopSearch() {
+                if (isSearching) {
+                    stopRequested = true;
+                    showMessage('⏳ Keresés leállítása...', 'warning');
+                    updateStatus('⏹️', 'Leállítás...', 'Kérlek várj...');
+                }
+            }
+
+            // HTML Letöltés
+            function downloadHtml() {
+                if (currentPrimes.length === 0) {
+                    showMessage('Nincs mit letölteni!', 'error');
+                    return;
+                }
+
+                const primesList = currentPrimes.map(p => `    <li>${p}</li>`).join('\n');
+                
+                const htmlContent = `<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prímek listája (${currentPrimes.length} darab)</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            background: #ffffff;
+            margin: 0;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #000000;
+            font-size: 2rem;
+            margin-top: 0;
+            border-bottom: 2px solid #000000;
+            padding-bottom: 12px;
+            font-weight: 700;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .info {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            padding: 12px 0;
+            margin-bottom: 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #000000;
+            border-bottom: 1px solid #cccccc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .prime-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 0;
+            list-style: none;
+            margin: 0;
+        }
+        .prime-list li {
+            color: #000000;
+            padding: 4px 0;
+            font-size: 2.8rem;
+            font-weight: 700;
+            line-height: 1.5;
+            font-family: 'Courier New', monospace;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .prime-list li:hover {
+            background: #f5f5f5;
+        }
+        .footer {
+            margin-top: 30px;
+            color: #666666;
+            font-size: 0.85rem;
+            text-align: center;
+            border-top: 1px solid #cccccc;
+            padding-top: 16px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 12px; }
+            .prime-list li { font-size: 1.8rem; padding: 3px 0; }
+            h1 { font-size: 1.5rem; }
+        }
+        @media (max-width: 400px) {
+            .prime-list li { font-size: 1.2rem; padding: 2px 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Prímek listája</h1>
+        <div class="info">
+            <span>Összesen: ${currentPrimes.length} prím</span>
+            <span>Legnagyobb: ${currentPrimes[currentPrimes.length - 1]}</span>
+            <span>Generálva: ${new Date().toLocaleString()}</span>
+        </div>
+        <ul class="prime-list">
+${primesList}
+        </ul>
+        <div class="footer">
+            Generálva a Prímgenerátor segítségével
+        </div>
+    </div>
+</body>
+</html>`;
+
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `primes_${currentPrimes.length}_${Date.now()}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showMessage(`💾 ${currentPrimes.length} prím letöltve (HTML)!`, 'success');
+            }
+
+            // Törlés
+            function clearList() {
+                if (isSearching) {
+                    stopSearch();
+                    setTimeout(() => {
+                        currentPrimes = [];
+                        updateStats();
+                        updateStatus('🗑️', 'Törölve', 'A lista üres');
+                        timeDisplayEl.textContent = '–';
+                        clearMessages();
+                        clearState();
+                        downloadHtmlBtn.disabled = true;
+                        fromInput.value = '2';
+                        toInput.value = '';
+                        countInput.value = '';
+                    }, 100);
+                    return;
+                }
+                currentPrimes = [];
+                updateStats();
+                updateStatus('🗑️', 'Törölve', 'A lista üres');
+                timeDisplayEl.textContent = '–';
+                clearMessages();
+                progressContainer.classList.remove('active');
+                clearState();
+                downloadHtmlBtn.disabled = true;
+                fromInput.value = '2';
+                toInput.value = '';
+                countInput.value = '';
+            }
+
+            // --- Eseménykezelők ---
+
+            searchBtn.addEventListener('click', handleSearch);
+            stopBtn.addEventListener('click', stopSearch);
+            clearBtn.addEventListener('click', clearList);
+            downloadHtmlBtn.addEventListener('click', downloadHtml);
+
+            [fromInput, toInput, countInput].forEach(el => {
+                el.addEventListener('change', saveState);
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSearch();
+                    }
+                });
+            });
+
+            // --- Indítás ---
+            window.addEventListener('load', function() {
+                const hasSavedState = loadState();
+                
+                if (!hasSavedState && !hasLoadedFromStorage) {
+                    fromInput.value = '2';
+                    toInput.value = '100000';
+                    countInput.value = '';
+                    updateStatus('⏳', 'Várakozás...', 'Adj meg paramétereket és kattints a Generálás gombra');
+                    storageInfoEl.textContent = '💾 Új munkafolyamat';
+                } else if (currentPrimes.length > 0) {
+                    updateStatus('✅', 'Betöltve!', `${currentPrimes.length} prím a memóriában`);
+                    updateStats();
+                }
+            });
+
+            window.addEventListener('beforeunload', function() {
+                saveState();
+            });
+
+        })();
+    </script>
+</body>
+</html>
