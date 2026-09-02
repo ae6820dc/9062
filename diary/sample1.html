@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>📖 Napló</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #0b0e14;
+            color: #eaeef2;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: #1a1f2b;
+            border-radius: 28px;
+            padding: 30px 30px 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+            border: 1px solid #2e3645;
+        }
+        h1 {
+            font-weight: 300;
+            letter-spacing: 2px;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #2e3645;
+            padding-bottom: 18px;
+            margin-bottom: 24px;
+        }
+        h1 small {
+            font-size: 0.9rem;
+            color: #7e8aa3;
+            margin-left: auto;
+            font-weight: 300;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 25px;
+            align-items: center;
+        }
+        .toolbar button, .toolbar .file-label {
+            background: #2a3344;
+            border: none;
+            color: #d6deed;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #3b455a;
+            font-weight: 500;
+        }
+        .toolbar button:hover, .toolbar .file-label:hover {
+            background: #38425a;
+            border-color: #5e6c8a;
+            color: white;
+        }
+        .toolbar .danger {
+            border-color: #a03a3a;
+            color: #f1a5a5;
+        }
+        .toolbar .danger:hover {
+            background: #5a2a2a;
+            border-color: #c44;
+        }
+        .toolbar .edit-mode {
+            background: #2c5a8a;
+            border-color: #3f7ab3;
+        }
+        .toolbar .edit-mode:hover {
+            background: #3b72ae;
+        }
+        .toolbar .export-btn {
+            background: #2a5a3a;
+            border-color: #3a7a4a;
+        }
+        .toolbar .export-btn:hover {
+            background: #3a7a4a;
+        }
+        .toolbar .password-btn {
+            background: #5a3a2a;
+            border-color: #7a4a3a;
+        }
+        .toolbar .password-btn:hover {
+            background: #7a4a3a;
+        }
+        .toolbar .reset-btn {
+            background: transparent;
+            border-color: #5a3a3a;
+            color: #8a5a5a;
+            padding: 10px 14px;
+            font-size: 1.2rem;
+        }
+        .toolbar .reset-btn:hover {
+            background: #3a1a1a;
+            border-color: #8a4a4a;
+            color: #f1a5a5;
+        }
+        .toolbar input[type="file"] {
+            display: none;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            background: #131a24;
+            padding: 16px;
+            border-radius: 18px;
+            margin-bottom: 28px;
+            border: 1px solid #293141;
+        }
+        .calendar-grid .day-header {
+            font-weight: 600;
+            color: #8595b0;
+            text-align: center;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            padding: 5px 0;
+        }
+        .calendar-grid .day {
+            text-align: center;
+            padding: 10px 0;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.15s;
+            font-size: 0.9rem;
+            background: #1d2533;
+            color: #c6d0e0;
+        }
+        .calendar-grid .day:hover {
+            background: #2f3b52;
+        }
+        .calendar-grid .day.empty {
+            background: transparent;
+            cursor: default;
+        }
+        .calendar-grid .day.has-entry {
+            font-weight: bold;
+            color: #8fcbff;
+            box-shadow: inset 0 0 0 2px #3d6b9b;
+        }
+        .calendar-grid .day.today {
+            background: #2c5a8a;
+            color: white;
+        }
+        .calendar-grid .day.selected {
+            background: #4b7ec0;
+            color: white;
+        }
+        .editor {
+            background: #131a24;
+            border-radius: 18px;
+            padding: 20px;
+            border: 1px solid #293141;
+        }
+        .editor .date-badge {
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: #b2c3dd;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .editor textarea {
+            width: 100%;
+            min-height: 200px;
+            background: #0d121c;
+            border: 1px solid #2d374b;
+            border-radius: 16px;
+            color: #e5ecf5;
+            font-size: 1rem;
+            padding: 18px;
+            resize: vertical;
+            font-family: inherit;
+            line-height: 1.6;
+            transition: 0.2s;
+        }
+        .editor textarea:focus {
+            outline: none;
+            border-color: #4f7fc7;
+            box-shadow: 0 0 0 3px #1f3f6b;
+        }
+        .editor textarea:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            border-color: #2d374b;
+        }
+        .editor .actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .editor .actions button {
+            background: #2a3344;
+            border: none;
+            color: #d6deed;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #3b455a;
+            font-size: 0.95rem;
+            flex: 1 0 auto;
+        }
+        .editor .actions button:hover {
+            background: #38425a;
+        }
+        .editor .actions button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .editor .actions button.primary {
+            background: #2c5a8a;
+            border-color: #3f7ab3;
+        }
+        .editor .actions button.primary:hover {
+            background: #3b72ae;
+        }
+        .lock-overlay {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            background: #131a24;
+            border-radius: 18px;
+            border: 1px solid #293141;
+            margin-bottom: 20px;
+        }
+        .lock-overlay.show {
+            display: block;
+        }
+        .lock-overlay input {
+            background: #0d121c;
+            border: 1px solid #36405a;
+            color: white;
+            padding: 14px 22px;
+            border-radius: 60px;
+            font-size: 1.1rem;
+            width: 260px;
+            margin: 16px auto;
+            display: block;
+        }
+        .lock-overlay input:focus {
+            outline: none;
+            border-color: #4f7fc7;
+        }
+        .lock-overlay button {
+            background: #2c5a8a;
+            border: none;
+            color: white;
+            padding: 14px 34px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border: 1px solid #3f7ab3;
+            margin: 6px;
+        }
+        .status-msg {
+            margin-top: 16px;
+            color: #a5b9d6;
+            font-size: 0.9rem;
+            min-height: 24px;
+        }
+        .footer {
+            margin-top: 28px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #4f5b72;
+            border-top: 1px solid #222b3a;
+            padding-top: 22px;
+            line-height: 1.8;
+        }
+        .readonly-indicator {
+            display: inline-block;
+            background: #2a3344;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #8e9fc0;
+        }
+        
+        /* Jelszóváltó overlay */
+        .password-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .password-overlay.show {
+            display: flex;
+        }
+        .password-overlay .modal {
+            background: #1a1f2b;
+            border-radius: 28px;
+            padding: 40px;
+            max-width: 420px;
+            width: 90%;
+            border: 1px solid #2e3645;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+        }
+        .password-overlay .modal h2 {
+            font-weight: 300;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #b2c3dd;
+        }
+        .password-overlay .modal input {
+            width: 100%;
+            background: #0d121c;
+            border: 1px solid #2d374b;
+            color: white;
+            padding: 14px 18px;
+            border-radius: 16px;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .password-overlay .modal input:focus {
+            outline: none;
+            border-color: #4f7fc7;
+        }
+        .password-overlay .modal .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .password-overlay .modal .btn-group button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 40px;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .password-overlay .modal .btn-group .save-btn {
+            background: #2c5a8a;
+            color: white;
+            border: 1px solid #3f7ab3;
+        }
+        .password-overlay .modal .btn-group .save-btn:hover {
+            background: #3b72ae;
+        }
+        .password-overlay .modal .btn-group .cancel-btn {
+            background: #2a3344;
+            color: #d6deed;
+            border: 1px solid #3b455a;
+        }
+        .password-overlay .modal .btn-group .cancel-btn:hover {
+            background: #38425a;
+        }
+        .password-overlay .modal .pwd-msg {
+            margin-top: 12px;
+            color: #a5b9d6;
+            font-size: 0.9rem;
+            text-align: center;
+            min-height: 24px;
+        }
+        .password-overlay .modal .pwd-msg.error {
+            color: #f1a5a5;
+        }
+        .password-overlay .modal .pwd-msg.success {
+            color: #8fcb8f;
+        }
+
+        /* Reset overlay */
+        .reset-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .reset-overlay.show {
+            display: flex;
+        }
+        .reset-overlay .modal {
+            background: #1a1f2b;
+            border-radius: 28px;
+            padding: 40px;
+            max-width: 420px;
+            width: 90%;
+            border: 1px solid #2e3645;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+        }
+        .reset-overlay .modal .reset-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .reset-overlay .modal h2 {
+            font-weight: 300;
+            margin-bottom: 10px;
+            text-align: center;
+            color: #f1a5a5;
+        }
+        .reset-overlay .modal p {
+            color: #a5b9d6;
+            text-align: center;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+        .reset-overlay .modal .reset-password-hint {
+            background: #0d121c;
+            border: 1px solid #3a4a3a;
+            border-radius: 10px;
+            padding: 10px 16px;
+            margin: 12px 0 16px 0;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: #8fcb8f;
+            letter-spacing: 1px;
+            user-select: all;
+            cursor: pointer;
+        }
+        .reset-overlay .modal .reset-password-hint:hover {
+            background: #1a2a1a;
+            border-color: #5a7a5a;
+        }
+        .reset-overlay .modal .reset-password-hint small {
+            display: block;
+            font-size: 0.7rem;
+            color: #6b7d8b;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            letter-spacing: 0;
+            margin-top: 4px;
+        }
+        .reset-overlay .modal input {
+            width: 100%;
+            background: #0d121c;
+            border: 1px solid #2d374b;
+            color: white;
+            padding: 14px 18px;
+            border-radius: 16px;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .reset-overlay .modal input:focus {
+            outline: none;
+            border-color: #4f7fc7;
+        }
+        .reset-overlay .modal .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .reset-overlay .modal .btn-group button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 40px;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .reset-overlay .modal .btn-group .reset-btn {
+            background: #8a2a2a;
+            color: white;
+            border: 1px solid #aa3a3a;
+        }
+        .reset-overlay .modal .btn-group .reset-btn:hover {
+            background: #aa3a3a;
+        }
+        .reset-overlay .modal .btn-group .cancel-btn {
+            background: #2a3344;
+            color: #d6deed;
+            border: 1px solid #3b455a;
+        }
+        .reset-overlay .modal .btn-group .cancel-btn:hover {
+            background: #38425a;
+        }
+        .reset-overlay .modal .reset-msg {
+            margin-top: 12px;
+            color: #a5b9d6;
+            font-size: 0.9rem;
+            text-align: center;
+            min-height: 24px;
+        }
+        .reset-overlay .modal .reset-msg.error {
+            color: #f1a5a5;
+        }
+        .reset-overlay .modal .reset-msg.success {
+            color: #8fcb8f;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 16px; }
+            .toolbar button { padding: 8px 14px; font-size: 0.8rem; }
+            .toolbar .reset-btn { padding: 8px 12px; font-size: 1rem; }
+            .editor .date-badge { font-size: 0.9rem; }
+            .editor .actions button { padding: 10px 16px; font-size: 0.85rem; }
+            .password-overlay .modal { padding: 24px; }
+            .reset-overlay .modal { padding: 24px; }
+            .reset-overlay .modal .reset-password-hint { font-size: 0.8rem; padding: 8px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app">
+    <h1>
+        📖 Napló
+        <small id="lockStatus">👁️ olvasás</small>
+    </h1>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+        <button id="exportBtn" class="export-btn">💾 Export</button>
+        <label class="file-label" id="importLabel">📂 Import <input type="file" id="importInput" accept=".json"/></label>
+        <span style="flex:1;"></span>
+        <button id="passwordChangeBtn" class="password-btn">🔑 Jelszó</button>
+        <button id="resetBtn" class="reset-btn" title="Összes bejegyzés törlése">🧹</button>
+        <button id="viewModeBtn" style="display:none;">👁️ Olvasás</button>
+    </div>
+
+    <!-- JELSZÓVÁLTÓ OVERLAY -->
+    <div id="passwordOverlay" class="password-overlay">
+        <div class="modal">
+            <h2>🔑 Jelszó módosítása</h2>
+            <input type="password" id="oldPasswordInput" placeholder="Régi jelszó" />
+            <input type="password" id="newPasswordInput" placeholder="Új jelszó" />
+            <input type="password" id="confirmPasswordInput" placeholder="Új jelszó mégegyszer" />
+            <div class="btn-group">
+                <button id="pwdSaveBtn" class="save-btn">✅ Mentés</button>
+                <button id="pwdCancelBtn" class="cancel-btn">❌ Mégse</button>
+            </div>
+            <div id="pwdMsg" class="pwd-msg"></div>
+        </div>
+    </div>
+
+    <!-- RESET OVERLAY -->
+    <div id="resetOverlay" class="reset-overlay">
+        <div class="modal">
+            <div class="reset-icon">🧹</div>
+            <h2>Összes bejegyzés törlése</h2>
+            <p>Ez a művelet <strong>MINDEN</strong> naplóbejegyzést véglegesen töröl!</p>
+            <div class="reset-password-hint" id="resetPasswordHint">
+                CD5845FE9654874A
+                <small>🔑 Reset jelszó (kattints a kijelöléshez)</small>
+            </div>
+            <p style="font-size:0.9rem; color:#8a5a5a;">Csak akkor folytasd, ha biztos vagy benne!</p>
+            <input type="password" id="resetPasswordInput" placeholder="Reset jelszó megadása" />
+            <div class="btn-group">
+                <button id="resetConfirmBtn" class="reset-btn">🗑️ Minden törlése</button>
+                <button id="resetCancelBtn" class="cancel-btn">❌ Mégse</button>
+            </div>
+            <div id="resetMsg" class="reset-msg"></div>
+        </div>
+    </div>
+
+    <!-- LOCK OVERLAY (csak szerkesztéshez) -->
+    <div id="lockOverlay" class="lock-overlay">
+        <div style="font-size:2.5rem; margin-bottom:10px;">🔐</div>
+        <h3 style="font-weight:300;">Szerkesztéshez add meg a jelszót</h3>
+        <input type="password" id="passwordInput" placeholder="Jelszó" />
+        <button id="unlockSubmitBtn">Feloldás</button>
+        <button id="cancelEditBtn">Mégse</button>
+        <div id="lockMsg" class="status-msg"></div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="mainContent">
+        <!-- CALENDAR -->
+        <div class="calendar-grid" id="calendarGrid"></div>
+
+        <!-- EDITOR -->
+        <div class="editor">
+            <div class="date-badge">
+                <span id="selectedDateDisplay">📅 2026-09-02</span>
+                <span id="entryCountDisplay" style="font-size:0.8rem; color:#6b7d9b;">0 bejegyzés</span>
+                <span id="modeIndicator" class="readonly-indicator">👁️ olvasás</span>
+            </div>
+            <textarea id="entryText" placeholder="Válassz egy napot a napló megtekintéséhez..." disabled></textarea>
+            <div class="actions">
+                <button id="editModeBtn" class="primary">✏️ Szerkesztés</button>
+                <button id="deleteEntryBtn" disabled>🗑️ Törlés</button>
+            </div>
+            <div id="editorStatus" class="status-msg"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        🔑 Olvasás jelszó nélkül • Szerkesztéshez jelszó kell • "Jelszó" gombbal módosítható
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- CONST ----------
+        const STORAGE_KEY = 'secret_diary_entries';
+        const PASSWORD_KEY = 'diary_password';
+        const DEFAULT_PASSWORD = '1111';
+        const RESET_PASSWORD = 'CD5845FE9654874A';
+
+        // ---------- STATE ----------
+        let entries = {};
+        let currentDate = '2026-09-02';
+        let selectedDate = '2026-09-02';
+        let isEditMode = false;
+        let isUnlocked = false;
+        let currentPassword = DEFAULT_PASSWORD;
+        let saveTimeout = null;
+
+        // DOM refs
+        const calendarGrid = document.getElementById('calendarGrid');
+        const selectedDateDisplay = document.getElementById('selectedDateDisplay');
+        const entryCountDisplay = document.getElementById('entryCountDisplay');
+        const entryText = document.getElementById('entryText');
+        const editorStatus = document.getElementById('editorStatus');
+        const lockOverlay = document.getElementById('lockOverlay');
+        const mainContent = document.getElementById('mainContent');
+        const lockStatus = document.getElementById('lockStatus');
+        const editModeBtn = document.getElementById('editModeBtn');
+        const viewModeBtn = document.getElementById('viewModeBtn');
+        const unlockSubmitBtn = document.getElementById('unlockSubmitBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const passwordInput = document.getElementById('passwordInput');
+        const lockMsg = document.getElementById('lockMsg');
+        const deleteEntryBtn = document.getElementById('deleteEntryBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const importInput = document.getElementById('importInput');
+        const modeIndicator = document.getElementById('modeIndicator');
+
+        // Jelszóváltó DOM
+        const passwordOverlay = document.getElementById('passwordOverlay');
+        const oldPasswordInput = document.getElementById('oldPasswordInput');
+        const newPasswordInput = document.getElementById('newPasswordInput');
+        const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+        const pwdSaveBtn = document.getElementById('pwdSaveBtn');
+        const pwdCancelBtn = document.getElementById('pwdCancelBtn');
+        const pwdMsg = document.getElementById('pwdMsg');
+        const passwordChangeBtn = document.getElementById('passwordChangeBtn');
+
+        // Reset DOM
+        const resetOverlay = document.getElementById('resetOverlay');
+        const resetPasswordInput = document.getElementById('resetPasswordInput');
+        const resetConfirmBtn = document.getElementById('resetConfirmBtn');
+        const resetCancelBtn = document.getElementById('resetCancelBtn');
+        const resetMsg = document.getElementById('resetMsg');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // ---------- HELPERS ----------
+        function formatDate(dateStr) {
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        function formatDateFileName(dateStr) {
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('hu-HU', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\./g, '-').replace(/\s/g, '');
+        }
+
+        function loadEntries() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    entries = JSON.parse(raw);
+                } else {
+                    entries = {};
+                }
+            } catch (e) {
+                entries = {};
+            }
+            if (!localStorage.getItem(PASSWORD_KEY)) {
+                localStorage.setItem(PASSWORD_KEY, DEFAULT_PASSWORD);
+                currentPassword = DEFAULT_PASSWORD;
+            } else {
+                currentPassword = localStorage.getItem(PASSWORD_KEY);
+            }
+        }
+
+        function saveEntries() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+        }
+
+        function checkPassword(pwd) {
+            return pwd === currentPassword;
+        }
+
+        function checkResetPassword(pwd) {
+            return pwd === RESET_PASSWORD;
+        }
+
+        // Automatikus mentés
+        function autoSave() {
+            if (!isEditMode || !isUnlocked) return;
+            
+            const text = entryText.value.trim();
+            const currentEntry = entries[selectedDate] || '';
+            
+            if (text !== currentEntry) {
+                if (text === '') {
+                    if (entries[selectedDate]) {
+                        delete entries[selectedDate];
+                        saveEntries();
+                        renderCalendar();
+                        editorStatus.textContent = '🗑️ Bejegyzés eltávolítva (üres)';
+                        setTimeout(() => { editorStatus.textContent = ''; }, 2000);
+                    }
+                } else {
+                    entries[selectedDate] = text;
+                    saveEntries();
+                    renderCalendar();
+                    editorStatus.textContent = '💾 Automatikusan mentve';
+                    setTimeout(() => { editorStatus.textContent = ''; }, 1500);
+                }
+                const count = Object.keys(entries).length;
+                entryCountDisplay.textContent = `${count} bejegyzés`;
+            }
+        }
+
+        function renderCalendar() {
+            const now = new Date();
+            const todayStr = now.toISOString().slice(0,10);
+            const [year, month] = currentDate.split('-').map(Number);
+            const firstDay = new Date(year, month-1, 1).getDay();
+            const daysInMonth = new Date(year, month, 0).getDate();
+
+            let html = '';
+            const weekDays = ['H', 'K', 'Sze', 'Cs', 'P', 'Szo', 'V'];
+            weekDays.forEach(d => html += `<div class="day-header">${d}</div>`);
+
+            for (let i = 0; i < (firstDay === 0 ? 6 : firstDay-1); i++) {
+                html += `<div class="day empty"></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                const hasEntry = entries[dateStr] ? 'has-entry' : '';
+                const isToday = (dateStr === todayStr) ? 'today' : '';
+                const isSelected = (dateStr === selectedDate) ? 'selected' : '';
+                html += `<div class="day ${hasEntry} ${isToday} ${isSelected}" data-date="${dateStr}">${day}</div>`;
+            }
+            calendarGrid.innerHTML = html;
+
+            document.querySelectorAll('.day:not(.empty)').forEach(el => {
+                el.addEventListener('click', function() {
+                    const date = this.dataset.date;
+                    if (date) {
+                        if (isEditMode && isUnlocked) {
+                            autoSave();
+                        }
+                        selectedDate = date;
+                        loadEntryToEditor();
+                        renderCalendar();
+                    }
+                });
+            });
+
+            const monthNames = ['Január', 'Február', 'Március', 'Április', 'Május', 'Június',
+                                'Július', 'Augusztus', 'Szeptember', 'Október', 'November', 'December'];
+            const headerDate = `${monthNames[month-1]} ${year}`;
+            const headerEl = document.createElement('div');
+            headerEl.style.cssText = 'grid-column: span 7; text-align: center; font-weight: 300; color: #b2c3dd; padding: 4px 0 12px;';
+            headerEl.textContent = headerDate;
+            const grid = document.getElementById('calendarGrid');
+            const existingHeader = grid.querySelector('.cal-header');
+            if (existingHeader) existingHeader.remove();
+            headerEl.className = 'cal-header';
+            grid.prepend(headerEl);
+            addNavButtons();
+        }
+
+        function addNavButtons() {
+            const grid = document.getElementById('calendarGrid');
+            const header = grid.querySelector('.cal-header');
+            if (!header) return;
+            if (header.querySelector('.nav-buttons')) return;
+
+            const navDiv = document.createElement('div');
+            navDiv.className = 'nav-buttons';
+            navDiv.style.cssText = 'display: flex; justify-content: space-between; width: 100%; margin-top: 2px;';
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '◀';
+            prevBtn.style.cssText = 'background: #1d2533; border: none; color: #b0c2dd; padding: 0 14px; border-radius: 20px; cursor: pointer; font-size:1.2rem;';
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = '▶';
+            nextBtn.style.cssText = 'background: #1d2533; border: none; color: #b0c2dd; padding: 0 14px; border-radius: 20px; cursor: pointer; font-size:1.2rem;';
+
+            prevBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (isEditMode && isUnlocked) {
+                    autoSave();
+                }
+                const [y, m] = currentDate.split('-').map(Number);
+                const newMonth = m === 1 ? 12 : m-1;
+                const newYear = m === 1 ? y-1 : y;
+                currentDate = `${newYear}-${String(newMonth).padStart(2,'0')}-01`;
+                renderCalendar();
+            });
+            nextBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (isEditMode && isUnlocked) {
+                    autoSave();
+                }
+                const [y, m] = currentDate.split('-').map(Number);
+                const newMonth = m === 12 ? 1 : m+1;
+                const newYear = m === 12 ? y+1 : y;
+                currentDate = `${newYear}-${String(newMonth).padStart(2,'0')}-01`;
+                renderCalendar();
+            });
+
+            navDiv.appendChild(prevBtn);
+            const monthSpan = document.createElement('span');
+            monthSpan.textContent = header.textContent;
+            monthSpan.style.cssText = 'font-weight:500;';
+            navDiv.appendChild(monthSpan);
+            navDiv.appendChild(nextBtn);
+
+            header.textContent = '';
+            header.appendChild(navDiv);
+        }
+
+        function loadEntryToEditor() {
+            const text = entries[selectedDate] || '';
+            entryText.value = text;
+            selectedDateDisplay.textContent = `📅 ${formatDate(selectedDate)}`;
+            const count = Object.keys(entries).length;
+            entryCountDisplay.textContent = `${count} bejegyzés`;
+            editorStatus.textContent = '';
+            updateEditorState();
+        }
+
+        function updateEditorState() {
+            const canEdit = isEditMode && isUnlocked;
+            entryText.disabled = !canEdit;
+            deleteEntryBtn.disabled = !canEdit;
+            
+            // Export gomb állapota - akkor aktív, ha van bejegyzés
+            exportBtn.disabled = !entries[selectedDate];
+            
+            if (canEdit) {
+                modeIndicator.textContent = '✏️ szerkesztés';
+                modeIndicator.style.background = '#2c5a8a';
+                lockStatus.textContent = '✏️ szerkesztés';
+                editModeBtn.textContent = '💾 Mentés';
+                editModeBtn.className = '';
+                viewModeBtn.style.display = 'none';
+            } else {
+                modeIndicator.textContent = '👁️ olvasás';
+                modeIndicator.style.background = '#2a3344';
+                lockStatus.textContent = isEditMode ? '🔒 zárolva' : '👁️ olvasás';
+                editModeBtn.textContent = '✏️ Szerkesztés';
+                editModeBtn.className = 'primary';
+                viewModeBtn.style.display = 'none';
+            }
+        }
+
+        function updateUI() {
+            if (isEditMode) {
+                if (isUnlocked) {
+                    lockOverlay.classList.remove('show');
+                    entryText.disabled = false;
+                    deleteEntryBtn.disabled = false;
+                    editModeBtn.textContent = '💾 Mentés';
+                    editModeBtn.className = '';
+                    modeIndicator.textContent = '✏️ szerkesztés';
+                    modeIndicator.style.background = '#2c5a8a';
+                    lockStatus.textContent = '✏️ szerkesztés';
+                    lockMsg.textContent = '';
+                    passwordInput.value = '';
+                    viewModeBtn.style.display = 'none';
+                } else {
+                    lockOverlay.classList.add('show');
+                    entryText.disabled = true;
+                    deleteEntryBtn.disabled = true;
+                    editModeBtn.textContent = '✏️ Szerkesztés';
+                    editModeBtn.className = 'primary';
+                    modeIndicator.textContent = '🔒 zárolva';
+                    modeIndicator.style.background = '#5a2a2a';
+                    lockStatus.textContent = '🔒 zárolva';
+                    viewModeBtn.style.display = 'none';
+                }
+            } else {
+                lockOverlay.classList.remove('show');
+                entryText.disabled = true;
+                deleteEntryBtn.disabled = true;
+                editModeBtn.textContent = '✏️ Szerkesztés';
+                editModeBtn.className = 'primary';
+                modeIndicator.textContent = '👁️ olvasás';
+                modeIndicator.style.background = '#2a3344';
+                lockStatus.textContent = '👁️ olvasás';
+                lockMsg.textContent = '';
+                passwordInput.value = '';
+                isUnlocked = false;
+                viewModeBtn.style.display = 'none';
+            }
+            loadEntryToEditor();
+        }
+
+        // ---------- JELSZÓVÁLTÁS ----------
+        function changePassword(oldPwd, newPwd, confirmPwd) {
+            if (!oldPwd || !newPwd || !confirmPwd) {
+                pwdMsg.textContent = '⚠️ Minden mezőt tölts ki!';
+                pwdMsg.className = 'pwd-msg error';
+                return false;
+            }
+            
+            if (!checkPassword(oldPwd)) {
+                pwdMsg.textContent = '❌ A régi jelszó hibás!';
+                pwdMsg.className = 'pwd-msg error';
+                return false;
+            }
+            
+            if (newPwd.length < 4) {
+                pwdMsg.textContent = '⚠️ Az új jelszó legalább 4 karakter legyen!';
+                pwdMsg.className = 'pwd-msg error';
+                return false;
+            }
+            
+            if (newPwd !== confirmPwd) {
+                pwdMsg.textContent = '❌ Az új jelszavak nem egyeznek!';
+                pwdMsg.className = 'pwd-msg error';
+                return false;
+            }
+            
+            if (newPwd === oldPwd) {
+                pwdMsg.textContent = '⚠️ Az új jelszó nem lehet ugyanaz, mint a régi!';
+                pwdMsg.className = 'pwd-msg error';
+                return false;
+            }
+            
+            currentPassword = newPwd;
+            localStorage.setItem(PASSWORD_KEY, newPwd);
+            
+            pwdMsg.textContent = '✅ Jelszó sikeresen megváltoztatva!';
+            pwdMsg.className = 'pwd-msg success';
+            
+            if (isEditMode && isUnlocked) {
+                isUnlocked = false;
+                updateUI();
+            }
+            
+            return true;
+        }
+
+        // ---------- MASTER RESET ----------
+        function masterReset(password) {
+            if (!password) {
+                resetMsg.textContent = '⚠️ Add meg a reset jelszót!';
+                resetMsg.className = 'reset-msg error';
+                return false;
+            }
+            
+            if (!checkResetPassword(password)) {
+                resetMsg.textContent = '❌ Hibás reset jelszó!';
+                resetMsg.className = 'reset-msg error';
+                return false;
+            }
+            
+            // Összes bejegyzés törlése
+            entries = {};
+            saveEntries();
+            
+            // UI frissítése
+            renderCalendar();
+            loadEntryToEditor();
+            
+            resetMsg.textContent = '✅ Minden bejegyzés törölve!';
+            resetMsg.className = 'reset-msg success';
+            
+            // Ha szerkesztési módban voltunk, lépjünk ki belőle
+            if (isEditMode) {
+                isEditMode = false;
+                isUnlocked = false;
+                updateUI();
+            }
+            
+            // 1.5 másodperc múlva zárjuk az ablakot
+            setTimeout(() => {
+                resetOverlay.classList.remove('show');
+            }, 1500);
+            
+            return true;
+        }
+
+        // ---------- EXPORT FUNKCIÓ ----------
+        function exportCurrentDay() {
+            const content = entries[selectedDate];
+            if (!content) {
+                editorStatus.textContent = '⚠️ Erre a napra nincs bejegyzés!';
+                setTimeout(() => { editorStatus.textContent = ''; }, 3000);
+                return;
+            }
+            
+            const data = {
+                date: selectedDate,
+                entry: content,
+                exportedAt: new Date().toISOString()
+            };
+            
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const fileName = `naplo_${formatDateFileName(selectedDate)}.json`;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            editorStatus.textContent = `✅ ${formatDate(selectedDate)} exportálva!`;
+            setTimeout(() => { editorStatus.textContent = ''; }, 3000);
+        }
+
+        // ---------- ESEMÉNYEK ----------
+
+        // Szerkesztés gomb
+        editModeBtn.addEventListener('click', function() {
+            if (isEditMode && isUnlocked) {
+                autoSave();
+                isEditMode = false;
+                isUnlocked = false;
+                updateUI();
+            } else if (isEditMode && !isUnlocked) {
+                lockOverlay.classList.add('show');
+                passwordInput.focus();
+            } else {
+                isEditMode = true;
+                isUnlocked = false;
+                updateUI();
+                passwordInput.focus();
+            }
+        });
+
+        // Feloldás
+        unlockSubmitBtn.addEventListener('click', function() {
+            const pwd = passwordInput.value.trim();
+            if (checkPassword(pwd)) {
+                isUnlocked = true;
+                updateUI();
+                loadEntries();
+                renderCalendar();
+                loadEntryToEditor();
+                entryText.focus();
+            } else {
+                lockMsg.textContent = '❌ Hibás jelszó!';
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        });
+
+        passwordInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                unlockSubmitBtn.click();
+            }
+        });
+
+        cancelEditBtn.addEventListener('click', function() {
+            isEditMode = false;
+            isUnlocked = false;
+            updateUI();
+        });
+
+        // Automatikus mentés
+        entryText.addEventListener('input', function() {
+            if (!isEditMode || !isUnlocked) return;
+            
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                autoSave();
+            }, 500);
+        });
+
+        // Törlés
+        deleteEntryBtn.addEventListener('click', function() {
+            if (!isEditMode || !isUnlocked) {
+                editorStatus.textContent = '⚠️ A törléshez szerkesztési módban kell lenned!';
+                return;
+            }
+            
+            if (!entries[selectedDate]) {
+                editorStatus.textContent = `ℹ️ Erre a napra (${formatDate(selectedDate)}) nincs bejegyzés.`;
+                return;
+            }
+            
+            if (confirm(`Biztosan törlöd a ${formatDate(selectedDate)}-i bejegyzést?`)) {
+                delete entries[selectedDate];
+                saveEntries();
+                loadEntryToEditor();
+                renderCalendar();
+                editorStatus.textContent = `🗑️ ${formatDate(selectedDate)}-i bejegyzés törölve.`;
+                setTimeout(() => { editorStatus.textContent = ''; }, 3000);
+            }
+        });
+
+        // ---------- EXPORT GOMB ----------
+        exportBtn.addEventListener('click', function() {
+            if (isEditMode && isUnlocked) {
+                autoSave();
+            }
+            exportCurrentDay();
+        });
+
+        // ---------- IMPORT ----------
+        importInput.addEventListener('change', function(e) {
+            const file = this.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    
+                    let importEntries = {};
+                    if (data.entry && data.date) {
+                        importEntries[data.date] = data.entry;
+                    } else if (data.entries && typeof data.entries === 'object') {
+                        importEntries = data.entries;
+                    } else {
+                        alert('❌ Érvénytelen fájl formátum!');
+                        return;
+                    }
+                    
+                    const pwd = prompt('🔐 Add meg az import fájl jelszavát:');
+                    if (pwd === null) return;
+                    
+                    if (!checkPassword(pwd)) {
+                        alert('❌ Hibás jelszó!');
+                        return;
+                    }
+                    
+                    const entryCount = Object.keys(importEntries).length;
+                    if (confirm(`Ez ${entryCount} bejegyzést fog importálni. Felülírja a meglévőket! Biztos?`)) {
+                        for (const [date, content] of Object.entries(importEntries)) {
+                            entries[date] = content;
+                        }
+                        saveEntries();
+                        renderCalendar();
+                        loadEntryToEditor();
+                        editorStatus.textContent = `✅ ${entryCount} bejegyzés importálva!`;
+                        setTimeout(() => { editorStatus.textContent = ''; }, 3000);
+                    }
+                } catch (err) {
+                    alert('❌ Hibás JSON fájl!');
+                }
+            };
+            reader.readAsText(file);
+            this.value = '';
+        });
+
+        // ---------- JELSZÓVÁLTÓ GOMB ----------
+        passwordChangeBtn.addEventListener('click', function() {
+            passwordOverlay.classList.add('show');
+            oldPasswordInput.value = '';
+            newPasswordInput.value = '';
+            confirmPasswordInput.value = '';
+            pwdMsg.textContent = '';
+            pwdMsg.className = 'pwd-msg';
+            oldPasswordInput.focus();
+        });
+
+        pwdCancelBtn.addEventListener('click', function() {
+            passwordOverlay.classList.remove('show');
+        });
+
+        pwdSaveBtn.addEventListener('click', function() {
+            const oldPwd = oldPasswordInput.value.trim();
+            const newPwd = newPasswordInput.value.trim();
+            const confirmPwd = confirmPasswordInput.value.trim();
+            
+            if (changePassword(oldPwd, newPwd, confirmPwd)) {
+                setTimeout(() => {
+                    passwordOverlay.classList.remove('show');
+                }, 1500);
+            }
+        });
+
+        [oldPasswordInput, newPasswordInput, confirmPasswordInput].forEach(input => {
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    pwdSaveBtn.click();
+                }
+                if (e.key === 'Escape') {
+                    passwordOverlay.classList.remove('show');
+                }
+            });
+        });
+
+        passwordOverlay.addEventListener('click', function(e) {
+            if (e.target === this) {
+                passwordOverlay.classList.remove('show');
+            }
+        });
+
+        // ---------- RESET GOMB ----------
+        resetBtn.addEventListener('click', function() {
+            // Ellenőrizzük, hogy van-e egyáltalán bejegyzés
+            if (Object.keys(entries).length === 0) {
+                editorStatus.textContent = 'ℹ️ Már üres a napló, nincs mit törölni.';
+                setTimeout(() => { editorStatus.textContent = ''; }, 3000);
+                return;
+            }
+            
+            resetOverlay.classList.add('show');
+            resetPasswordInput.value = '';
+            resetMsg.textContent = '';
+            resetMsg.className = 'reset-msg';
+            resetPasswordInput.focus();
+        });
+
+        resetCancelBtn.addEventListener('click', function() {
+            resetOverlay.classList.remove('show');
+        });
+
+        resetConfirmBtn.addEventListener('click', function() {
+            const pwd = resetPasswordInput.value.trim();
+            masterReset(pwd);
+        });
+
+        resetPasswordInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                resetConfirmBtn.click();
+            }
+            if (e.key === 'Escape') {
+                resetOverlay.classList.remove('show');
+            }
+        });
+
+        resetOverlay.addEventListener('click', function(e) {
+            if (e.target === this) {
+                resetOverlay.classList.remove('show');
+            }
+        });
+
+        // ---------- INICIALIZÁLÁS ----------
+        function init() {
+            if (localStorage.getItem(PASSWORD_KEY)) {
+                currentPassword = localStorage.getItem(PASSWORD_KEY);
+            } else {
+                localStorage.setItem(PASSWORD_KEY, DEFAULT_PASSWORD);
+                currentPassword = DEFAULT_PASSWORD;
+            }
+            
+            const today = new Date();
+            currentDate = today.toISOString().slice(0,10);
+            selectedDate = currentDate;
+            
+            loadEntries();
+            isEditMode = false;
+            isUnlocked = false;
+            updateUI();
+            renderCalendar();
+            loadEntryToEditor();
+        }
+
+        init();
+
+        // Ctrl+S - kézi mentés
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                if (isEditMode && isUnlocked) {
+                    autoSave();
+                    editorStatus.textContent = '💾 Kézzel mentve';
+                    setTimeout(() => { editorStatus.textContent = ''; }, 1500);
+                }
+            }
+        });
+
+    })();
+</script>
+
+</body>
+</html>
