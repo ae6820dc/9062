@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heti órarend</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8edf5 0%, #d5dde8 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px 35px 35px 35px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            max-width: 1100px;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1a2639;
+            font-size: 28px;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7a8f;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar button {
+            padding: 10px 28px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: #e9eef4;
+            color: #1a2639;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+
+        .toolbar button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+
+        .toolbar .edit-btn {
+            background: #2c3e6b;
+            color: white;
+        }
+
+        .toolbar .edit-btn:hover {
+            background: #1f2f52;
+        }
+
+        .toolbar .save-btn {
+            background: #27ae60;
+            color: white;
+        }
+
+        .toolbar .save-btn:hover {
+            background: #1e8f4e;
+        }
+
+        .toolbar .random-btn {
+            background: #8e44ad;
+            color: white;
+        }
+
+        .toolbar .random-btn:hover {
+            background: #6c3483;
+        }
+
+        .status-msg {
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 14px;
+            padding: 8px;
+            border-radius: 8px;
+            background: #f0f3f7;
+            color: #2c3e6b;
+            min-height: 36px;
+        }
+
+        .status-msg.error {
+            background: #fde8e8;
+            color: #b33;
+        }
+
+        .status-msg.success {
+            background: #e6f7ed;
+            color: #1a7a3a;
+        }
+
+        .status-msg.random {
+            background: #f0e6f7;
+            color: #6c3483;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+            text-align: center;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th {
+            background: #1a2639;
+            color: white;
+            padding: 14px 10px;
+            font-weight: 600;
+            border: 1px solid #2c3e5a;
+        }
+
+        td {
+            padding: 6px 4px;
+            border: 1px solid #d0dbe8;
+            background: #ffffff;
+            vertical-align: middle;
+            min-height: 46px;
+            height: 46px;
+        }
+
+        .ido {
+            background: #e9edf4;
+            font-weight: bold;
+            color: #1a2639;
+            white-space: nowrap;
+            font-size: 13px;
+        }
+
+        .ora-szoveg {
+            display: block;
+            padding: 6px 4px;
+            font-weight: 500;
+        }
+
+        .ora-select {
+            display: none;
+            width: 100%;
+            padding: 4px 2px;
+            border: 2px dashed #2c3e6b;
+            border-radius: 6px;
+            font-size: 13px;
+            text-align: center;
+            background: #fafcff;
+            outline: none;
+            transition: 0.2s;
+            min-width: 60px;
+            cursor: pointer;
+        }
+
+        .ora-select:focus {
+            border-color: #27ae60;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
+        }
+
+        .szerkesztheto td:not(.ido) {
+            background: #f4f8ff;
+        }
+
+        /* ===== TÁRGYAK SZÍNEI ===== */
+        .matematika { background-color: #ffe6cc; }
+        .magyar { background-color: #d9f0f7; }
+        .tori { background-color: #fce4d6; }
+        .angol { background-color: #e2f0d9; }
+        .nemet { background-color: #d5e8d0; }
+        .francia { background-color: #f0d9d9; }
+        .orosz { background-color: #d9d9f0; }
+        .spanyol { background-color: #f0e6d9; }
+        .info { background-color: #d9e2f3; }
+        .tesi { background-color: #f9d9d9; }
+        .fizika { background-color: #e6d9f0; }
+        .kemia { background-color: #f0e6d9; }
+        .biologia { background-color: #d5f5e3; }
+        .foldrajz { background-color: #d9f0e6; }
+        .szabad { background-color: #f2f2f2; color: #888; font-style: italic; }
+        .etika { background-color: #f5e6d9; }
+        .osztalyfo { background-color: #d9e6f5; }
+        .rajz { background-color: #fdebd0; }
+        .zene { background-color: #ebdef0; }
+        .technika { background-color: #d6eaf8; }
+        .honvedelem { background-color: #d5dbdb; }
+        .digitalis { background-color: #aed6f1; }
+        .kornyezet { background-color: #a9dfbf; }
+        .egeszseg { background-color: #f9e79f; }
+        .munkavedelem { background-color: #f1948a; }
+        .penzugy { background-color: #f8c471; }
+        .kozlekedes { background-color: #f0b27a; }
+        .gazdalkodas { background-color: #fcf3cf; }
+        .jog { background-color: #e8daef; }
+        .pszichologia { background-color: #d4efdf; }
+        .szociologia { background-color: #fadbd8; }
+        .filozofia { background-color: #d5dbdb; }
+        .muveszettori { background-color: #f5cba7; }
+        .media { background-color: #aed6f1; }
+        .drama { background-color: #d2b4de; }
+        .konyvtar { background-color: #a3e4d7; }
+        .tanc { background-color: #f5b7b1; }
+        .termeszet { background-color: #82e0aa; }
+        .sport { background-color: #f9d9d9; }
+        .egeszsegfejlesztes { background-color: #f9e79f; }
+        .kornyezetvedelem { background-color: #a9dfbf; }
+        .fenntarthatosag { background-color: #82e0aa; }
+        .vallalkozas { background-color: #f8c471; }
+        .kommunikacio { background-color: #85c1e9; }
+        .kreativ { background-color: #d7bde2; }
+        .logika { background-color: #aeb6bf; }
+        .statisztika { background-color: #a3e4d7; }
+        .adatkezeles { background-color: #f0b27a; }
+        .projekt { background-color: #85c1e9; }
+        .kutatas { background-color: #d7bde2; }
+        .prezentacio { background-color: #f8c471; }
+        .csapat { background-color: #82e0aa; }
+        .vezetes { background-color: #a9cce3; }
+        .minoseg { background-color: #aeb6bf; }
+        .ergonomia { background-color: #f5b7b1; }
+        .biztonsag { background-color: #f1948a; }
+        .tuzvedelem { background-color: #f0b27a; }
+        .elso { background-color: #f9e79f; }
+        .taplalkozas { background-color: #d5f5e3; }
+        .palya { background-color: #aed6f1; }
+
+        @media (max-width: 700px) {
+            .container { padding: 15px; }
+            table { font-size: 12px; }
+            th, td { padding: 4px 3px; }
+            .ora-select { font-size: 11px; padding: 3px 1px; }
+            .toolbar button { padding: 8px 16px; font-size: 13px; }
+            h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📅 Heti órarend</h1>
+    <p class="subtitle"></p>
+
+    <div class="toolbar">
+        <button class="edit-btn" onclick="szerkesztesIndit()">✏️ Szerkesztés</button>
+        <button class="save-btn" onclick="mentes()">💾 Mentés</button>
+        <button class="random-btn" onclick="randomOrarend()">🎲 Random</button>
+    </div>
+
+    <div id="statusMsg" class="status-msg">📖 Olvasó mód – kattints a Szerkesztés gombra a módosításhoz.</div>
+
+    <table id="orarendTabla">
+        <thead>
+            <tr>
+                <th>Idő</th>
+                <th>Hétfő</th>
+                <th>Kedd</th>
+                <th>Szerda</th>
+                <th>Csütörtök</th>
+                <th>Péntek</th>
+            </tr>
+        </thead>
+        <tbody id="orarendTest">
+            <!-- Az adatok JavaScriptből kerülnek betöltésre -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // ==================== TANTÁRGYAK LISTÁJA ====================
+    const TANTARGYAK = [
+        "Szabad",
+        "Matematika",
+        "Magyar nyelv és irodalom",
+        "Történelem",
+        "Angol nyelv",
+        "Német nyelv",
+        "Francia nyelv",
+        "Orosz nyelv",
+        "Spanyol nyelv",
+        "Informatika",
+        "Testnevelés",
+        "Fizika",
+        "Kémia",
+        "Biológia",
+        "Földrajz",
+        "Etika",
+        "Osztályfőnöki",
+        "Rajz és vizuális kultúra",
+        "Ének-zene",
+        "Technika és életvitel",
+        "Honvédelem",
+        "Digitális kultúra",
+        "Környezetismeret",
+        "Egészségtan",
+        "Munkavédelem",
+        "Pénzügyi és vállalkozási ismeretek",
+        "Közlekedésismeret",
+        "Gazdálkodási ismeretek",
+        "Jogi ismeretek",
+        "Pszichológia",
+        "Szociológia",
+        "Filozófia",
+        "Művészettörténet",
+        "Médiaismeret",
+        "Dráma és színház",
+        "Könyvtárhasználat",
+        "Tánc és mozgás",
+        "Természetismeret",
+        "Fizikai kultúra",
+        "Sport",
+        "Egészségfejlesztés",
+        "Környezetvédelem",
+        "Fenntarthatóság",
+        "Vállalkozásfejlesztés",
+        "Kommunikáció",
+        "Kreatív írás",
+        "Logika",
+        "Statisztika",
+        "Adatkezelés",
+        "Projektmunka",
+        "Kutatásmódszertan",
+        "Prezentáció",
+        "Csapatépítés",
+        "Vezetés és szervezés",
+        "Minőségbiztosítás",
+        "Ergonómia",
+        "Biztonságtechnika",
+        "Tűzvédelem",
+        "Elsősegély",
+        "Táplálkozástan",
+        "Pályaorientáció"
+    ];
+
+    // ==================== SZÍN MEGHATÁROZÁS ====================
+    function getOsztaly(nev) {
+        const map = {
+            'Matematika': 'matematika',
+            'Magyar nyelv és irodalom': 'magyar',
+            'Történelem': 'tori',
+            'Angol nyelv': 'angol',
+            'Német nyelv': 'nemet',
+            'Francia nyelv': 'francia',
+            'Orosz nyelv': 'orosz',
+            'Spanyol nyelv': 'spanyol',
+            'Informatika': 'info',
+            'Testnevelés': 'tesi',
+            'Fizika': 'fizika',
+            'Kémia': 'kemia',
+            'Biológia': 'biologia',
+            'Földrajz': 'foldrajz',
+            'Szabad': 'szabad',
+            'Etika': 'etika',
+            'Osztályfőnöki': 'osztalyfo',
+            'Rajz és vizuális kultúra': 'rajz',
+            'Ének-zene': 'zene',
+            'Technika és életvitel': 'technika',
+            'Honvédelem': 'honvedelem',
+            'Digitális kultúra': 'digitalis',
+            'Környezetismeret': 'kornyezet',
+            'Egészségtan': 'egeszseg',
+            'Munkavédelem': 'munkavedelem',
+            'Pénzügyi és vállalkozási ismeretek': 'penzugy',
+            'Közlekedésismeret': 'kozlekedes',
+            'Gazdálkodási ismeretek': 'gazdalkodas',
+            'Jogi ismeretek': 'jog',
+            'Pszichológia': 'pszichologia',
+            'Szociológia': 'szociologia',
+            'Filozófia': 'filozofia',
+            'Művészettörténet': 'muveszettori',
+            'Médiaismeret': 'media',
+            'Dráma és színház': 'drama',
+            'Könyvtárhasználat': 'konyvtar',
+            'Tánc és mozgás': 'tanc',
+            'Természetismeret': 'termeszet',
+            'Fizikai kultúra': 'sport',
+            'Sport': 'sport',
+            'Egészségfejlesztés': 'egeszsegfejlesztes',
+            'Környezetvédelem': 'kornyezetvedelem',
+            'Fenntarthatóság': 'fenntarthatosag',
+            'Vállalkozásfejlesztés': 'vallalkozas',
+            'Kommunikáció': 'kommunikacio',
+            'Kreatív írás': 'kreativ',
+            'Logika': 'logika',
+            'Statisztika': 'statisztika',
+            'Adatkezelés': 'adatkezeles',
+            'Projektmunka': 'projekt',
+            'Kutatásmódszertan': 'kutatas',
+            'Prezentáció': 'prezentacio',
+            'Csapatépítés': 'csapat',
+            'Vezetés és szervezés': 'vezetes',
+            'Minőségbiztosítás': 'minoseg',
+            'Ergonómia': 'ergonomia',
+            'Biztonságtechnika': 'biztonsag',
+            'Tűzvédelem': 'tuzvedelem',
+            'Elsősegély': 'elso',
+            'Táplálkozástan': 'taplalkozas',
+            'Pályaorientáció': 'palya'
+        };
+        return map[nev] || '';
+    }
+
+    // ==================== ALAPÓRAREND ====================
+    const ALAP_ORAREND = [
+        { ido: "08:00 – 08:45", hetfo: "Matematika", kedd: "Magyar nyelv és irodalom", szerda: "Angol nyelv", csutortok: "Informatika", pentek: "Történelem" },
+        { ido: "09:00 – 09:45", hetfo: "Magyar nyelv és irodalom", kedd: "Matematika", szerda: "Történelem", csutortok: "Informatika", pentek: "Angol nyelv" },
+        { ido: "10:00 – 10:45", hetfo: "Angol nyelv", kedd: "Fizika", szerda: "Matematika", csutortok: "Magyar nyelv és irodalom", pentek: "Kémia" },
+        { ido: "11:00 – 11:45", hetfo: "Történelem", kedd: "Földrajz", szerda: "Testnevelés", csutortok: "Matematika", pentek: "Magyar nyelv és irodalom" },
+        { ido: "12:00 – 12:45", hetfo: "Kémia", kedd: "Angol nyelv", szerda: "Testnevelés", csutortok: "Fizika", pentek: "Földrajz" },
+        { ido: "13:00 – 13:45", hetfo: "Szabad", kedd: "Szabad", szerda: "Szabad", csutortok: "Szabad", pentek: "Szabad" },
+        { ido: "14:00 – 14:45", hetfo: "Informatika", kedd: "Testnevelés", szerda: "Magyar nyelv és irodalom", csutortok: "Angol nyelv", pentek: "Szabad" },
+        { ido: "15:00 – 15:45", hetfo: "Szabad", kedd: "Szabad", szerda: "Fizika", csutortok: "Testnevelés", pentek: "Szabad" }
+    ];
+
+    // ==================== TÁROLÁS ====================
+    function getOrarend() {
+        const stored = localStorage.getItem('orarendData0215');
+        if (stored) {
+            try {
+                return JSON.parse(stored);
+            } catch(e) {
+                return JSON.parse(JSON.stringify(ALAP_ORAREND));
+            }
+        }
+        return JSON.parse(JSON.stringify(ALAP_ORAREND));
+    }
+
+    function saveOrarend(data) {
+        localStorage.setItem('orarendData', JSON.stringify(data));
+    }
+
+    // ==================== RANDOM ÓRAREND ====================
+    function randomOrarend() {
+        const jelszo = prompt('🔐 A random generáláshoz add meg a jelszót:', '');
+        if (jelszo !== '1111') {
+            if (jelszo !== null) {
+                document.getElementById('statusMsg').className = 'status-msg error';
+                document.getElementById('statusMsg').textContent = '❌ Hibás jelszó!';
+            }
+            return;
+        }
+
+        // Ha szerkesztő módban vagyunk, lépjünk ki belőle
+        if (szerkesztesAktiv) {
+            szerkesztesAktiv = false;
+        }
+
+        const ujAdatok = JSON.parse(JSON.stringify(ALAP_ORAREND));
+        const napok = ['hetfo', 'kedd', 'szerda', 'csutortok', 'pentek'];
+
+        ujAdatok.forEach(sor => {
+            napok.forEach(nap => {
+                const randomIndex = Math.floor(Math.random() * TANTARGYAK.length);
+                sor[nap] = TANTARGYAK[randomIndex];
+            });
+        });
+
+        aktualisAdatok = ujAdatok;
+        saveOrarend(aktualisAdatok);
+        frissitNezet();
+
+        document.getElementById('statusMsg').className = 'status-msg random';
+        document.getElementById('statusMsg').textContent = '🎲 Random órarend generálva! (Szerkesztéshez kattints a Szerkesztés gombra)';
+    }
+
+    // ==================== SELECT MENÜ LÉTREHOZÁSA ====================
+    function createSelect(value, rowIdx, colKey) {
+        const select = document.createElement('select');
+        select.className = 'ora-select';
+        select.dataset.row = rowIdx;
+        select.dataset.col = colKey;
+
+        TANTARGYAK.forEach(targy => {
+            const option = document.createElement('option');
+            option.value = targy;
+            option.textContent = targy;
+            if (targy === value) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+
+        return select;
+    }
+
+    // ==================== TABLA MEGJELENÍTÉS ====================
+    let szerkesztesAktiv = false;
+
+    function renderTabla(adatok, editMode) {
+        const tbody = document.getElementById('orarendTest');
+        tbody.innerHTML = '';
+
+        adatok.forEach((sor, index) => {
+            const tr = document.createElement('tr');
+            const napok = ['ido', 'hetfo', 'kedd', 'szerda', 'csutortok', 'pentek'];
+
+            napok.forEach((key, idx) => {
+                const td = document.createElement('td');
+                if (idx === 0) {
+                    td.className = 'ido';
+                    td.textContent = sor[key];
+                } else {
+                    const ertek = sor[key] || 'Szabad';
+                    const osztaly = getOsztaly(ertek);
+
+                    if (editMode) {
+                        td.className = osztaly;
+                        const select = createSelect(ertek, index, key);
+                        td.appendChild(select);
+                    } else {
+                        td.className = osztaly;
+                        const span = document.createElement('span');
+                        span.className = 'ora-szoveg';
+                        span.textContent = ertek;
+                        td.appendChild(span);
+                    }
+                }
+                tr.appendChild(td);
+            });
+
+            tbody.appendChild(tr);
+        });
+
+        document.querySelectorAll('.ora-select').forEach(el => el.style.display = editMode ? 'block' : 'none');
+        document.querySelectorAll('.ora-szoveg').forEach(el => el.style.display = editMode ? 'none' : 'block');
+
+        if (editMode) {
+            document.getElementById('orarendTabla').classList.add('szerkesztheto');
+        } else {
+            document.getElementById('orarendTabla').classList.remove('szerkesztheto');
+        }
+    }
+
+    // ==================== JELENLEGI ADATOK BETÖLTÉSE ====================
+    let aktualisAdatok = getOrarend();
+
+    function frissitNezet() {
+        renderTabla(aktualisAdatok, szerkesztesAktiv);
+    }
+
+    // ==================== SZERKESZTÉS INDÍTÁSA ====================
+    function szerkesztesIndit() {
+        const jelszo = prompt('🔐 Add meg a szerkesztési jelszót:', '');
+        if (jelszo === '1111') {
+            szerkesztesAktiv = true;
+            frissitNezet();
+            document.getElementById('statusMsg').className = 'status-msg success';
+            document.getElementById('statusMsg').textContent = '✏️ Szerkesztő mód aktív – válassz a legördülő menüből, majd kattints a Mentés gombra!';
+        } else if (jelszo === null) {
+            // Mégse
+        } else {
+            document.getElementById('statusMsg').className = 'status-msg error';
+            document.getElementById('statusMsg').textContent = '❌ Hibás jelszó!';
+        }
+    }
+
+    // ==================== MENTÉS ====================
+    function mentes() {
+        if (!szerkesztesAktiv) {
+            return;
+        }
+
+        const selects = document.querySelectorAll('.ora-select');
+        const ujAdatok = JSON.parse(JSON.stringify(aktualisAdatok));
+
+        selects.forEach(select => {
+            const rowIdx = parseInt(select.dataset.row);
+            const colKey = select.dataset.col;
+            if (!isNaN(rowIdx) && colKey && ujAdatok[rowIdx]) {
+                ujAdatok[rowIdx][colKey] = select.value || 'Szabad';
+            }
+        });
+
+        aktualisAdatok = ujAdatok;
+        saveOrarend(aktualisAdatok);
+
+        szerkesztesAktiv = false;
+        frissitNezet();
+
+        document.getElementById('statusMsg').className = 'status-msg success';
+        document.getElementById('statusMsg').textContent = '✅ Órarend sikeresen elmentve!';
+    }
+
+    // ==================== INDULÁS ====================
+    frissitNezet();
+
+    if (!localStorage.getItem('orarendData')) {
+        saveOrarend(ALAP_ORAREND);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && szerkesztesAktiv) {
+            const target = e.target;
+            if (target.classList.contains('ora-select')) {
+                mentes();
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
