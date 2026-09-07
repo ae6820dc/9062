@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Véges tizedes törtek – 1/n vizsgálat</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f8f9fc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .card {
+            max-width: 860px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.06);
+            padding: 30px 28px 40px;
+            transition: 0.2s;
+        }
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #0b1e33;
+            margin-top: 0;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .subhead {
+            color: #3a4b60;
+            font-size: 1rem;
+            border-left: 4px solid #7c9bda;
+            padding-left: 16px;
+            background: #f0f4fe;
+            border-radius: 0 40px 40px 0;
+            line-height: 1.5;
+            margin: 0 0 22px 0;
+        }
+        .subhead strong {
+            color: #1f3a6b;
+        }
+        .control-panel {
+            background: #f2f6fd;
+            border-radius: 60px;
+            padding: 16px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px 20px;
+            margin-bottom: 30px;
+            border: 1px solid #dbe3f0;
+        }
+        .range-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            flex: 2 1 280px;
+        }
+        .range-group label {
+            font-weight: 500;
+            color: #1f3a6b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .range-group label span {
+            background: #dce5f5;
+            padding: 0 8px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            color: #1f3a6b;
+        }
+        .range-group input {
+            width: 80px;
+            padding: 10px 6px 10px 14px;
+            border: 1px solid #c6d4e8;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            background: white;
+            transition: 0.15s;
+            outline: none;
+            text-align: center;
+        }
+        .range-group input:focus {
+            border-color: #3b6ec9;
+            box-shadow: 0 0 0 3px rgba(59, 110, 201, 0.2);
+        }
+        .range-group input[type="number"]::-webkit-inner-spin-button {
+            opacity: 0.5;
+        }
+        .action-btn {
+            background: #1f3a6b;
+            border: none;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 10px 26px;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 8px rgba(31, 58, 107, 0.15);
+            border: 1px solid #2b4a7a;
+            flex: 0 1 auto;
+        }
+        .action-btn:hover {
+            background: #14315c;
+            transform: scale(0.97);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        .action-btn:active {
+            background: #0e2547;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            border-bottom: 1px dashed #cbd8ea;
+            padding-bottom: 12px;
+        }
+        .stats span {
+            background: #e6edf9;
+            padding: 4px 16px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1a345a;
+        }
+        .stats .count-badge {
+            background: #1f3a6b;
+            color: white;
+            padding: 4px 18px;
+        }
+        .result-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 8px;
+            max-height: 440px;
+            overflow-y: auto;
+            padding: 10px 6px 6px 4px;
+            background: #ffffff;
+            border-radius: 24px;
+            scrollbar-width: thin;
+            scrollbar-color: #b6cae5 #eef4fd;
+            align-content: flex-start;
+        }
+        .result-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .result-container::-webkit-scrollbar-track {
+            background: #eef4fd;
+            border-radius: 12px;
+        }
+        .result-container::-webkit-scrollbar-thumb {
+            background: #b6cae5;
+            border-radius: 12px;
+        }
+        .number-chip {
+            background: #f2f7ff;
+            border-radius: 60px;
+            padding: 8px 14px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #0b1e33;
+            border: 1px solid #dee9f7;
+            transition: 0.1s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+            flex: 0 0 auto;
+        }
+        .number-chip:hover {
+            background: #e2edfe;
+            border-color: #a7bddb;
+            transform: translateY(-1px);
+        }
+        .empty-message {
+            width: 100%;
+            text-align: center;
+            padding: 40px 10px;
+            color: #5d738c;
+            font-style: italic;
+            background: #fafcff;
+            border-radius: 40px;
+            border: 1px dashed #c6d4e8;
+        }
+        .footer-note {
+            margin-top: 22px;
+            font-size: 0.85rem;
+            color: #4b6585;
+            display: flex;
+            justify-content: flex-end;
+            gap: 24px;
+            flex-wrap: wrap;
+            border-top: 1px solid #e3ebf6;
+            padding-top: 18px;
+        }
+        .footer-note kbd {
+            background: #e9eff8;
+            padding: 0 12px;
+            border-radius: 30px;
+            font-weight: 500;
+            color: #1f3a6b;
+        }
+        @media (max-width: 550px) {
+            .card { padding: 20px 16px; }
+            .control-panel { border-radius: 30px; padding: 16px; }
+            .range-group input { width: 68px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>
+            <span>🔢 1 / <em>n</em></span>
+            <span style="font-size: 1rem; font-weight: 400; color: #3f5f86;">véges tizedes</span>
+        </h1>
+        <div class="subhead">
+            <strong>Csak azok az <em>n</em></strong> számok jelennek meg, amelyekre <strong>1/n</strong> véges tizedes tört (nincs végtelen szakasz).
+        </div>
+
+        <div class="control-panel">
+            <div class="range-group">
+                <label>
+                    <span>⬅️</span> 
+                    <input type="number" id="lowerBound" value="0" min="0" step="1">
+                </label>
+                <span style="color:#2f4b77; font-weight: 300;">–</span>
+                <label>
+                    <input type="number" id="upperBound" value="160" min="1" step="1">
+                    <span>➡️</span>
+                </label>
+            </div>
+            <button class="action-btn" id="searchBtn">🔍 Szűrés</button>
+        </div>
+
+        <div class="stats">
+            <span>📌 Tartomány: <strong id="rangeDisplay">0 – 160</strong></span>
+            <span class="count-badge" id="countDisplay">0 db</span>
+        </div>
+
+        <div id="resultContainer" class="result-container">
+            <!-- Dynamikus tartalom -->
+            <div class="empty-message">✨ Adj meg egy tartományt és nyomd meg a „Szűrés” gombot</div>
+        </div>
+
+        <div class="footer-note">
+            <span>🧮 <kbd>n</kbd> = 2<sup>a</sup> · 5<sup>b</sup> · (más prím nélkül)</span>
+            <span>⚡ 0 kivételével (1/0 értelmetlen)</span>
+        </div>
+    </div>
+    <script>
+        (function() {
+            'use strict';
+
+            const lowerInput = document.getElementById('lowerBound');
+            const upperInput = document.getElementById('upperBound');
+            const searchBtn = document.getElementById('searchBtn');
+            const rangeDisplay = document.getElementById('rangeDisplay');
+            const countDisplay = document.getElementById('countDisplay');
+            const resultContainer = document.getElementById('resultContainer');
+
+            // --- segéd: véges tizedes-e? (n >= 1) ---
+            function isFiniteDecimal(n) {
+                if (n === 1) return true;
+                let temp = n;
+                while (temp % 2 === 0) {
+                    temp /= 2;
+                }
+                while (temp % 5 === 0) {
+                    temp /= 5;
+                }
+                return temp === 1;
+            }
+
+            // --- generálás ---
+            function generateNumbers(lower, upper) {
+                const results = [];
+                const start = Math.max(lower, 1);
+                const end = Math.max(start, upper);
+
+                for (let n = start; n <= end; n++) {
+                    if (isFiniteDecimal(n)) {
+                        results.push(n);
+                    }
+                }
+                return results;
+            }
+
+            // --- megjelenítés ---
+            function renderResults(lower, upper, numbers) {
+                rangeDisplay.textContent = `${lower} – ${upper}`;
+                countDisplay.textContent = `${numbers.length} db`;
+
+                resultContainer.innerHTML = '';
+
+                if (numbers.length === 0) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'empty-message';
+                    emptyDiv.textContent = '😕 Nincs ilyen szám a megadott tartományban.';
+                    resultContainer.appendChild(emptyDiv);
+                    return;
+                }
+
+                for (const num of numbers) {
+                    const chip = document.createElement('div');
+                    chip.className = 'number-chip';
+                    chip.textContent = num;
+                    resultContainer.appendChild(chip);
+                }
+            }
+
+            // --- fő keresés ---
+            function performSearch() {
+                let rawLower = lowerInput.value.trim();
+                let rawUpper = upperInput.value.trim();
+
+                if (rawLower === '') rawLower = '0';
+                if (rawUpper === '') rawUpper = '160';
+
+                let lower = Number(rawLower);
+                let upper = Number(rawUpper);
+
+                if (isNaN(lower)) lower = 0;
+                if (isNaN(upper)) upper = 160;
+
+                lower = Math.max(0, Math.floor(lower));
+                upper = Math.max(lower, Math.floor(upper));
+
+                if (lower > upper) {
+                    [lower, upper] = [upper, lower];
+                }
+
+                if (upper < 1) upper = 1;
+                if (lower < 0) lower = 0;
+
+                lowerInput.value = lower;
+                upperInput.value = upper;
+
+                const numbers = generateNumbers(lower, upper);
+                renderResults(lower, upper, numbers);
+            }
+
+            searchBtn.addEventListener('click', performSearch);
+
+            lowerInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch();
+                }
+            });
+            upperInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch();
+                }
+            });
+
+            window.addEventListener('DOMContentLoaded', () => {
+                lowerInput.value = 0;
+                upperInput.value = 160;
+                performSearch();
+            });
+        })();
+    </script>
+</body>
+</html>
