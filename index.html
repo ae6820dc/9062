@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Repository Fás Szerkezete</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --border-color: #30363d;
+            --text-color: #c9d1d9;
+            --accent-color: #58a6ff;
+            --folder-color: #79c0ff;
+            --file-color: #8b949e;
+            --hover-bg: #21262d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--accent-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            font-size: 1.25rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input {
+            flex: 1;
+            min-width: 200px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+        }
+
+        button {
+            background-color: #238636;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #2ea043;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn-small {
+            background-color: var(--border-color);
+            color: var(--text-color);
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+
+        .btn-small:hover {
+            background-color: #383f47;
+        }
+
+        #tree-container {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        /* Tree Styles */
+        ul.tree, ul.tree ul {
+            list-style: none;
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        ul.tree {
+            padding-left: 0;
+        }
+
+        li.tree-item {
+            margin: 4px 0;
+        }
+
+        .item-content {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .item-content:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .icon {
+            display: inline-block;
+            width: 16px;
+            text-align: center;
+        }
+
+        .folder > .item-content {
+            color: var(--folder-color);
+            font-weight: 600;
+        }
+
+        .file > .item-content {
+            color: var(--file-color);
+        }
+
+        .arrow {
+            transition: transform 0.2s;
+            font-size: 10px;
+            color: var(--file-color);
+        }
+
+        .collapsed > ul {
+            display: none;
+        }
+
+        .collapsed > .item-content > .arrow {
+            transform: rotate(-90deg);
+        }
+
+        #status {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        .error {
+            color: #f85149 !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>GitHub Repository Faszerkezet Vizualizáló</h2>
+    
+    <div class="input-group">
+        <input type="text" id="repo-url" placeholder="URL pl: https://github.com/user/repository" value="ae6820dc/4062">
+        <button onclick="loadRepository()">Betöltés</button>
+    </div>
+
+    <div class="controls" id="controls" style="display: none;">
+        <button class="btn-small" onclick="toggleAll(false)">Mind becsukása</button>
+        <button class="btn-small" onclick="toggleAll(true)">Mind kinyitása</button>
+    </div>
+
+    <div id="status">Add meg a repository URL-jét vagy `felhasználónév/repo` formátumot!</div>
+
+    <div id="tree-container" style="display: none;">
+        <ul id="tree-root" class="tree"></ul>
+    </div>
+</div>
+
+<script>
+    async function loadRepository() {
+        const input = document.getElementById('repo-url').value.trim();
+        const statusEl = document.getElementById('status');
+        const container = document.getElementById('tree-container');
+        const treeRoot = document.getElementById('tree-root');
+        const controls = document.getElementById('controls');
+
+        if (!input) {
+            showError("Kérlek adj meg egy valid GitHub hivatkozást vagy repo nevet!");
+            return;
+        }
+
+        // URL vagy 'user/repo' parsere
+        let repoPath = input;
+        if (input.includes('github.com/')) {
+            repoPath = input.split('github.com/')[1].replace(/\.git$/, '').replace(/\/$/, '');
+        }
+
+        const parts = repoPath.split('/');
+        if (parts.length < 2) {
+            showError("Érvénytelen formátum. Használd a 'felhasználó/repo' formátumot.");
+            return;
+        }
+
+        const owner = parts[0];
+        const repo = parts[1];
+
+        statusEl.className = '';
+        statusEl.textContent = "Faszerkezet lekérése a GitHub API-n keresztül...";
+        container.style.display = 'none';
+        controls.style.display = 'none';
+        treeRoot.innerHTML = '';
+
+        try {
+            // 1. Alapértelmezett branch lekérése
+            const repoInfoResp = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+            if (!repoInfoResp.ok) throw new Error(`Repository nem található vagy privát (${repoInfoResp.status})`);
+            const repoInfo = await repoInfoResp.json();
+            const defaultBranch = repoInfo.default_branch;
+
+            // 2. Teljes fájlfa lekérése (recursive=1)
+            const treeResp = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${defaultBranch}?recursive=1`);
+            if (!treeResp.ok) throw new Error("Nem sikerült lekérni a könyvtárszerkezetet.");
+            const treeData = await treeResp.json();
+
+            if (treeData.truncated) {
+                statusEl.textContent = "Figyelem: A repository nagyon nagy, a faszerkezet részleges lehet.";
+            } else {
+                statusEl.textContent = `Sikeres betöltés! (${owner}/${repo} - ${defaultBranch} ág)`;
+            }
+
+            // Hiearchia felépítése az útvonalakból
+            const treeStructure = buildTreeStructure(treeData.tree);
+            
+            // UI kirajzolása
+            treeRoot.appendChild(createTreeUI(treeStructure));
+            
+            container.style.display = 'block';
+            controls.style.display = 'flex';
+
+        } catch (err) {
+            showError(err.message);
+        }
+    }
+
+    function showError(msg) {
+        const statusEl = document.getElementById('status');
+        statusEl.className = 'error';
+        statusEl.textContent = "Hiba: " + msg;
+    }
+
+    // Lapos tömbből strukturált objektum-fa építése
+    function buildTreeStructure(paths) {
+        const root = { name: 'root', type: 'tree', children: {} };
+
+        paths.forEach(item => {
+            const parts = item.path.split('/');
+            let current = root;
+
+            parts.forEach((part, index) => {
+                const isLast = index === parts.length - 1;
+                
+                if (!current.children[part]) {
+                    current.children[part] = {
+                        name: part,
+                        type: isLast ? item.type : 'tree',
+                        path: item.path,
+                        children: {}
+                    };
+                }
+                current = current.children[part];
+            });
+        });
+
+        return root;
+    }
+
+    // HTML fanézet generálása meglévő strukturált objektumból
+    function createTreeUI(node) {
+        const fragment = document.createDocumentFragment();
+        
+        // Rendezés: Mappák előre, fájlok utána (ABC sorrendben)
+        const sortedKeys = Object.keys(node.children).sort((a, b) => {
+            const itemA = node.children[a];
+            const itemB = node.children[b];
+            const isDirA = itemA.type === 'tree';
+            const isDirB = itemB.type === 'tree';
+
+            if (isDirA && !isDirB) return -1;
+            if (!isDirA && isDirB) return 1;
+            return a.localeCompare(b);
+        });
+
+        sortedKeys.forEach(key => {
+            const item = node.children[key];
+            const li = document.createElement('li');
+            li.className = 'tree-item ' + (item.type === 'tree' ? 'folder' : 'file');
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'item-content';
+
+            if (item.type === 'tree') {
+                const arrow = document.createElement('span');
+                arrow.className = 'arrow';
+                arrow.innerHTML = '▼';
+
+                const icon = document.createElement('span');
+                icon.className = 'icon';
+                icon.innerHTML = '📁';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = item.name;
+
+                contentDiv.appendChild(arrow);
+                contentDiv.appendChild(icon);
+                contentDiv.appendChild(nameSpan);
+                li.appendChild(contentDiv);
+
+                const ul = createTreeUI(item);
+                li.appendChild(ul);
+
+                // Mappa nyitás / csukás esemény
+                contentDiv.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    li.classList.toggle('collapsed');
+                });
+
+            } else {
+                const spacer = document.createElement('span');
+                spacer.className = 'arrow';
+                spacer.style.opacity = '0';
+                spacer.innerHTML = '•';
+
+                const icon = document.createElement('span');
+                icon.className = 'icon';
+                icon.innerHTML = getFileIcon(item.name);
+
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = item.name;
+
+                contentDiv.appendChild(spacer);
+                contentDiv.appendChild(icon);
+                contentDiv.appendChild(nameSpan);
+                li.appendChild(contentDiv);
+            }
+
+            fragment.appendChild(li);
+        });
+
+        const ul = document.createElement('ul');
+        ul.appendChild(fragment);
+        return ul;
+    }
+
+    // Fájltípus szerinti ikon választás
+    function getFileIcon(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        switch(ext) {
+            case 'html': case 'htm': return '📄';
+            case 'css': return '🎨';
+            case 'js': case 'json': return '📜';
+            case 'png': case 'jpg': case 'jpeg': case 'gif': case 'svg': return '🖼️';
+            case 'md': return '📝';
+            default: return '📄';
+        }
+    }
+
+    // Összes mappa lenyitása / becsukása
+    function toggleAll(expand) {
+        const folders = document.querySelectorAll('.tree-item.folder');
+        folders.forEach(folder => {
+            if (expand) {
+                folder.classList.remove('collapsed');
+            } else {
+                folder.classList.add('collapsed');
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
