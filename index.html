@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>9062 Repository</title>
+<style>
+body{font-family:Arial,sans-serif;background:#111;color:#eee;max-width:900px;margin:40px auto;padding:20px}a,button{color:#eee;background:#222;border:1px solid #444;border-radius:8px;padding:10px 14px;text-decoration:none;display:inline-block;margin:4px;cursor:pointer}a:hover,button:hover{background:#333}.item{display:block;padding:8px 12px;margin:4px 0}.folder{cursor:pointer}.path{color:#aaa;margin:15px 0}
+</style>
+</head>
+<body>
+<h1>📦 9062 Repository</h1>
+<p>Ez az index automatikusan generálódik a repository fájlszerkezetéből.</p>
+<div id="nav"></div>
+<div id="path" class="path"></div>
+<div id="list"></div>
+<script>
+const owner='ae6820dc',repo='9062';
+let tree=null,current=[];
+async function load(){
+ const r=await fetch('https://api.github.com/repos/'+owner+'/'+repo+'/git/trees/main?recursive=1');
+ if(!r.ok){document.getElementById('list').textContent='Hiba a repository betöltésekor.';return}
+ const d=await r.json(); tree={};
+ for(const x of d.tree||[]){if(x.type!=='blob'&&x.type!=='tree')continue;let p=x.path.split('/'),n=tree;for(let i=0;i<p.length;i++){if(!n[p[i]])n[p[i]]=i===p.length-1?(x.type==='tree'?{}:{__file:x.path}):{};n=n[p[i]]}}
+ render();
+}
+function render(){let n=tree;for(const p of current)n=n[p];document.getElementById('path').textContent='📍 / '+current.join(' / ');let h='';if(current.length)h+='<button onclick="back()">⬅️ Vissza</button>';h+='<button onclick="home()">🏠 Főkönyvtár</button>';document.getElementById('nav').innerHTML=h;let out='';Object.keys(n).filter(k=>k!=='__file').sort().forEach(k=>out+='<a class="item folder" onclick="openFolder('+JSON.stringify(k)+')">📁 '+k+'</a>');Object.keys(n).filter(k=>k==='__file'||!n[k].__file===false).sort().forEach(k=>{if(n[k]&&n[k].__file){let path=n[k].__file.split('/').map(encodeURIComponent).join('/');out+='<a class="item" href="'+path+'">📄 '+k+'</a>'}});document.getElementById('list').innerHTML=out||'<p>Üres mappa.</p>'}
+function openFolder(p){current.push(p);render()}function back(){current.pop();render()}function home(){current=[];render()}load();
+</script>
+</body>
+</html>
