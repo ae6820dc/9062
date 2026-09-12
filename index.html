@@ -1,324 +1,103 @@
-```html
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>GitHub Repository</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #0d1117;
-            color: #c9d1d9;
-            margin: 0;
-            padding: 30px;
-        }
-
-        h1 {
-            color: white;
-        }
-
-        #path {
-            margin: 15px 0 25px;
-            color: #8b949e;
-        }
-
-        button {
-            background: #21262d;
-            color: #c9d1d9;
-            border: 1px solid #30363d;
-            padding: 8px 14px;
-            margin-right: 8px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #30363d;
-        }
-
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        li {
-            border-bottom: 1px solid #21262d;
-            padding: 12px 8px;
-        }
-
-        a {
-            color: #58a6ff;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .folder {
-            color: #79c0ff;
-            cursor: pointer;
-        }
-
-        .file {
-            color: #c9d1d9;
-        }
-
-        #loading {
-            color: #8b949e;
-        }
-
-        #error {
-            color: #f85149;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>9062 – Repository</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 30px; font-family: Arial, sans-serif; background: #0d1117; color: #c9d1d9; }
+main { max-width: 1000px; margin: auto; }
+h1 { color: #fff; margin-bottom: 8px; }
+#path { color: #8b949e; margin-bottom: 20px; }
+.toolbar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+button { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 8px 14px; border-radius: 6px; cursor: pointer; }
+button:hover { background: #30363d; }
+ul { list-style: none; padding: 0; margin: 0; }
+li { border-bottom: 1px solid #21262d; padding: 12px 8px; }
+a { color: #58a6ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.folder { color: #79c0ff; cursor: pointer; }
+.muted { color: #8b949e; }
+</style>
 </head>
-
 <body>
-
-    <h1>📦 GitHub Repository</h1>
-
-    <div id="path">/</div>
-
-    <button onclick="goHome()">🏠 Főkönyvtár</button>
-    <button onclick="goBack()">⬅️ Vissza</button>
-
-    <div id="loading">Betöltés...</div>
-    <div id="error"></div>
-
-    <ul id="repo"></ul>
-
-
+<main>
+<h1>📦 9062 Repository</h1>
+<div id="path">/</div>
+<div class="toolbar">
+  <button onclick="goHome()">🏠 Főkönyvtár</button>
+  <button onclick="goBack()">⬅️ Vissza</button>
+</div>
+<ul id="repo"></ul>
+</main>
 <script>
+const tree = {"chess":{"1":{"chess_b.html":null,"chess_w.html":null,"readme.html":null},"2":{"chess_b.html":null,"chess_w.html":null,"readme.html":null},"3":{"chess_b.html":null,"chess_w.html":null,"readme.html":null},"4":{"chess_b.html":null,"chess_w.html":null,"readme.html":null},"5":{"chess_b.html":null,"chess_w.html":null,"readme.html":null},"6":{"chess_b.html":null,"chess_w.html":null,"readme.html":null},"7":{"chess_b.html":null,"chess_w.html":null,"readme.txt":null},"8":{"chess_b.html":null,"chess_w.html":null,"readme.html":null},"9":{"chess_b.html":null,"chess_w.html":null,"readme.html":null},"readme.html":null},"diary":{"readme.html":null,"sample1.html":null},"factorial":{"43":{"1":{"readme.html":null},"readme.html":null},"readme.html":null,"v20":{"112.html":null,"128.html":null,"144.html":null,"45.html":null,"64.html":null,"80.html":null,"96.html":null,"readme.html":null},"v21":{"112.html":null,"128.html":null,"144.html":null,"45.html":null,"64.html":null,"80.html":null,"96.html":null,"readme.html":null},"v22":{"112.html":null,"128.html":null,"144.html":null,"45.html":null,"64.html":null,"80.html":null,"96.html":null,"readme.html":null},"v23":{"112.html":null,"128.html":null,"144.html":null,"192.html":null,"256.html":null,"45.html":null,"64.html":null,"80.html":null,"96.html":null,"readme.html":null},"v24":{"162.html":null,"54.html":null,"81.html":null,"readme.html":null},"v25":{"100.html":null,"120.html":null,"160.html":null,"200.html":null,"60.html":null,"readme.html":null},"v26":{"100.html":null,"120.html":null,"160.html":null,"200.html":null,"256.html":null,"60.html":null,"readme.html":null},"v27":{"100.html":null,"120.html":null,"160.html":null,"200.html":null,"256.html":null,"60.html":null,"readme.html":null},"v28":{"100.html":null,"120.html":null,"160.html":null,"200.html":null,"256.html":null,"60.html":null,"readme.html":null},"v29":{"100.html":null,"120.html":null,"160.html":null,"200.html":null,"256.html":null,"60.html":null,"80.html":null,"readme.html":null},"v30":{"100.html":null,"120.html":null,"160.html":null,"200.html":null,"256.html":null,"60.html":null,"80.html":null,"readme.html":null},"v31":{"100.html":null,"120.html":null,"160.html":null,"200.html":null,"256.html":null,"60.html":null,"80.html":null,"readme.html":null},"v32":{"100.html":null,"120.html":null,"160.html":null,"200.html":null,"256.html":null,"50.html":null,"60.html":null,"80.html":null,"readme.html":null},"v33":{"100.html":null,"120.html":null,"160.html":null,"200.html":null,"256.html":null,"60.html":null,"readme.html":null},"v34":{"100.html":null,"120.html":null,"160.html":null,"200.html":null,"256.html":null,"60.html":null,"readme.html":null},"v35":{"100.html":null,"120.html":null,"160.html":null,"200.html":null,"256.html":null,"60.html":null,"readme.html":null},"v36":{"128.html":null,"144.html":null,"160.html":null,"192.html":null,"256.html":null,"96.html":null,"readme.html":null},"v37":{"1":{"128.html":null,"160.html":null,"192.html":null,"256.html":null,"96.html":null,"readme.html":null},"2":{"128.html":null,"160.html":null,"192.html":null,"256.html":null,"96.html":null,"readme.html":null},"3":{"128.html":null,"160.html":null,"192.html":null,"256.html":null,"96.html":null,"readme.html":null},"readme.html":null},"v38":{"128.html":null,"160.html":null,"192.html":null,"256.html":null,"96.html":null,"readme.html":null},"v39":{"128.html":null,"160.html":null,"192.html":null,"256.html":null,"96.html":null,"readme.html":null},"v40":{"128.html":null,"160.html":null,"192.html":null,"256.html":null,"96.html":null,"readme.html":null},"v41":{"1":{"128.html":null,"192.html":null,"256.html":null,"64.html":null,"96.html":null,"readme.html":null},"2":{"128.html":null,"192.html":null,"256.html":null,"64.html":null,"96.html":null,"readme.html":null},"readme.html":null},"v42":{"1":{"128.html":null,"192.html":null,"256.html":null,"64.html":null,"96.html":null,"readme.html":null},"2":{"128.html":null,"192.html":null,"256.html":null,"64.html":null,"96.html":null,"readme.html":null},"readme.html":null},"v43":{"readme.html":null}},"language":{"1":{"128.html":null,"96.html":null,"readme.html":null},"10":{"128_1.html":null,"128_2.html":null,"96_1.html":null,"96_2.html":null,"readme.html":null},"11":{"128_1.html":null,"128_2.html":null,"96_1.html":null,"96_2.html":null,"readme.txt":null},"12":{"128_1.html":null,"128_2.html":null,"96_1.html":null,"96_2.html":null,"readme.html":null},"13":{"128_1.html":null,"128_2.html":null,"96_1.html":null,"96_2.html":null,"readme.html":null},"14":{"128_1.html":null,"128_2.html":null,"96_1.html":null,"96_2.html":null,"readme.html":null},"15":{"128_1.html":null,"128_2.html":null,"96_1.html":null,"96_2.html":null,"readme.html":null},"16":{"128_1.html":null,"128_2.html":null,"96_1.html":null,"96_2.html":null,"readme.html":null},"17":{"128_1.html":null,"128_2.html":null,"96_1.html":null,"96_2.html":null,"readme.html":null},"18":{"192_1.html":null,"192_2.html":null,"readme.html":null},"19":{"192_1.html":null,"192_2.html":null,"96_1.html":null,"96_2.html":null,"readme.html":null},"2":{"128.html":null,"96.html":null,"readme.html":null},"20":{"192_1.html":null,"192_2.html":null,"96_1.html":null,"96_2.html":null,"readme.html":null},"3":{"128.html":null,"96.html":null,"readme.html":null},"4":{"128.html":null,"96.html":null,"readme.html":null},"5":{"128.html":null,"96.html":null,"readme.html":null},"6":{"128_1.html":null,"128_2.html":null,"96_1.html":null,"96_2.html":null,"readme.html":null},"7":{"128_1.html":null,"128_2.html":null,"96_1.html":null,"96_2.html":null,"readme.html":null},"8":{"128_1.html":null,"128_2.html":null,"96_1.html":null,"96_2.html":null,"readme.html":null},"9":{"128_1.html":null,"128_2.html":null,"96_1.html":null,"96_2.html":null,"readme.html":null},"readme.html":null},"loopten":{"readme.html":null,"v10":{"loopten_100_v10.html":null,"loopten_120_v10.html":null,"loopten_160_v10.html":null,"loopten_200_v10.html":null,"loopten_60_v10.html":null,"loopten_80_v10.html":null,"readme.html":null}},"primes":{"prime_generator.html":null,"readme.html":null},"readme.html":null,"time":{"readme.html":null,"sample1.html":null},"timetable":{"readme.html":null,"sample1.html":null}};
+let currentPath = [];
 
-// ==========================================
-// GITHUB BEÁLLÍTÁSOK
-// ==========================================
+function icon(name, isFolder) {
+  if (isFolder) return '📁';
+  const ext = name.includes('.') ? name.split('.').pop().toLowerCase() : '';
+  const icons = { html:'🌐', htm:'🌐', css:'🎨', js:'📜', json:'⚙️', py:'🐍', java:'☕', c:'🔧', cpp:'🔧', h:'🔧', md:'📝', txt:'📄', jpg:'🖼️', jpeg:'🖼️', png:'🖼️', gif:'🖼️', webp:'🖼️', mp3:'🎵', mp4:'🎬', zip:'📦', pdf:'📕' };
+  return icons[ext] || '📄';
+}
 
-const owner = "ae6820dc";
-const repository = "9062";
+function getNode(path) {
+  let node = tree;
+  for (const part of path) node = node[part];
+  return node;
+}
 
+function render() {
+  const node = getNode(currentPath);
+  const list = document.getElementById('repo');
+  list.innerHTML = '';
+  document.getElementById('path').textContent = '/' + currentPath.join('/');
 
-// ==========================================
-// ÁLLAPOT
-// ==========================================
+  const entries = Object.keys(node).sort((a, b) => {
+    const af = node[a] !== null, bf = node[b] !== null;
+    if (af !== bf) return af ? -1 : 1;
+    return a.localeCompare(b, 'hu');
+  });
 
-let currentPath = "";
+  if (!entries.length) {
+    const li = document.createElement('li');
+    li.className = 'muted';
+    li.textContent = 'Üres mappa';
+    list.appendChild(li);
+    return;
+  }
 
+  for (const name of entries) {
+    const li = document.createElement('li');
+    const folder = node[name] !== null;
+    const label = icon(name, folder) + ' ' + name;
 
-// ==========================================
-// REPOSITORY BETÖLTÉSE
-// ==========================================
-
-async function loadDirectory(path = "") {
-
-    currentPath = path;
-
-    const list = document.getElementById("repo");
-    const loading = document.getElementById("loading");
-    const error = document.getElementById("error");
-    const pathDisplay = document.getElementById("path");
-
-    list.innerHTML = "";
-    error.innerHTML = "";
-
-    pathDisplay.textContent = "/" + path;
-
-    loading.style.display = "block";
-
-    try {
-
-        const url =
-            `https://api.github.com/repos/${owner}/${repository}/contents/${path}`;
-
-        const response = await fetch(url);
-
-        if (!response.ok) {
-            throw new Error(
-                `GitHub API hiba: ${response.status}`
-            );
-        }
-
-        const files = await response.json();
-
-        loading.style.display = "none";
-
-
-        // ==================================
-        // FÁJLOK / MAPPÁK LISTÁZÁSA
-        // ==================================
-
-        files.sort((a, b) => {
-
-            // Mappák kerüljenek előre
-            if (a.type === "dir" && b.type !== "dir") return -1;
-            if (a.type !== "dir" && b.type === "dir") return 1;
-
-            return a.name.localeCompare(b.name);
-        });
-
-
-        files.forEach(file => {
-
-            const li = document.createElement("li");
-
-
-            // ==================================
-            // MAPPA
-            // ==================================
-
-            if (file.type === "dir") {
-
-                const folder = document.createElement("span");
-
-                folder.className = "folder";
-
-                folder.textContent = "📁 " + file.name;
-
-                folder.onclick = () => {
-
-                    loadDirectory(file.path);
-
-                };
-
-                li.appendChild(folder);
-
-            }
-
-
-            // ==================================
-            // FÁJL
-            // ==================================
-
-            else {
-
-                const link = document.createElement("a");
-
-                link.className = "file";
-
-                link.href = file.html_url;
-
-                link.target = "_blank";
-
-                link.textContent =
-                    getFileIcon(file.name) + " " + file.name;
-
-                li.appendChild(link);
-
-            }
-
-
-            list.appendChild(li);
-
-        });
-
+    if (folder) {
+      const span = document.createElement('span');
+      span.className = 'folder';
+      span.textContent = label;
+      span.onclick = () => { currentPath.push(name); render(); };
+      li.appendChild(span);
+    } else {
+      const a = document.createElement('a');
+      const fullPath = [...currentPath, name].join('/');
+      a.href = encodePath(fullPath);
+      a.textContent = label;
+      li.appendChild(a);
     }
-
-    catch (err) {
-
-        loading.style.display = "none";
-
-        error.textContent =
-            "❌ Hiba: " + err.message;
-
-    }
+    list.appendChild(li);
+  }
 }
 
-
-// ==========================================
-// FÁJL IKON
-// ==========================================
-
-function getFileIcon(filename) {
-
-    const extension =
-        filename.split(".").pop().toLowerCase();
-
-
-    const icons = {
-
-        html: "🌐",
-        htm: "🌐",
-
-        css: "🎨",
-
-        js: "📜",
-        json: "⚙️",
-
-        py: "🐍",
-
-        java: "☕",
-
-        c: "🔧",
-        cpp: "🔧",
-        h: "🔧",
-
-        md: "📝",
-
-        txt: "📄",
-
-        jpg: "🖼️",
-        jpeg: "🖼️",
-        png: "🖼️",
-        gif: "🖼️",
-        webp: "🖼️",
-
-        mp3: "🎵",
-        mp4: "🎬",
-
-        zip: "📦",
-
-        pdf: "📕"
-
-    };
-
-    return icons[extension] || "📄";
+function encodePath(path) {
+  return path.split('/').map(part => encodeURIComponent(part)).join('/');
 }
 
-
-// ==========================================
-// FŐKÖNYVTÁR
-// ==========================================
-
-function goHome() {
-
-    loadDirectory("");
-
-}
-
-
-// ==========================================
-// VISSZA
-// ==========================================
-
-function goBack() {
-
-    if (!currentPath) {
-        return;
-    }
-
-    const parts = currentPath.split("/");
-
-    parts.pop();
-
-    const previousPath = parts.join("/");
-
-    loadDirectory(previousPath);
-
-}
-
-
-// ==========================================
-// INDÍTÁS
-// ==========================================
-
-loadDirectory("");
-
+function goHome() { currentPath = []; render(); }
+function goBack() { if (currentPath.length) { currentPath.pop(); render(); } }
+render();
 </script>
-
 </body>
 </html>
-```
