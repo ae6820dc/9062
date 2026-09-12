@@ -2,10 +2,8 @@ name: Generate repository index
 
 on:
   push:
-    branches:
-      - main
-    paths-ignore:
-      - index.html
+    branches: [main]
+    paths-ignore: [index.html]
   workflow_dispatch:
 
 permissions:
@@ -14,154 +12,49 @@ permissions:
 jobs:
   generate-index:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Generate index.html
         run: |
           python3 <<'PY'
           from pathlib import Path
-          from html import escape
           from urllib.parse import quote
           import json
 
           root = Path('.')
-          ignored_dirs = {'.git', '.github'}
-          ignored_files = {'index.html'}
-
-          entries = []
-          for path in sorted(root.rglob('*')):
-              if not path.is_file():
-                  continue
-              parts = path.parts
-              if any(part in ignored_dirs for part in parts):
-                  continue
-              if path.name in ignored_files and len(parts) == 1:
-                  continue
-              entries.append('/'.join(parts))
+          ignored = {'.git', '.github', 'index.html'}
+          files = []
+          for p in root.rglob('*'):
+              if p.is_file() and not any(x in ignored for x in p.parts):
+                  files.append('/'.join(p.parts))
 
           tree = {}
-          for item in entries:
+          for path in sorted(files):
               node = tree
-              parts = item.split('/')
+              parts = path.split('/')
               for i, part in enumerate(parts):
                   if i == len(parts) - 1:
                       node[part] = None
                   else:
                       node = node.setdefault(part, {})
 
-          def encode_path(path):
-              return '/'.join(quote(p, safe='') for p in path.split('/'))
-
           data = json.dumps(tree, ensure_ascii=False, separators=(',', ':'))
 
           html = '''<!DOCTYPE html>
-          <html lang="hu">
-          <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>9062 – Repository</title>
+          <html lang="hu"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>9062 Repository</title>
           <style>
-          :root { color-scheme: dark; }
-          * { box-sizing: border-box; }
-          body { margin: 0; padding: 30px; font-family: Arial, sans-serif; background: #0d1117; color: #c9d1d9; }
-          main { max-width: 1000px; margin: auto; }
-          h1 { color: #fff; margin-bottom: 8px; }
-          #path { color: #8b949e; margin-bottom: 20px; }
-          .toolbar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-          button { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 8px 14px; border-radius: 6px; cursor: pointer; }
-          button:hover { background: #30363d; }
-          ul { list-style: none; padding: 0; margin: 0; }
-          li { border-bottom: 1px solid #21262d; padding: 12px 8px; }
-          a { color: #58a6ff; text-decoration: none; }
-          a:hover { text-decoration: underline; }
-          .folder { color: #79c0ff; cursor: pointer; }
-          .muted { color: #8b949e; }
-          </style>
-          </head>
-          <body>
-          <main>
-          <h1>📦 9062 Repository</h1>
-          <div id="path">/</div>
-          <div class="toolbar">
-            <button onclick="goHome()">🏠 Főkönyvtár</button>
-            <button onclick="goBack()">⬅️ Vissza</button>
-          </div>
-          <ul id="repo"></ul>
-          </main>
+          :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;padding:30px;font-family:Arial,sans-serif;background:#0d1117;color:#c9d1d9}main{max-width:1000px;margin:auto}h1{color:#fff}#path{color:#8b949e;margin:10px 0 20px}.toolbar{display:flex;gap:8px;margin-bottom:20px}button{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:8px 14px;border-radius:6px;cursor:pointer}button:hover{background:#30363d}ul{list-style:none;padding:0;margin:0}li{border-bottom:1px solid #21262d;padding:12px 8px}a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}.folder{color:#79c0ff;cursor:pointer}
+          </style></head><body><main><h1>📦 9062 Repository</h1><div id="path">/</div><div class="toolbar"><button onclick="home()">🏠 Főkönyvtár</button><button onclick="back()">⬅️ Vissza</button></div><ul id="repo"></ul></main>
           <script>
-          const tree = __TREE__;
-          let currentPath = [];
-
-          function icon(name, isFolder) {
-            if (isFolder) return '📁';
-            const ext = name.includes('.') ? name.split('.').pop().toLowerCase() : '';
-            const icons = { html:'🌐', htm:'🌐', css:'🎨', js:'📜', json:'⚙️', py:'🐍', java:'☕', c:'🔧', cpp:'🔧', h:'🔧', md:'📝', txt:'📄', jpg:'🖼️', jpeg:'🖼️', png:'🖼️', gif:'🖼️', webp:'🖼️', mp3:'🎵', mp4:'🎬', zip:'📦', pdf:'📕' };
-            return icons[ext] || '📄';
-          }
-
-          function getNode(path) {
-            let node = tree;
-            for (const part of path) node = node[part];
-            return node;
-          }
-
-          function render() {
-            const node = getNode(currentPath);
-            const list = document.getElementById('repo');
-            list.innerHTML = '';
-            document.getElementById('path').textContent = '/' + currentPath.join('/');
-
-            const entries = Object.keys(node).sort((a, b) => {
-              const af = node[a] !== null, bf = node[b] !== null;
-              if (af !== bf) return af ? -1 : 1;
-              return a.localeCompare(b, 'hu');
-            });
-
-            if (!entries.length) {
-              const li = document.createElement('li');
-              li.className = 'muted';
-              li.textContent = 'Üres mappa';
-              list.appendChild(li);
-              return;
-            }
-
-            for (const name of entries) {
-              const li = document.createElement('li');
-              const folder = node[name] !== null;
-              const label = icon(name, folder) + ' ' + name;
-
-              if (folder) {
-                const span = document.createElement('span');
-                span.className = 'folder';
-                span.textContent = label;
-                span.onclick = () => { currentPath.push(name); render(); };
-                li.appendChild(span);
-              } else {
-                const a = document.createElement('a');
-                const fullPath = [...currentPath, name].join('/');
-                a.href = encodePath(fullPath);
-                a.textContent = label;
-                li.appendChild(a);
-              }
-              list.appendChild(li);
-            }
-          }
-
-          function encodePath(path) {
-            return path.split('/').map(part => encodeURIComponent(part)).join('/');
-          }
-
-          function goHome() { currentPath = []; render(); }
-          function goBack() { if (currentPath.length) { currentPath.pop(); render(); } }
-          render();
-          </script>
-          </body>
-          </html>'''.replace('__TREE__', data)
-
-          Path('index.html').write_text(html, encoding='utf-8')
+          const tree=__TREE__;let current=[];
+          function enc(p){return p.split('/').map(encodeURIComponent).join('/')}
+          function node(){let n=tree;for(const x of current)n=n[x];return n}
+          function render(){const n=node(),list=document.getElementById('repo');list.innerHTML='';document.getElementById('path').textContent='/'+current.join('/');const names=Object.keys(n).sort((a,b)=>{const af=n[a]!==null,bf=n[b]!==null;return af!==bf?(af?-1:1):a.localeCompare(b,'hu')});for(const name of names){const li=document.createElement('li'),folder=n[name]!==null;const label=(folder?'📁 ':'📄 ')+name;if(folder){const s=document.createElement('span');s.className='folder';s.textContent=label;s.onclick=()=>{current.push(name);render()};li.appendChild(s)}else{const a=document.createElement('a');a.href=enc([...current,name].join('/'));a.textContent=label;li.appendChild(a)}list.appendChild(li)}}
+          function home(){current=[];render()}function back(){if(current.length){current.pop();render()}}render();
+          </script></body></html>'''.replace('__TREE__',data)
+          Path('index.html').write_text(html,encoding='utf-8')
           PY
 
       - name: Commit generated index
