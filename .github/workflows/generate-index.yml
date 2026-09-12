@@ -3,7 +3,8 @@ name: Generate repository index
 on:
   push:
     branches: [main]
-    paths-ignore: [index.html]
+    paths-ignore:
+      - index.html
   workflow_dispatch:
 
 permissions:
@@ -17,54 +18,99 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Generate index.html
+        shell: python
         run: |
-          python3 <<'PY'
           from pathlib import Path
-          from urllib.parse import quote
+          from html import escape
           import json
 
-          root = Path('.')
-          ignored = {'.git', '.github', 'index.html'}
-          files = []
-          for p in root.rglob('*'):
-              if p.is_file() and not any(x in ignored for x in p.parts):
-                  files.append('/'.join(p.parts))
+          root = Path('.').resolve()
+          ignored_dirs = {'.git', '.github'}
+          ignored_files = {'index.html'}
 
-          tree = {}
-          for path in sorted(files):
-              node = tree
-              parts = path.split('/')
-              for i, part in enumerate(parts):
-                  if i == len(parts) - 1:
-                      node[part] = None
-                  else:
-                      node = node.setdefault(part, {})
+          def build_tree(path):
+              tree = []
+              for p in sorted(path.iterdir(), key=lambda x: (not x.is_dir(), x.name.lower())):
+                  if p.is_dir() and p.name in ignored_dirs:
+                      continue
+                  if p.is_file() and p.name in ignored_files and p.parent == root:
+                      continue
+                  if p.is_dir():
+                      tree.append({'name': p.name, 'type': 'dir', 'children': build_tree(p)})
+                  elif p.is_file():
+                      tree.append({'name': p.name, 'type': 'file'})
+              return tree
 
-          data = json.dumps(tree, ensure_ascii=False, separators=(',', ':'))
+          tree = build_tree(root)
+          tree_json = json.dumps(tree, ensure_ascii=False).replace('</', '<\\/')
 
-          html = '''<!DOCTYPE html>
-          <html lang="hu"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>9062 Repository</title>
-          <style>
-          :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;padding:30px;font-family:Arial,sans-serif;background:#0d1117;color:#c9d1d9}main{max-width:1000px;margin:auto}h1{color:#fff}#path{color:#8b949e;margin:10px 0 20px}.toolbar{display:flex;gap:8px;margin-bottom:20px}button{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:8px 14px;border-radius:6px;cursor:pointer}button:hover{background:#30363d}ul{list-style:none;padding:0;margin:0}li{border-bottom:1px solid #21262d;padding:12px 8px}a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}.folder{color:#79c0ff;cursor:pointer}
-          </style></head><body><main><h1>📦 9062 Repository</h1><div id="path">/</div><div class="toolbar"><button onclick="home()">🏠 Főkönyvtár</button><button onclick="back()">⬅️ Vissza</button></div><ul id="repo"></ul></main>
-          <script>
-          const tree=__TREE__;let current=[];
-          function enc(p){return p.split('/').map(encodeURIComponent).join('/')}
-          function node(){let n=tree;for(const x of current)n=n[x];return n}
-          function render(){const n=node(),list=document.getElementById('repo');list.innerHTML='';document.getElementById('path').textContent='/'+current.join('/');const names=Object.keys(n).sort((a,b)=>{const af=n[a]!==null,bf=n[b]!==null;return af!==bf?(af?-1:1):a.localeCompare(b,'hu')});for(const name of names){const li=document.createElement('li'),folder=n[name]!==null;const label=(folder?'📁 ':'📄 ')+name;if(folder){const s=document.createElement('span');s.className='folder';s.textContent=label;s.onclick=()=>{current.push(name);render()};li.appendChild(s)}else{const a=document.createElement('a');a.href=enc([...current,name].join('/'));a.textContent=label;li.appendChild(a)}list.appendChild(li)}}
-          function home(){current=[];render()}function back(){if(current.length){current.pop();render()}}render();
-          </script></body></html>'''.replace('__TREE__',data)
-          Path('index.html').write_text(html,encoding='utf-8')
-          PY
+          html = f'''<!doctype html>
+          <html lang="hu">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width,initial-scale=1">
+            <title>📦 Repository index</title>
+            <style>
+              *{{box-sizing:border-box}} body{{margin:0;background:#111827;color:#f3f4f6;font-family:Arial,sans-serif}}
+              .wrap{{max-width:1000px;margin:auto;padding:32px 20px}}
+              h1{{margin:0 0 8px}} .path{{color:#9ca3af;margin-bottom:20px}}
+              button,.item{{font-size:16px;border:0;border-radius:10px;padding:12px 14px}}
+              button{{background:#374151;color:white;cursor:pointer;margin-right:8px;margin-bottom:18px}}
+              .list{{display:grid;gap:8px}} .item{{display:block;background:#1f2937;color:#f3f4f6;text-decoration:none;cursor:pointer}}
+              .item:hover{{background:#374151}} .folder{{font-weight:700}}
+            </style>
+          </head>
+          <body>
+            <div class="wrap">
+              <h1>📦 Repository</h1>
+              <div id="path" class="path">/</div>
+              <button onclick="goHome()">🏠 Főkönyvtár</button>
+              <button id="back" onclick="goBack()">⬅️ Vissza</button>
+              <div id="list" class="list"></div>
+            </div>
+            <script>
+              const tree = {tree_json};
+              let current = [];
+
+              function getItems(){{
+                let items = tree;
+                for (const part of current) items = items.find(x => x.name === part).children;
+                return items;
+              }}
+              function render(){{
+                document.getElementById('path').textContent = '/' + current.join('/') + (current.length ? '/' : '');
+                document.getElementById('back').style.display = current.length ? 'inline-block' : 'none';
+                const list = document.getElementById('list');
+                list.innerHTML = '';
+                for (const item of getItems()){{
+                  const el = document.createElement('a');
+                  el.className = 'item ' + (item.type === 'dir' ? 'folder' : '');
+                  el.textContent = (item.type === 'dir' ? '📁 ' : '📄 ') + item.name;
+                  if (item.type === 'dir') {{
+                    el.href = '#';
+                    el.onclick = e => {{ e.preventDefault(); current.push(item.name); render(); }};
+                  }} else {{
+                    const path = [...current, item.name].map(encodeURIComponent).join('/');
+                    el.href = path;
+                    el.target = '_blank';
+                  }}
+                  list.appendChild(el);
+                }}
+              }}
+              function goHome(){{ current = []; render(); }}
+              function goBack(){{ current.pop(); render(); }}
+              render();
+            </script>
+          </body>
+          </html>'''
+
+          Path('index.html').write_text(html, encoding='utf-8')
 
       - name: Commit generated index
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          if git diff --cached --quiet; then
-            echo "No index changes."
-          else
-            git commit -m "Automatically update repository index"
-            git push
-          fi
+          git diff --cached --quiet && exit 0
+          git commit -m "Update generated repository index"
+          git push
