@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💰 Pénzügyi Nyilvántartó</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233498db'/%3E%3Cstop offset='1' stop-color='%232c3e50'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Cpath d='M14 22h36a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4V26a4 4 0 0 1 4-4z' fill='%23ecf0f1'/%3E%3Cpath d='M10 26h44v6H10z' fill='%23bdc3c7'/%3E%3Ccircle cx='46' cy='38' r='5' fill='%23f39c12'/%3E%3Ccircle cx='46' cy='38' r='2' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f2f5;
+    color: #333;
+    padding: 20px;
+  }
+  .container { max-width: 1050px; margin: 0 auto; }
+  h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  h1 .logo { width: 40px; height: 40px; flex-shrink: 0; }
+
+  .asof {
+    background: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+  .asof label { font-weight: bold; color: #2c3e50; }
+  .asof input[type="date"] {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+  .asof button {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: #95a5a6;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .asof button:hover { background: #7f8c8d; }
+
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  .currency-block {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  .currency-header {
+    background: linear-gradient(135deg,#34495e,#2c3e50);
+    color: white;
+    padding: 8px 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+  }
+  .currency-header .flag { font-size: 16px; margin-right: 6px; }
+  .currency-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: #ecf0f1;
+  }
+  .currency-body .cell {
+    padding: 12px 15px;
+    background: white;
+  }
+  .currency-body .cell.balance-cell {
+    grid-column: 1 / -1;
+    background: #f8f9fa;
+    border-top: 2px solid #ecf0f1;
+  }
+  .currency-body .label {
+    font-size: 11px;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .currency-body .value {
+    font-size: 18px;
+    font-weight: bold;
+    word-break: break-word;
+  }
+  .currency-body .value.income { color: #27ae60; }
+  .currency-body .value.expense { color: #e74c3c; }
+  .currency-body .value.balance { font-size: 22px; }
+  .currency-body .value.balance.positive { color: #27ae60; }
+  .currency-body .value.balance.negative { color: #e74c3c; }
+  .currency-body .value.balance.zero { color: #95a5a6; }
+
+  .no-data {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    text-align: center;
+    color: #95a5a6;
+    font-size: 14px;
+    grid-column: 1 / -1;
+  }
+
+  form {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  input, select, button {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  input:focus, select:focus { outline: none; border-color: #3498db; }
+  form button[type="submit"] {
+    background: #3498db;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: .2s;
+  }
+  form button[type="submit"]:hover { background: #2980b9; }
+
+  .tools {
+    background: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .tools button {
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: .2s;
+  }
+  .tools button.export { background: #16a085; }
+  .tools button.export:hover { background: #12876f; }
+  .tools button.import { background: #8e44ad; }
+  .tools button.import:hover { background: #713795; }
+  .tools button.clear { background: #e67e22; }
+  .tools button.clear:hover { background: #ca6f1e; }
+
+  button.delete {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  button.delete:hover { background: #c0392b; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    table-layout: fixed;
+  }
+  th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+  }
+  th { background: #34495e; color: white; font-weight: normal; }
+  tr:hover { background: #f9f9f9; }
+  tr.future { background: #fff8e1; }
+  tr.future:hover { background: #ffecb3; }
+
+  td.desc, th.desc {
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    line-height: 1.4;
+    hyphens: auto;
+  }
+  th.col-date { width: 120px; }
+  th.col-desc { width: auto; }
+  th.col-type { width: 90px; }
+  th.col-amount { width: 150px; }
+  th.col-actions { width: 80px; }
+
+  .type-income { color: #27ae60; font-weight: bold; }
+  .type-expense { color: #e74c3c; font-weight: bold; }
+  .amount-income { color: #27ae60; font-weight: bold; word-break: break-word; }
+  .amount-expense { color: #e74c3c; font-weight: bold; word-break: break-word; }
+  .empty {
+    text-align: center;
+    padding: 30px;
+    color: #999;
+  }
+  .badge {
+    font-size: 11px;
+    background: #f39c12;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: white;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    max-width: 400px;
+    width: 100%;
+  }
+  .modal h2 { font-size: 18px; margin-bottom: 15px; color: #2c3e50; }
+  .modal p { font-size: 14px; color: #555; margin-bottom: 15px; line-height: 1.5; }
+  .modal p strong { color: #c0392b; }
+  .modal input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    margin-bottom: 15px;
+    letter-spacing: 3px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  .modal-actions button {
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  .modal-actions button.primary { background: #3498db; color: white; }
+  .modal-actions button.primary:hover { background: #2980b9; }
+  .modal-actions button.danger { background: #e74c3c; color: white; }
+  .modal-actions button.danger:hover { background: #c0392b; }
+  .modal-actions button.secondary { background: #ecf0f1; color: #333; }
+  .modal-actions button.secondary:hover { background: #d5dbdb; }
+  .modal .error {
+    color: #e74c3c;
+    font-size: 13px;
+    margin-bottom: 10px;
+    display: none;
+  }
+  .modal .error.show { display: block; }
+  .modal input[type="file"] { width: 100%; margin-bottom: 15px; font-size: 13px; }
+
+  @media (max-width: 750px) {
+    form { grid-template-columns: 1fr 1fr; }
+    form button[type="submit"] { grid-column: 1 / -1; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>
+    <svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#3498db"/>
+          <stop offset="1" stop-color="#2c3e50"/>
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="14" fill="url(#g)"/>
+      <path d="M14 22h36a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4V26a4 4 0 0 1 4-4z" fill="#ecf0f1"/>
+      <path d="M10 26h44v6H10z" fill="#bdc3c7"/>
+      <circle cx="46" cy="38" r="5" fill="#f39c12"/>
+      <circle cx="46" cy="38" r="2" fill="#fff"/>
+    </svg>
+    Pénzügyi Nyilvántartó
+  </h1>
+
+  <div class="asof">
+    <label for="asOfDate">Állapot dátuma:</label>
+    <input type="date" id="asOfDate">
+    <button id="todayBtn">Mai nap</button>
+    <span id="asOfInfo" style="color:#7f8c8d; font-size:13px;"></span>
+  </div>
+
+  <div class="summary" id="summaryContainer"></div>
+
+  <form id="transactionForm">
+    <input type="text" id="description" placeholder="Leírás" required>
+    <input type="number" id="amount" placeholder="Összeg" min="0.01" step="0.01" required>
+    <select id="currency" required>
+      <option value="HUF">🇭🇺 HUF</option>
+      <option value="EUR">🇪🇺 EUR</option>
+      <option value="USD">🇺🇸 USD</option>
+      <option value="GBP">🇬🇧 GBP</option>
+      <option value="CHF">🇨🇭 CHF</option>
+      <option value="JPY">🇯🇵 JPY</option>
+      <option value="CNY">🇨🇳 CNY</option>
+      <option value="AUD">🇦🇺 AUD</option>
+      <option value="CAD">🇨🇦 CAD</option>
+      <option value="PLN">🇵🇱 PLN</option>
+      <option value="CZK">🇨🇿 CZK</option>
+      <option value="RON">🇷🇴 RON</option>
+      <option value="SEK">🇸🇪 SEK</option>
+      <option value="NOK">🇳🇴 NOK</option>
+      <option value="DKK">🇩🇰 DKK</option>
+      <option value="RUB">🇷🇺 RUB</option>
+      <option value="UAH">🇺🇦 UAH</option>
+      <option value="TRY">🇹🇷 TRY</option>
+      <option value="INR">🇮🇳 INR</option>
+      <option value="KRW">🇰🇷 KRW</option>
+      <option value="BRL">🇧🇷 BRL</option>
+      <option value="MXN">🇲🇽 MXN</option>
+      <option value="ZAR">🇿🇦 ZAR</option>
+      <option value="ILS">🇮🇱 ILS</option>
+      <option value="AED">🇦🇪 AED</option>
+      <option value="SAR">🇸🇦 SAR</option>
+      <option value="SGD">🇸🇬 SGD</option>
+      <option value="HKD">🇭🇰 HKD</option>
+      <option value="NZD">🇳🇿 NZD</option>
+      <option value="THB">🇹🇭 THB</option>
+      <option value="BTC">₿ BTC</option>
+      <option value="ETH">Ξ ETH</option>
+    </select>
+    <select id="type" required>
+      <option value="income">Bevétel</option>
+      <option value="expense">Kiadás</option>
+    </select>
+    <input type="date" id="date" required>
+    <button type="submit">🔒 Hozzáadás</button>
+  </form>
+
+  <div class="tools">
+    <button class="export" id="exportBtn">📤 Export </button>
+    <button class="import" id="importBtn">📥 Import </button>
+    <button class="clear" id="clearBtn">🗑️ Összes törlése</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="col-date">Dátum</th>
+        <th class="col-desc desc">Leírás</th>
+        <th class="col-type">Típus</th>
+        <th class="col-amount">Összeg</th>
+        <th class="col-actions"></th>
+      </tr>
+    </thead>
+    <tbody id="transactionList"></tbody>
+  </table>
+</div>
+
+<!-- Modálok (változatlan) -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h2>🔒 Új tétel hozzáadása</h2>
+    <p>Add meg a jelszót a tranzakció rögzítéséhez.</p>
+    <input type="password" id="addPassword" placeholder="Jelszó" inputmode="numeric" autocomplete="off">
+    <div class="error" id="addError">❌ Hibás jelszó!</div>
+    <div class="modal-actions">
+      <button class="secondary" id="addCancel">Mégse</button>
+      <button class="primary" id="addConfirm">Megerősítés</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="importModal">
+  <div class="modal">
+    <h2>📥 Importálás</h2>
+    <p>Válaszd ki a JSON fájlt, majd add meg a jelszót.</p>
+    <input type="file" id="importFile" accept=".json,application/json">
+    <input type="password" id="importPassword" placeholder="Jelszó" inputmode="numeric" autocomplete="off">
+    <div class="error" id="importError">❌ Hibás jelszó vagy érvénytelen fájl!</div>
+    <div class="modal-actions">
+      <button class="secondary" id="importCancel">Mégse</button>
+      <button class="primary" id="importConfirm">Importálás</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h2>🗑️ Tétel törlése</h2>
+    <p>Biztosan törölni szeretnéd ezt a tételt?<br><strong id="deleteDesc"></strong></p>
+    <input type="password" id="deletePassword" placeholder="Jelszó" inputmode="numeric" autocomplete="off">
+    <div class="error" id="deleteError">❌ Hibás jelszó!</div>
+    <div class="modal-actions">
+      <button class="secondary" id="deleteCancel">Mégse</button>
+      <button class="danger" id="deleteConfirm">Törlés</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="clearModal">
+  <div class="modal">
+    <h2>⚠️ Összes tétel törlése</h2>
+    <p>Ez a művelet <strong>nem visszavonható</strong>! Minden tranzakció véglegesen törlődik.</p>
+    <input type="password" id="clearPassword" placeholder="Jelszó" inputmode="numeric" autocomplete="off">
+    <div class="error" id="clearError">❌ Hibás jelszó!</div>
+    <div class="modal-actions">
+      <button class="secondary" id="clearCancel">Mégse</button>
+      <button class="danger" id="clearConfirm">Mindent töröl</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'penzugyi_tranzakciok542225556585';
+  const ASOF_KEY = 'penzugyi_asof';
+  const PASSWORD = '1111';
+
+  // Valuták adatai (szimbólum + zászló)
+  const CURRENCIES = {
+    HUF: { symbol: 'Ft', flag: '🇭🇺', name: 'Magyar forint' },
+    EUR: { symbol: '€', flag: '🇪🇺', name: 'Euró' },
+    USD: { symbol: '$', flag: '🇺🇸', name: 'Amerikai dollár' },
+    GBP: { symbol: '£', flag: '🇬🇧', name: 'Angol font' },
+    CHF: { symbol: 'Fr', flag: '🇨🇭', name: 'Svájci frank' },
+    JPY: { symbol: '¥', flag: '🇯🇵', name: 'Japán jen' },
+    CNY: { symbol: '¥', flag: '🇨🇳', name: 'Kínai jüan' },
+    AUD: { symbol: 'A$', flag: '🇦🇺', name: 'Ausztrál dollár' },
+    CAD: { symbol: 'C$', flag: '🇨🇦', name: 'Kanadai dollár' },
+    PLN: { symbol: 'zł', flag: '🇵🇱', name: 'Lengyel zloty' },
+    CZK: { symbol: 'Kč', flag: '🇨🇿', name: 'Cseh korona' },
+    RON: { symbol: 'lei', flag: '🇷🇴', name: 'Román lej' },
+    SEK: { symbol: 'kr', flag: '🇸🇪', name: 'Svéd korona' },
+    NOK: { symbol: 'kr', flag: '🇳🇴', name: 'Norvég korona' },
+    DKK: { symbol: 'kr', flag: '🇩🇰', name: 'Dán korona' },
+    RUB: { symbol: '₽', flag: '🇷🇺', name: 'Orosz rubel' },
+    UAH: { symbol: '₴', flag: '🇺🇦', name: 'Ukrán hrivnya' },
+    TRY: { symbol: '₺', flag: '🇹🇷', name: 'Török líra' },
+    INR: { symbol: '₹', flag: '🇮🇳', name: 'Indiai rúpia' },
+    KRW: { symbol: '₩', flag: '🇰🇷', name: 'Dél-koreai von' },
+    BRL: { symbol: 'R$', flag: '🇧🇷', name: 'Brazil real' },
+    MXN: { symbol: 'Mex$', flag: '🇲🇽', name: 'Mexikói peso' },
+    ZAR: { symbol: 'R', flag: '🇿🇦', name: 'Dél-afrikai rand' },
+    ILS: { symbol: '₪', flag: '🇮🇱', name: 'Izraeli sékel' },
+    AED: { symbol: 'د.إ', flag: '🇦🇪', name: 'EAE dirham' },
+    SAR: { symbol: '﷼', flag: '🇸🇦', name: 'Szaúdi riál' },
+    SGD: { symbol: 'S$', flag: '🇸🇬', name: 'Szingapúri dollár' },
+    HKD: { symbol: 'HK$', flag: '🇭🇰', name: 'Hongkongi dollár' },
+    NZD: { symbol: 'NZ$', flag: '🇳🇿', name: 'Új-zélandi dollár' },
+    THB: { symbol: '฿', flag: '🇹🇭', name: 'Thai baht' },
+    BTC: { symbol: '₿', flag: '₿', name: 'Bitcoin' },
+    ETH: { symbol: 'Ξ', flag: 'Ξ', name: 'Ethereum' }
+  };
+
+  function currencyInfo(code) {
+    return CURRENCIES[code] || { symbol: code, flag: '💱', name: code };
+  }
+
+  let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  let pendingTransaction = null;
+  let pendingDeleteId = null;
+
+  const form = document.getElementById('transactionForm');
+  const list = document.getElementById('transactionList');
+  const dateInput = document.getElementById('date');
+  const asOfInput = document.getElementById('asOfDate');
+  const asOfInfo = document.getElementById('asOfInfo');
+  const summaryContainer = document.getElementById('summaryContainer');
+
+  const addModal = document.getElementById('addModal');
+  const addPassword = document.getElementById('addPassword');
+  const addError = document.getElementById('addError');
+
+  const importModal = document.getElementById('importModal');
+  const importFile = document.getElementById('importFile');
+  const importPassword = document.getElementById('importPassword');
+  const importError = document.getElementById('importError');
+
+  const deleteModal = document.getElementById('deleteModal');
+  const deletePassword = document.getElementById('deletePassword');
+  const deleteError = document.getElementById('deleteError');
+  const deleteDesc = document.getElementById('deleteDesc');
+
+  const clearModal = document.getElementById('clearModal');
+  const clearPassword = document.getElementById('clearPassword');
+  const clearError = document.getElementById('clearError');
+
+  function todayStr() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  // Szám formázás a valutának megfelelően
+  function formatAmount(amount, code) {
+    const info = currencyInfo(code);
+    // BTC / ETH esetén 8 tizedesjegy, más esetén attól függően
+    let decimals = 2;
+    if (code === 'BTC' || code === 'ETH') decimals = 8;
+    else if (code === 'HUF' || code === 'JPY' || code === 'KRW') decimals = 0;
+
+    const num = amount.toLocaleString('hu-HU', {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    });
+    // A szimbólum lehet elöl (USD, EUR, GBP...) vagy hátul (HUF: Ft)
+    const suffixCurrencies = ['HUF', 'PLN', 'CZK', 'RON', 'SEK', 'NOK', 'DKK', 'RUB', 'UAH', 'TRY', 'INR', 'KRW'];
+    if (suffixCurrencies.includes(code)) {
+      return `${num} ${info.symbol}`;
+    }
+    return `${info.symbol} ${num}`;
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+    localStorage.setItem(ASOF_KEY, asOfInput.value);
+  }
+
+  dateInput.value = todayStr();
+  const savedAsof = localStorage.getItem(ASOF_KEY);
+  asOfInput.value = savedAsof || todayStr();
+
+  function renderSummary(asOf) {
+    // Csak a dátumig érvényes tételek
+    const relevant = transactions.filter(t => t.date <= asOf);
+
+    // Csoportosítás valutánként
+    const groups = {};
+    relevant.forEach(t => {
+      const cur = t.currency || 'HUF';
+      if (!groups[cur]) groups[cur] = { income: 0, expense: 0 };
+      if (t.type === 'income') groups[cur].income += t.amount;
+      else groups[cur].expense += t.amount;
+    });
+
+    const currencyCodes = Object.keys(groups);
+
+    if (currencyCodes.length === 0) {
+      summaryContainer.innerHTML = '<div class="no-data">Nincs adat a kiválasztott dátumig. Adj hozzá egy tételt!</div>';
+      return;
+    }
+
+    // Rendezés: HUF előre, aztán ABC
+    currencyCodes.sort((a, b) => {
+      if (a === 'HUF') return -1;
+      if (b === 'HUF') return 1;
+      return a.localeCompare(b);
+    });
+
+    summaryContainer.innerHTML = currencyCodes.map(code => {
+      const g = groups[code];
+      const info = currencyInfo(code);
+      const bal = g.income - g.expense;
+      let balClass = 'zero';
+      if (bal > 0) balClass = 'positive';
+      else if (bal < 0) balClass = 'negative';
+
+      return `
+        <div class="currency-block">
+          <div class="currency-header">
+            <span><span class="flag">${info.flag}</span>${code}</span>
+            <span style="font-size:11px;opacity:.7;">${info.name}</span>
+          </div>
+          <div class="currency-body">
+            <div class="cell">
+              <div class="label">Bevétel</div>
+              <div class="value income">+${formatAmount(g.income, code)}</div>
+            </div>
+            <div class="cell">
+              <div class="label">Kiadás</div>
+              <div class="value expense">−${formatAmount(g.expense, code)}</div>
+            </div>
+            <div class="cell balance-cell">
+              <div class="label">Egyenleg</div>
+              <div class="value balance ${balClass}">${formatAmount(bal, code)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function render() {
+    const asOf = asOfInput.value || todayStr();
+    const today = todayStr();
+
+    asOfInfo.textContent = (asOf === today)
+      ? '(mai állapot)'
+      : `(a(z) ${asOf} napi állapot)`;
+
+    // Táblázat
+    list.innerHTML = '';
+    if (transactions.length === 0) {
+      list.innerHTML = '<tr><td colspan="5" class="empty">Még nincs tranzakció. Adj hozzá egyet fent!</td></tr>';
+    } else {
+      const sorted = [...transactions].sort((a,b) => new Date(b.date) - new Date(a.date));
+      sorted.forEach(t => {
+        const isFuture = t.date > today;
+        const tr = document.createElement('tr');
+        if (isFuture) tr.classList.add('future');
+        const cur = t.currency || 'HUF';
+        tr.innerHTML = `
+          <td>${t.date}${isFuture ? '<span class="badge">T</span>' : ''}</td>
+          <td class="desc">${escapeHtml(t.description)}</td>
+          <td class="${t.type === 'income' ? 'type-income' : 'type-expense'}">
+            ${t.type === 'income' ? 'Bevétel' : 'Kiadás'}
+          </td>
+          <td class="${t.type === 'income' ? 'amount-income' : 'amount-expense'}">
+            ${t.type === 'income' ? '+' : '−'}${formatAmount(t.amount, cur)}
+          </td>
+          <td><button class="delete" data-id="${t.id}">Törlés</button></td>
+        `;
+        list.appendChild(tr);
+      });
+    }
+
+    // Összesítők
+    renderSummary(asOf);
+  }
+
+  // --- Új tétel felvétele ---
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    pendingTransaction = {
+      id: Date.now(),
+      description: document.getElementById('description').value.trim(),
+      amount: parseFloat(document.getElementById('amount').value),
+      currency: document.getElementById('currency').value,
+      type: document.getElementById('type').value,
+      date: document.getElementById('date').value
+    };
+    addPassword.value = '';
+    addError.classList.remove('show');
+    addModal.classList.add('active');
+    setTimeout(() => addPassword.focus(), 50);
+  });
+
+  document.getElementById('addCancel').addEventListener('click', () => {
+    addModal.classList.remove('active');
+    pendingTransaction = null;
+  });
+
+  document.getElementById('addConfirm').addEventListener('click', () => {
+    if (addPassword.value !== PASSWORD) {
+      addError.classList.add('show');
+      addPassword.value = '';
+      addPassword.focus();
+      return;
+    }
+    if (!pendingTransaction) { addModal.classList.remove('active'); return; }
+    transactions.push(pendingTransaction);
+    save();
+    render();
+    form.reset();
+    dateInput.value = todayStr();
+    addModal.classList.remove('active');
+    pendingTransaction = null;
+  });
+
+  addPassword.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('addConfirm').click();
+  });
+
+  // --- Egy tétel törlése ---
+  list.addEventListener('click', e => {
+    if (e.target.classList.contains('delete')) {
+      const id = parseInt(e.target.dataset.id);
+      const tx = transactions.find(t => t.id === id);
+      if (!tx) return;
+      pendingDeleteId = id;
+      const cur = tx.currency || 'HUF';
+      deleteDesc.textContent = `"${tx.description}" – ${tx.type === 'income' ? '+' : '−'}${formatAmount(tx.amount, cur)}`;
+      deletePassword.value = '';
+      deleteError.classList.remove('show');
+      deleteModal.classList.add('active');
+      setTimeout(() => deletePassword.focus(), 50);
+    }
+  });
+
+  document.getElementById('deleteCancel').addEventListener('click', () => {
+    deleteModal.classList.remove('active');
+    pendingDeleteId = null;
+  });
+
+  document.getElementById('deleteConfirm').addEventListener('click', () => {
+    if (deletePassword.value !== PASSWORD) {
+      deleteError.classList.add('show');
+      deletePassword.value = '';
+      deletePassword.focus();
+      return;
+    }
+    if (pendingDeleteId === null) { deleteModal.classList.remove('active'); return; }
+    transactions = transactions.filter(t => t.id !== pendingDeleteId);
+    save();
+    render();
+    deleteModal.classList.remove('active');
+    pendingDeleteId = null;
+  });
+
+  deletePassword.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('deleteConfirm').click();
+  });
+
+  // --- Dátum szűrő ---
+  asOfInput.addEventListener('change', () => { save(); render(); });
+  document.getElementById('todayBtn').addEventListener('click', () => {
+    asOfInput.value = todayStr();
+    save();
+    render();
+  });
+
+  // --- Export ---
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    const data = {
+      version: 2,
+      exported: new Date().toISOString(),
+      asOfDate: asOfInput.value,
+      transactions: transactions
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `penzugyek_${todayStr()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  // --- Import ---
+  document.getElementById('importBtn').addEventListener('click', () => {
+    importFile.value = '';
+    importPassword.value = '';
+    importError.classList.remove('show');
+    importModal.classList.add('active');
+  });
+
+  document.getElementById('importCancel').addEventListener('click', () => {
+    importModal.classList.remove('active');
+  });
+
+  document.getElementById('importConfirm').addEventListener('click', () => {
+    importError.classList.remove('show');
+
+    if (importPassword.value !== PASSWORD) {
+      importError.textContent = '❌ Hibás jelszó!';
+      importError.classList.add('show');
+      importPassword.value = '';
+      importPassword.focus();
+      return;
+    }
+
+    const file = importFile.files[0];
+    if (!file) {
+      importError.textContent = '❌ Nincs kiválasztva fájl!';
+      importError.classList.add('show');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        let newTx;
+        if (Array.isArray(parsed)) {
+          newTx = parsed;
+        } else if (parsed && Array.isArray(parsed.transactions)) {
+          newTx = parsed.transactions;
+          if (parsed.asOfDate) {
+            asOfInput.value = parsed.asOfDate;
+          }
+        } else {
+          throw new Error('Ismeretlen formátum');
+        }
+
+        newTx = newTx.filter(t =>
+          t && typeof t.description === 'string' &&
+          typeof t.amount === 'number' &&
+          (t.type === 'income' || t.type === 'expense') &&
+          typeof t.date === 'string'
+        ).map(t => ({
+          id: t.id || Date.now() + Math.random(),
+          description: t.description,
+          amount: t.amount,
+          currency: (typeof t.currency === 'string' && CURRENCIES[t.currency]) ? t.currency : 'HUF',
+          type: t.type,
+          date: t.date
+        }));
+
+        if (newTx.length === 0) {
+          throw new Error('Nincs érvényes tranzakció');
+        }
+
+        const mode = confirm(
+          `Találtam ${newTx.length} tranzakciót.\n\n` +
+          `OK = hozzáadás a meglévőkhöz\n` +
+          `Mégse = meglévők lecserélése`
+        );
+
+        if (mode) {
+          const existingIds = new Set(transactions.map(t => t.id));
+          newTx.forEach(t => {
+            if (!existingIds.has(t.id)) transactions.push(t);
+          });
+        } else {
+          transactions = newTx;
+        }
+
+        save();
+        render();
+        importModal.classList.remove('active');
+        alert(`✅ ${newTx.length} tranzakció importálva.`);
+      } catch (err) {
+        importError.textContent = '❌ Érvénytelen vagy hibás fájl: ' + err.message;
+        importError.classList.add('show');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  importPassword.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('importConfirm').click();
+  });
+
+  // --- Összes törlése ---
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    if (transactions.length === 0) {
+      alert('Nincs mit törölni.');
+      return;
+    }
+    clearPassword.value = '';
+    clearError.classList.remove('show');
+    clearModal.classList.add('active');
+    setTimeout(() => clearPassword.focus(), 50);
+  });
+
+  document.getElementById('clearCancel').addEventListener('click', () => {
+    clearModal.classList.remove('active');
+  });
+
+  document.getElementById('clearConfirm').addEventListener('click', () => {
+    if (clearPassword.value !== PASSWORD) {
+      clearError.classList.add('show');
+      clearPassword.value = '';
+      clearPassword.focus();
+      return;
+    }
+    transactions = [];
+    save();
+    render();
+    clearModal.classList.remove('active');
+  });
+
+  clearPassword.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('clearConfirm').click();
+  });
+
+  [addModal, importModal, deleteModal, clearModal].forEach(m => {
+    m.addEventListener('click', e => {
+      if (e.target === m) m.classList.remove('active');
+    });
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      addModal.classList.remove('active');
+      importModal.classList.remove('active');
+      deleteModal.classList.remove('active');
+      clearModal.classList.remove('active');
+    }
+  });
+
+  render();
+</script>
+</body>
+</html>
