@@ -97,10 +97,10 @@ const dirs=()=>M()[1]==="hex"?HEXD:BOXD;
 
 function ls(get,k,v){try{if(get)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 
-const SAVE_PREFIX="hex2048_state_v4_";
-const memoryStates={};
+const ALLSTATEKEY="hex2048_all_states_v5";
+const gridStates=Object.create(null);
 
-function stateKey(){return SAVE_PREFIX+gmode+"_"+mi;}
+function stateKeyFor(grid,mode){return mode+"_"+grid;}
 
 function captureState(){
   return {
@@ -111,50 +111,79 @@ function captureState(){
     uid,over,won,keepGoing,started
   };
 }
-function saveGame(){
+
+function saveAllStates(){
   try{
-    const s=captureState();
-    memoryStates[stateKey()]=s;
-    localStorage.setItem(stateKey(),JSON.stringify(s));
-  }catch(e){
-    try{memoryStates[stateKey()]=captureState()}catch(_){}
-  }
+    localStorage.setItem(ALLSTATEKEY,JSON.stringify(gridStates));
+  }catch(e){}
 }
-function loadGame(){
+
+function loadAllStates(){
   try{
-    const k=stateKey();
-    let s=memoryStates[k];
-    if(!s){
-      const raw=localStorage.getItem(k);
-      if(raw)s=JSON.parse(raw);
+    const raw=localStorage.getItem(ALLSTATEKEY);
+    if(raw){
+      const x=JSON.parse(raw);
+      if(x&&typeof x==="object"){
+        Object.keys(x).forEach(k=>gridStates[k]=x[k]);
+      }
     }
-    if(!s||!Array.isArray(s.tiles))return false;
+  }catch(e){}
+}
 
-    buildCells();
-    tiles=s.tiles.map(t=>({id:t.id,v:t.v,q:t.q,r:t.r}))
-      .filter(t=>cset.has(key(t.q,t.r)));
+function saveGame(){
+  const k=stateKeyFor(mi,gmode);
+  gridStates[k]=captureState();
+  saveAllStates();
+}
 
-    try{score=BigInt(s.score??0)}catch(_){score=0n}
-    try{best=BigInt(s.best??0)}catch(_){best=0n}
-    undos=Number.isFinite(s.undos)?s.undos:10;
-    hist=Array.isArray(s.hist)?s.hist.slice(-10).map(h=>{
-      let hs=0n;try{hs=BigInt(h.score??0)}catch(_){}
-      return{tiles:Array.isArray(h.tiles)?h.tiles:[],score:hs};
-    }):[];
-    uid=Number(s.uid)||Math.max(0,...tiles.map(t=>t.id||0));
-    over=!!s.over;won=!!s.won;keepGoing=!!s.keepGoing;
-    started=s.started!==false;
-    if(s.autoMode)autoMode=s.autoMode;
+function applyState(s){
+  if(!s||!Array.isArray(s.tiles))return false;
 
-    memoryStates[k]=s;
-    $("hint").textContent=hintText();
-    fullRender();
+  buildCells();
+  tiles=s.tiles.map(t=>({id:t.id,v:t.v,q:t.q,r:t.r}))
+    .filter(t=>cset.has(key(t.q,t.r)));
 
-    if(over)showOver();
-    else if(gmode==="survival"&&!started)$("startTxt").style.display="flex";
-    else if(gmode==="survival"&&started)startSurv();
-    return true;
-  }catch(e){return false}
+  try{score=BigInt(s.score??0)}catch(_){score=0n}
+  try{best=BigInt(s.best??0)}catch(_){best=0n}
+  undos=Number.isFinite(s.undos)?s.undos:10;
+  hist=Array.isArray(s.hist)?s.hist.slice(-10).map(h=>{
+    let hs=0n;try{hs=BigInt(h.score??0)}catch(_){}
+    return{tiles:Array.isArray(h.tiles)?h.tiles:[],score:hs};
+  }):[];
+  uid=Number(s.uid)||Math.max(0,...tiles.map(t=>t.id||0));
+  over=!!s.over;
+  won=!!s.won;
+  keepGoing=!!s.keepGoing;
+  started=s.started!==false;
+  if(s.autoMode)autoMode=s.autoMode;
+
+  $("hint").textContent=hintText();
+  fullRender();
+
+  if(over)showOver();
+  else if(gmode==="survival"&&!started)$("startTxt").style.display="flex";
+  else if(gmode==="survival"&&started)startSurv();
+
+  return true;
+}
+
+function loadGame(){
+  const k=stateKeyFor(mi,gmode);
+  return applyState(gridStates[k]);
+}
+
+function switchGrid(next){
+  if(next===mi)return;
+  saveGame();
+
+  stopAuto();
+  stopSurv();
+  hideOv();
+  $("startTxt").style.display="none";
+
+  mi=next;
+
+  if(!loadGame())newGame();
 }
 
 function buildCells(){
@@ -398,7 +427,7 @@ function openMenu(btn,items,cur,onPick){
   m.style.left=Math.min(btn.offsetLeft,$("bar").clientWidth-150)+"px";m.style.display="block";
 }
 const MODENAMES=["Classic","Survival","X-Tile"],MODEKEYS=["classic","survival","x"];
-$("bGrid").onclick=e=>{e.stopPropagation();openMenu($("bGrid"),MODES.map(x=>x[0]),mi,i=>{if(i===mi)return;saveGame();mi=i;if(!loadGame())newGame()})};
+$("bGrid").onclick=e=>{e.stopPropagation();openMenu($("bGrid"),MODES.map(x=>x[0]),mi,i=>{switchGrid(i)})};
 $("bMode").onclick=e=>{e.stopPropagation();openMenu($("bMode"),MODENAMES,MODEKEYS.indexOf(gmode),i=>{const next=MODEKEYS[i];if(next===gmode)return;saveGame();gmode=next;if(!loadGame())newGame()})};
 $("bAuto").onclick=e=>{e.stopPropagation();
   if(autoT){stopAuto();return}
@@ -410,6 +439,7 @@ document.addEventListener("click",closeMenus);
 $("startTxt").onclick=startSurv;
 $("bUndo").onclick=undo;
 window.addEventListener("resize",()=>{if(cells.length)fullRender()});
+loadAllStates();
 if(!loadGame())newGame();
 })();
 </script>
