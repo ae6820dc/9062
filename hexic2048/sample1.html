@@ -97,7 +97,7 @@ const dirs=()=>M()[1]==="hex"?HEXD:BOXD;
 
 function ls(get,k,v){try{if(get)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 
-const SAVEKEY="hex2048save_v1";
+function saveKey(){return "hex2048save_v2_"+mi+"_"+gmode;}
 function saveGame(){
   try{
     localStorage.setItem(SAVEKEY,JSON.stringify({mi,gmode,autoMode,tiles:tiles.map(t=>({id:t.id,v:t.v,q:t.q,r:t.r})),score:score.toString(),best:best.toString(),undos,hist:hist.map(h=>({tiles:h.tiles,score:h.score.toString()})),uid,over,won,keepGoing,started}));
@@ -105,7 +105,7 @@ function saveGame(){
 }
 function loadGame(){
   try{
-    const raw=localStorage.getItem(SAVEKEY);if(!raw)return false;
+    const raw=localStorage.getItem(saveKey());if(!raw)return false;
     const s=JSON.parse(raw);
     if(!s||!Array.isArray(s.tiles)||!Number.isInteger(s.mi)||s.mi<0||s.mi>=MODES.length)return false;
     mi=s.mi;gmode=s.gmode||"classic";autoMode=s.autoMode||"Corner";
@@ -366,8 +366,8 @@ function openMenu(btn,items,cur,onPick){
   m.style.left=Math.min(btn.offsetLeft,$("bar").clientWidth-150)+"px";m.style.display="block";
 }
 const MODENAMES=["Classic","Survival","X-Tile"],MODEKEYS=["classic","survival","x"];
-$("bGrid").onclick=e=>{e.stopPropagation();openMenu($("bGrid"),MODES.map(x=>x[0]),mi,i=>{mi=i;newGame()})};
-$("bMode").onclick=e=>{e.stopPropagation();openMenu($("bMode"),MODENAMES,MODEKEYS.indexOf(gmode),i=>{gmode=MODEKEYS[i];newGame()})};
+$("bGrid").onclick=e=>{e.stopPropagation();openMenu($("bGrid"),MODES.map(x=>x[0]),mi,i=>{if(i===mi)return;saveGame();mi=i;if(!loadGame())newGame()})};
+$("bMode").onclick=e=>{e.stopPropagation();openMenu($("bMode"),MODENAMES,MODEKEYS.indexOf(gmode),i=>{const next=MODEKEYS[i];if(next===gmode)return;saveGame();gmode=next;if(!loadGame())newGame()})};
 $("bAuto").onclick=e=>{e.stopPropagation();
   if(autoT){stopAuto();return}
   openMenu($("bAuto"),["Corner","Swing","Swirl","Random"],["Corner","Swing","Swirl","Random"].indexOf(autoMode),(i,x)=>{if(!over&&started)startAuto(x)})};
