@@ -97,26 +97,38 @@ const dirs=()=>M()[1]==="hex"?HEXD:BOXD;
 
 function ls(get,k,v){try{if(get)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 
-function saveKey(){return "hex2048save_v2_"+mi+"_"+gmode;}
+const ALLSAVEKEY="hex2048states_v3";
 function saveGame(){
   try{
-    localStorage.setItem(SAVEKEY,JSON.stringify({mi,gmode,autoMode,tiles:tiles.map(t=>({id:t.id,v:t.v,q:t.q,r:t.r})),score:score.toString(),best:best.toString(),undos,hist:hist.map(h=>({tiles:h.tiles,score:h.score.toString()})),uid,over,won,keepGoing,started}));
+    const all=JSON.parse(localStorage.getItem(ALLSAVEKEY)||"{}");
+    const k=mi+"_"+gmode;
+    all[k]={
+      mi,gmode,autoMode,
+      tiles:tiles.map(t=>({id:t.id,v:t.v,q:t.q,r:t.r})),
+      score:score.toString(),best:best.toString(),undos,
+      hist:hist.map(h=>({tiles:h.tiles,score:h.score.toString()})),
+      uid,over,won,keepGoing,started
+    };
+    localStorage.setItem(ALLSAVEKEY,JSON.stringify(all));
   }catch(e){}
 }
 function loadGame(){
   try{
-    const raw=localStorage.getItem(saveKey());if(!raw)return false;
-    const s=JSON.parse(raw);
-    if(!s||!Array.isArray(s.tiles)||!Number.isInteger(s.mi)||s.mi<0||s.mi>=MODES.length)return false;
-    mi=s.mi;gmode=s.gmode||"classic";autoMode=s.autoMode||"Corner";
+    const all=JSON.parse(localStorage.getItem(ALLSAVEKEY)||"{}");
+    const s=all[mi+"_"+gmode];
+    if(!s||!Array.isArray(s.tiles))return false;
     buildCells();
     tiles=s.tiles.map(t=>({id:t.id,v:t.v,q:t.q,r:t.r})).filter(t=>cset.has(key(t.q,t.r)));
     try{score=BigInt(s.score??0)}catch(_){score=0n}
     try{best=BigInt(s.best??0)}catch(_){best=0n}
     undos=Number.isFinite(s.undos)?s.undos:10;
-    hist=Array.isArray(s.hist)?s.hist.slice(-10).map(h=>{let hs=0n;try{hs=BigInt(h.score??0)}catch(_){}return{tiles:Array.isArray(h.tiles)?h.tiles:[],score:hs}}):[];uid=Number(s.uid)||Math.max(0,...tiles.map(t=>t.id||0));
+    hist=Array.isArray(s.hist)?s.hist.slice(-10).map(h=>{
+      let hs=0n;try{hs=BigInt(h.score??0)}catch(_){}
+      return{tiles:Array.isArray(h.tiles)?h.tiles:[],score:hs}
+    }):[];
+    uid=Number(s.uid)||Math.max(0,...tiles.map(t=>t.id||0));
     over=!!s.over;won=!!s.won;keepGoing=!!s.keepGoing;started=s.started!==false;
-    {let oldBest=0n;try{oldBest=BigInt(ls(true,"hex2048best"+mi+gmode)||"0")}catch(_){}if(oldBest>best)best=oldBest;}
+    if(s.autoMode)autoMode=s.autoMode;
     $("hint").textContent=hintText();fullRender();
     if(over)showOver();
     else if(gmode==="survival"&&!started)$("startTxt").style.display="flex";
