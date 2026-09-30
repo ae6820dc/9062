@@ -97,39 +97,59 @@ const dirs=()=>M()[1]==="hex"?HEXD:BOXD;
 
 function ls(get,k,v){try{if(get)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 
-const ALLSAVEKEY="hex2048states_v3";
+const SAVE_PREFIX="hex2048_state_v4_";
+const memoryStates={};
+
+function stateKey(){return SAVE_PREFIX+gmode+"_"+mi;}
+
+function captureState(){
+  return {
+    mi,gmode,autoMode,
+    tiles:tiles.map(t=>({id:t.id,v:t.v,q:t.q,r:t.r})),
+    score:score.toString(),best:best.toString(),undos,
+    hist:hist.map(h=>({tiles:h.tiles,score:h.score.toString()})),
+    uid,over,won,keepGoing,started
+  };
+}
 function saveGame(){
   try{
-    const all=JSON.parse(localStorage.getItem(ALLSAVEKEY)||"{}");
-    const k=mi+"_"+gmode;
-    all[k]={
-      mi,gmode,autoMode,
-      tiles:tiles.map(t=>({id:t.id,v:t.v,q:t.q,r:t.r})),
-      score:score.toString(),best:best.toString(),undos,
-      hist:hist.map(h=>({tiles:h.tiles,score:h.score.toString()})),
-      uid,over,won,keepGoing,started
-    };
-    localStorage.setItem(ALLSAVEKEY,JSON.stringify(all));
-  }catch(e){}
+    const s=captureState();
+    memoryStates[stateKey()]=s;
+    localStorage.setItem(stateKey(),JSON.stringify(s));
+  }catch(e){
+    try{memoryStates[stateKey()]=captureState()}catch(_){}
+  }
 }
 function loadGame(){
   try{
-    const all=JSON.parse(localStorage.getItem(ALLSAVEKEY)||"{}");
-    const s=all[mi+"_"+gmode];
+    const k=stateKey();
+    let s=memoryStates[k];
+    if(!s){
+      const raw=localStorage.getItem(k);
+      if(raw)s=JSON.parse(raw);
+    }
     if(!s||!Array.isArray(s.tiles))return false;
+
     buildCells();
-    tiles=s.tiles.map(t=>({id:t.id,v:t.v,q:t.q,r:t.r})).filter(t=>cset.has(key(t.q,t.r)));
+    tiles=s.tiles.map(t=>({id:t.id,v:t.v,q:t.q,r:t.r}))
+      .filter(t=>cset.has(key(t.q,t.r)));
+
     try{score=BigInt(s.score??0)}catch(_){score=0n}
     try{best=BigInt(s.best??0)}catch(_){best=0n}
     undos=Number.isFinite(s.undos)?s.undos:10;
     hist=Array.isArray(s.hist)?s.hist.slice(-10).map(h=>{
       let hs=0n;try{hs=BigInt(h.score??0)}catch(_){}
-      return{tiles:Array.isArray(h.tiles)?h.tiles:[],score:hs}
+      return{tiles:Array.isArray(h.tiles)?h.tiles:[],score:hs};
     }):[];
     uid=Number(s.uid)||Math.max(0,...tiles.map(t=>t.id||0));
-    over=!!s.over;won=!!s.won;keepGoing=!!s.keepGoing;started=s.started!==false;
+    over=!!s.over;won=!!s.won;keepGoing=!!s.keepGoing;
+    started=s.started!==false;
     if(s.autoMode)autoMode=s.autoMode;
-    $("hint").textContent=hintText();fullRender();
+
+    memoryStates[k]=s;
+    $("hint").textContent=hintText();
+    fullRender();
+
     if(over)showOver();
     else if(gmode==="survival"&&!started)$("startTxt").style.display="flex";
     else if(gmode==="survival"&&started)startSurv();
