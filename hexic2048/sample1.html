@@ -263,7 +263,7 @@ function empties(ts){const o=new Set(ts.map(t=>key(t.q,t.r)));return cells.filte
 function spawn(isX){
   const em=empties(tiles);if(!em.length)return null;
   const c=em[Math.floor(Math.random()*em.length)];
-  const t={id:++uid,v:isX?"X":(Math.random()<.9?2:4),q:c[0],r:c[1]};tiles.push(t);return t;
+  const t={id:++uid,v:isX?"X":(2),q:c[0],r:c[1]};tiles.push(t);return t;
 }
 function step(ts,d){
   const grid=new Map();ts.forEach(t=>{t.m=false;t.dead=false;grid.set(key(t.q,t.r),t)});
