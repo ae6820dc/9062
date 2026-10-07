@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2218%22%20fill%3D%22%2307152f%22%2F%3E%3Cg%20stroke%3D%22%23111b38%22%20stroke-width%3D%223%22%3E%3Cpath%20fill%3D%22%237b2cff%22%20d%3D%22M50%208l17%2010v20L50%2048%2033%2038V18z%22%2F%3E%3Cpath%20fill%3D%22%2308c9a1%22%20d%3D%22M18%2027l17%2010v20L18%2067%201%2057V37z%22%2F%3E%3Cpath%20fill%3D%22%23ffd21c%22%20d%3D%22M50%2035l17%2010v20L50%2075%2033%2065V45z%22%2F%3E%3Cpath%20fill%3D%22%23ff4b66%22%20d%3D%22M82%2027l17%2010v20L82%2067%2065%2057V37z%22%2F%3E%3Cpath%20fill%3D%22%23ff9418%22%20d%3D%22M50%2062l17%2010v20L50%20102%2033%2092V72z%22%2F%3E%3C%2Fg%3E%3Ctext%20x%3D%2250%22%20y%3D%2263%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2220%22%20font-weight%3D%22900%22%20fill%3D%22white%22%3E2048%3C%2Ftext%3E%3C%2Fsvg%3E" />
+<title>Hexic 2048</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#faf8ef;--txt:#776e65;--box:#bbada0;--boxtxt:#eee4da;--btn:#6f4e37;--btnt:#f9f6f2;--cell:#cbc1b4;--cellr:#b9ae9f;--menu:#333;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2b2622;--txt:#d8cfc6;--box:#5a4e45;--boxtxt:#cbbfb3;--cell:#4a413a;--cellr:#3d3530}}
+:root[data-theme="dark"]{--bg:#2b2622;--txt:#d8cfc6;--box:#5a4e45;--boxtxt:#cbbfb3;--cell:#4a413a;--cellr:#3d3530}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family:Roboto,"Helvetica Neue",Arial,sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none}
+#app{max-width:480px;height:100%;margin:0 auto;padding:8px 8px 10px;display:flex;flex-direction:column}
+#top{display:flex;gap:8px;align-items:stretch}
+.sq{background:var(--box);border-radius:4px;color:#fff}
+#menuBtn{width:56px;height:56px;border:0;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:0 12px;cursor:pointer}
+#menuBtn i{display:block;height:4px;background:#fff;border-radius:2px}
+.sp{flex:1}
+.sc{width:90px;text-align:center;padding:6px 4px;height:56px}
+.sc small{display:block;font-size:12px;color:var(--boxtxt);letter-spacing:.5px}
+.sc b{font-size:22px;line-height:1.2}
+#hint{margin:8px 2px 4px;font-size:15px;min-height:20px}
+#wrap{flex:1;min-height:0;position:relative}
+#board{position:absolute;left:50%;top:50%;touch-action:none}
+#board .cw,#board .tw{position:absolute}
+.cw{background:var(--cellr)}
+.cw i{position:absolute;inset:7%;background:var(--cell)}
+.hex{clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.bx{border-radius:8%}
+.tw{transition:transform var(--d,.15s) ease-in-out;z-index:2}
+.tw .t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700}
+.tw.new .t{animation:nw var(--d-spawn,.15s) ease-out}
+.tw.pop .t{animation:pp var(--d-spawn,.15s) ease-out}
+@keyframes nw{from{transform:scale(.2);opacity:.3}to{transform:scale(1);opacity:1}}
+@keyframes pp{50%{transform:scale(1.18)}}
+@media (prefers-reduced-motion:reduce){.tw{transition:none}.tw .t{animation:none!important}}
+#bar{display:flex;gap:6px;margin-top:8px;position:relative}
+#bar button{flex:1;height:38px;border:0;border-radius:4px;background:var(--btn);color:var(--btnt);font-size:17px;cursor:pointer;position:relative;transition:background .2s}
+#bar button.on{background:#a4703e;outline:2px solid #fff8}
+#bar button.saved{background:#2e8b57}
+#bar button:disabled{opacity:.55}
+#bar button:focus-visible,#menuBtn:focus-visible{outline:3px solid #f59563}
+.pop-menu{position:absolute;background:var(--menu);color:#fff;border-radius:4px;box-shadow:0 4px 14px #0007;z-index:20;padding:6px 0;display:none;min-width:150px}
+.pop-menu div{padding:9px 16px;font-size:16px;cursor:pointer}
+.pop-menu div:hover,.pop-menu div.sel{background:#555}
+.mm{bottom:48px}
+#hm{top:64px;left:8px}
+#ov{position:absolute;inset:0;background:#faf8efd9;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:30;text-align:center;color:#5a4a3e}
+#ov h2{font-size:34px;margin:0}
+#ov .sb{background:var(--box);border-radius:4px;color:#fff;width:200px;padding:6px 0}
+#ov .sb small{display:block;font-size:12px;color:var(--boxtxt)}
+#ov .sb b{font-size:26px}
+#ov button{width:200px}
+#ov button:disabled{opacity:.5}
+#startTxt{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:56px;color:#ffe600;text-shadow:0 2px 6px #000a;z-index:25;cursor:pointer;font-weight:500}
+#ov button{border:0;border-radius:4px;background:var(--btn);color:#fff;font-size:18px;padding:10px 22px;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top">
+    <button id="menuBtn" class="sq" aria-label="Menü"><i></i><i></i><i></i></button>
+    <div class="sp"></div>
+    <div class="sq sc"><small>SCORE</small><b id="score">0</b></div>
+    <div class="sq sc"><small>BEST</small><b id="best">0</b></div>
+  </div>
+  <div id="hint"></div>
+  <div id="wrap">
+    <div id="board"></div>
+    <div id="ov"></div>
+    <div id="startTxt">Start</div>
+  </div>
+  <div id="bar">
+    <button id="bGrid">Grid</button>
+    <button id="bAuto">Auto</button>
+    <button id="bSave">Save</button>
+    <div class="pop-menu mm" id="mm"></div>
+  </div>
+  <div class="pop-menu" id="hm">
+    <div data-a="new">New game</div>
+    <div data-a="share">Share</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const SQ3 = Math.sqrt(3);
+  const MODES = [
+    ["Hex 2x2x2", "hex", 2], ["Hex 3x3x3", "hex", 3], ["Hex 4x4x4", "hex", 4], ["Hex 5x5x5", "hex", 5],
+    ["Hex 6x6x6", "hex", 6], ["Hex 7x7x7", "hex", 7], ["Hex 8x8x8", "hex", 8],
+    ["Box 4x4", "box", 4], ["Box 5x5", "box", 5], ["Box 6x6", "box", 6], ["Box 7x7", "box", 7], ["Box 8x8", "box", 8], ["Box 9x9", "box", 9], ["Box 10x10", "box", 10]
+  ];
+  const HEXD = [[0,-1],[1,-1],[1,0],[0,1],[-1,1],[-1,0]];
+  const BOXD = [[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]];
+
+  const $ = id => document.getElementById(id);
+  const key = (q, r) => q + "," + r;
+
+  // Minden csempe értéke mindig 1
+  const TILE_VALUE = 1n;
+
+  let state = {
+    mi: 0,
+    gmode: "classic",
+    autoMode: "Random",
+    started: true,
+    score: 0n,
+    uid: 0,
+    over: false,
+    tiles: [],
+    bestScores: {},
+    moveCount: 0
+  };
+
+  let cells = [];
+  let cset = new Set();
+  let els = new Map();
+  let S = 30;
+  let layout = {};
+  let survT = null;
+
+  let isAutoRunning = false;
+  let autoTimer = null;
+  const MOVE_DURATION = 320;
+  const SPAWN_DURATION = 320;
+
+  const currentMode = () => MODES[state.mi];
+  const currentDirs = () => currentMode()[1] === "hex" ? HEXD : BOXD;
+  const currentKey = () => state.gmode + "_" + state.mi;
+  const getBest = () => state.bestScores[currentKey()] || 0n;
+
+  const MANUAL_SAVE_KEY = "hex2048_manual_save_data_D837C4402A907037";
+  const SLOT_SAVE_KEY = "hex2048_grid_mode_slots_6947FDDB25C51196";
+
+  const encVal = v => typeof v === "bigint" ? v.toString() + "n" : v;
+  const decVal = v => (typeof v === "string" && v.endsWith("n")) ? BigInt(v.slice(0, -1)) : v;
+  const encTile = t => ({ id:t.id, v:encVal(t.v), q:t.q, r:t.r, rc:t.randColor });
+  const decTile = t => ({ id:t.id, v:t.v === "X" ? "X" : BigInt(decVal(t.v)), q:t.q, r:t.r, randColor:t.rc });
+
+  function makeSnapshot() {
+    return {
+      version: 5,
+      savedAt: Date.now(),
+      mi: state.mi,
+      gmode: state.gmode,
+      autoMode: state.autoMode,
+      started: state.started,
+      score: encVal(state.score),
+      uid: state.uid,
+      over: state.over,
+      tiles: state.tiles.map(encTile),
+      bestScores: Object.fromEntries(Object.entries(state.bestScores).map(([k,v]) => [k, encVal(v)])),
+      autoRunning: isAutoRunning,
+      survivalRunning: !!survT
+    };
+  }
+
+  function readSlots() {
+    try { return JSON.parse(localStorage.getItem(SLOT_SAVE_KEY) || "{}"); }
+    catch(e) { console.error("Slot read failed:", e); return {}; }
+  }
+
+  function saveCurrentSlot() {
+    const slots = readSlots();
+    slots[currentKey()] = makeSnapshot();
+    localStorage.setItem(SLOT_SAVE_KEY, JSON.stringify(slots));
+  }
+
+  function restoreSnapshot(s) {
+    if (!s) return false;
+    state.mi = s.mi ?? state.mi;
+    state.gmode = "classic";
+    state.autoMode = "Random";
+    state.started = s.started !== false;
+    state.score = BigInt(decVal(s.score ?? "0n"));
+    state.uid = s.uid ?? 0;
+    state.over = !!s.over;
+    state.moveCount = 0;
+    if (s.bestScores) {
+      for (const [k,v] of Object.entries(s.bestScores)) state.bestScores[k] = BigInt(decVal(v));
+    }
+    buildCells();
+    state.tiles = Array.isArray(s.tiles) ? s.tiles.map(decTile).filter(t => cset.has(key(t.q,t.r))) : [];
+    isAutoRunning = false;
+    if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+    stopSurv();
+    hideOv();
+    $("startTxt").style.display = "none";
+    $("hint").textContent = hintText();
+    fullRender();
+    if (state.over) showOver();
+    if (!state.over && state.started && s.autoRunning) setTimeout(() => startAuto(), 0);
+    return true;
+  }
+
+  function loadSlot(mi, gmode) {
+    const slots = readSlots();
+    return restoreSnapshot(slots[gmode + "_" + mi]);
+  }
+
+  function saveGame() {
+    try {
+      const data = makeSnapshot();
+      saveCurrentSlot();
+      const json = JSON.stringify(data);
+      localStorage.setItem(MANUAL_SAVE_KEY, json);
+      if (localStorage.getItem(MANUAL_SAVE_KEY) !== json) throw new Error("A mentés nem olvasható vissza.");
+      flashSaveButton(true);
+    } catch(e) {
+      console.error("Save failed:", e);
+      flashSaveButton(false);
+    }
+  }
+
+  let saveFlashTimer = null;
+  function flashSaveButton(ok) {
+    const btn = $("bSave");
+    if (!btn) return;
+    if (saveFlashTimer) clearTimeout(saveFlashTimer);
+    btn.textContent = ok ? "Saved!" : "Error";
+    btn.classList.add("saved");
+    if (!ok) btn.style.background = "#a33";
+    saveFlashTimer = setTimeout(() => {
+      btn.textContent = "Save";
+      btn.classList.remove("saved");
+      btn.style.background = "";
+    }, 900);
+  }
+
+  function loadGame() {
+    try {
+      const raw = localStorage.getItem(MANUAL_SAVE_KEY);
+      if (!raw) return false;
+      const s = JSON.parse(raw);
+
+      state.mi = s.mi ?? state.mi;
+      state.gmode = "classic";
+      state.autoMode = "Random";
+      state.started = s.started !== false;
+      state.score = BigInt(decVal(s.score ?? "0n"));
+      state.uid = s.uid ?? 0;
+      state.over = !!s.over;
+      state.moveCount = 0;
+
+      state.bestScores = {};
+      if (s.bestScores) {
+        for (const [k,v] of Object.entries(s.bestScores)) state.bestScores[k] = BigInt(decVal(v));
+      }
+
+      buildCells();
+      state.tiles = Array.isArray(s.tiles) ? s.tiles.map(decTile).filter(t => cset.has(key(t.q,t.r))) : [];
+
+      isAutoRunning = false;
+      if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+      stopSurv();
+
+      $("hint").textContent = hintText();
+      fullRender();
+      if (state.over) showOver();
+      if (!state.over && state.started && s.autoRunning) {
+        setTimeout(() => startAuto(), 0);
+      }
+      return true;
+    } catch(e) {
+      console.error("Load failed:", e);
+      return false;
+    }
+  }
+
+  function switchGrid(next) {
+    if (next === state.mi) return;
+    saveCurrentSlot();
+    stopAuto();
+    stopSurv();
+    hideOv();
+    $("startTxt").style.display = "none";
+    const targetMode = state.gmode;
+    if (!loadSlot(next, targetMode)) {
+      state.mi = next;
+      state.gmode = targetMode;
+      newGame();
+    }
+  }
+
+  function buildCells() {
+    cells = [];
+    const [name, t, n] = currentMode();
+    if (t === "hex") {
+      const R = n - 1;
+      for (let q = -R; q <= R; q++) {
+        for (let r = Math.max(-R, -q - R); r <= Math.min(R, -q + R); r++) {
+          cells.push([q, r]);
+        }
+      }
+    } else {
+      for (let q = 0; q < n; q++) {
+        for (let r = 0; r < n; r++) {
+          cells.push([q, r]);
+        }
+      }
+    }
+    cset = new Set(cells.map(c => key(c[0], c[1])));
+  }
+
+  function unit(q, r) {
+    return currentMode()[1] === "hex" ? [1.5 * q, SQ3 * (r + q / 2)] : [2 * q, 2 * r];
+  }
+
+  function fit() {
+    const wrap = $("wrap"), W = wrap.clientWidth - 4, H = wrap.clientHeight - 4;
+    const hex = currentMode()[1] === "hex";
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    const hw = 1, hh = hex ? SQ3 / 2 : 1;
+
+    cells.forEach(([q, r]) => {
+      const [x, y] = unit(q, r);
+      x0 = Math.min(x0, x - hw); x1 = Math.max(x1, x + hw);
+      y0 = Math.min(y0, y - hh); y1 = Math.max(y1, y + hh);
+    });
+
+    S = Math.min(W / (x1 - x0), H / (y1 - y0));
+    layout = { cx: -(x0 + x1) / 2 * S, cy: -(y0 + y1) / 2 * S, w: (x1 - x0) * S, h: (y1 - y0) * S };
+
+    const b = $("board");
+    b.style.width = layout.w + "px";
+    b.style.height = layout.h + "px";
+    b.style.marginLeft = -layout.w / 2 + "px";
+    b.style.marginTop = -layout.h / 2 + "px";
+  }
+
+  function px(q, r) {
+    const [x, y] = unit(q, r);
+    return [x * S + layout.w / 2 + layout.cx, y * S + layout.h / 2 + layout.cy];
+  }
+
+  function dims(k) {
+    const hex = currentMode()[1] === "hex";
+    return hex ? [2 * S * k, SQ3 * S * k] : [2 * S * k, 2 * S * k];
+  }
+
+  function randomColor() {
+    return Math.floor(Math.random() * 360);
+  }
+
+  function colorOf(t) {
+    if (t.v === "X") return ["#3b3b3b", "#fff"];
+    if (t.randColor !== undefined && t.randColor !== null) {
+      return [`hsl(${t.randColor},65%,45%)`, "#fff"];
+    }
+    return ["#ccc", "#000"];
+  }
+
+  function drawBoard() {
+    const b = $("board");
+    b.innerHTML = "";
+    els.clear();
+    const cls = currentMode()[1] === "hex" ? "hex" : "bx";
+
+    cells.forEach(([q, r]) => {
+      const [x, y] = px(q, r);
+      const [w, h] = dims(1);
+      const d = document.createElement("div");
+      d.className = "cw " + cls;
+      d.style.cssText = `left:${x - w / 2}px;top:${y - h / 2}px;width:${w}px;height:${h}px;`;
+      d.innerHTML = `<i class='${cls}'></i>`;
+      b.appendChild(d);
+    });
+  }
+
+  function elFor(t, isNew) {
+    let e = els.get(t.id);
+    if (!e) {
+      e = document.createElement("div");
+      e.className = "tw" + (isNew ? " new" : "");
+      const i = document.createElement("div");
+      i.className = "t " + (currentMode()[1] === "hex" ? "hex" : "bx");
+      e.appendChild(i);
+      $("board").appendChild(e);
+      els.set(t.id, e);
+    } else {
+      if (isNew) e.classList.add("new");
+    }
+    const [w, h] = dims(.92);
+    const [x, y] = px(t.q, t.r);
+    const i = e.firstChild;
+
+    e.style.width = w + "px";
+    e.style.height = h + "px";
+    e.style.transform = `translate(${x - w / 2}px,${y - h / 2}px)`;
+
+    const [bg] = colorOf(t);
+    i.style.background = bg;
+    i.textContent = "";
+
+    return e;
+  }
+
+  function render(newIds = [], popIds = []) {
+    state.tiles.forEach(t => elFor(t, newIds.includes(t.id)));
+    popIds.forEach(id => {
+      const e = els.get(id);
+      if (e) {
+        e.classList.remove("pop");
+        void e.offsetWidth;
+        e.classList.add("pop");
+      }
+    });
+
+    setNum($("score"), state.score);
+    setNum($("best"), getBest());
+  }
+
+  function setNum(el, n) {
+    const s = String(n);
+    let t = s;
+    if (s.length > 15) {
+      t = s[0] + "." + s.slice(1, 5) + "e+" + (s.length - 1);
+    }
+    el.textContent = t;
+    el.title = s;
+    el.style.fontSize = (t.length > 8 ? Math.max(11, 22 * 8 / t.length) : 22) + "px";
+  }
+
+  function fullRender() {
+    fit();
+    drawBoard();
+    state.tiles.forEach(t => elFor(t, false));
+    render();
+  }
+
+  function empties(ts) {
+    const o = new Set(ts.map(t => key(t.q, t.r)));
+    return cells.filter(c => !o.has(key(c[0], c[1])));
+  }
+
+  function spawn(isX) {
+    const em = empties(state.tiles);
+    if (!em.length) return null;
+    const c = em[Math.floor(Math.random() * em.length)];
+    const t = { id: ++state.uid, v: isX ? "X" : TILE_VALUE, q: c[0], r: c[1], randColor: randomColor() };
+    state.tiles.push(t);
+    return t;
+  }
+
+  // ===== ÖSSZEOLVADÁS =====
+  // Classic (nem auto): csak azonos értékű, nem-X csempék (mind 1-es, tehát bármely kettő)
+  // Auto Random: bármely két nem-X csempe összeolvad
+  // Mindkét esetben az eredmény egy új 1-es csempe új véletlen színnel
+  function step(ts, d) {
+    const grid = new Map();
+    ts.forEach(t => { t.m = false; t.dead = false; grid.set(key(t.q, t.r), t); });
+
+    const order = ts.slice().sort((a, b) => (b.q * d[0] + b.r * d[1]) - (a.q * d[0] + a.r * d[1]));
+    let moved = false, gained = 0n;
+    const pops = [];
+
+    const isRandom = (state.autoMode === "Random" && isAutoRunning);
+
+    for (const t of order) {
+      let q = t.q, r = t.r;
+      for (;;) {
+        const nq = q + d[0], nr = r + d[1], k = key(nq, nr);
+        if (!cset.has(k)) break;
+        const o = grid.get(k);
+        if (!o) { q = nq; r = nr; continue; }
+
+        const canMerge = isRandom
+          ? (t.v !== "X" && o.v !== "X" && !o.m && !o.dead)
+          : (o.v === t.v && t.v !== "X" && !o.m && !o.dead);
+
+        if (canMerge) {
+          grid.delete(key(t.q, t.r));
+          t.dead = true;
+          t.q = nq; t.r = nr;
+
+          gained += 2n;
+
+          o.v = TILE_VALUE;
+          o.randColor = randomColor();
+          o.m = true;
+          moved = true;
+          pops.push(o.id);
+        }
+        break;
+      }
+      if (!t.dead && (q !== t.q || r !== t.r)) {
+        grid.delete(key(t.q, t.r));
+        t.q = q; t.r = r;
+        grid.set(key(q, r), t);
+        moved = true;
+      }
+    }
+    return { moved, gained, pops };
+  }
+
+  function canMove() {
+    if (empties(state.tiles).length) return true;
+    return currentDirs().some(d => {
+      const c = state.tiles.map(t => ({ ...t }));
+      return step(c, d).moved;
+    });
+  }
+
+  function doMove(di, onComplete) {
+    if (state.over || !state.started) {
+      if (onComplete) onComplete(false);
+      return false;
+    }
+    const d = currentDirs()[di];
+    if (!d) {
+      if (onComplete) onComplete(false);
+      return false;
+    }
+
+    const res = step(state.tiles, d);
+    if (!res.moved) {
+      state.tiles.forEach(t => { t.dead = false; });
+      if (onComplete) onComplete(false);
+      return false;
+    }
+
+    state.moveCount++;
+    if (state.moveCount % 100 === 0) {
+      saveCurrentSlot();
+      try {
+        localStorage.setItem(MANUAL_SAVE_KEY, JSON.stringify(makeSnapshot()));
+        console.log("Auto-save completed at move", state.moveCount);
+      } catch(e) {
+        console.warn("Auto-save failed:", e);
+      }
+    }
+
+    const dead = state.tiles.filter(t => t.dead);
+    state.tiles = state.tiles.filter(t => !t.dead);
+    state.score += res.gained;
+
+    const ck = currentKey();
+    const currentBest = state.bestScores[ck] || 0n;
+    if (state.score > currentBest) {
+      state.bestScores[ck] = state.score;
+    }
+
+    render([], res.pops);
+
+    dead.forEach(t => {
+      const e = els.get(t.id);
+      if (e) {
+        const [w, h] = dims(.92);
+        const [x, y] = px(t.q, t.r);
+        e.style.transform = `translate(${x - w / 2}px,${y - h / 2}px)`;
+        els.delete(t.id);
+        setTimeout(() => e.remove(), MOVE_DURATION);
+      }
+    });
+
+    setTimeout(() => {
+      const nt = spawn(false);
+      if (nt) {
+        render([nt.id], []);
+      }
+
+      if (!canMove()) {
+        state.over = true;
+        stopAuto();
+        stopSurv();
+        showOver();
+      }
+
+      setTimeout(() => {
+        if (onComplete) onComplete(true);
+      }, SPAWN_DURATION);
+
+    }, MOVE_DURATION);
+
+    return true;
+  }
+
+  function showOver() {
+    const o = $("ov");
+    o.innerHTML = `<h2>Game Over!</h2>
+      <div class='sb'><small>SCORE</small><b>${state.score}</b></div>
+      <button id='ovS'>SHARE</button>
+      <button id='ovT'>TRY AGAIN</button>`;
+    o.style.display = "flex";
+
+    $("ovS").onclick = shareScore;
+    $("ovT").onclick = newGame;
+  }
+
+  function hideOv() {
+    $("ov").style.display = "none";
+  }
+
+  function shareScore() {
+    const txt = "Hexic 2048 Pure Math – " + currentMode()[0] + " – pontszámom: " + state.score;
+    if (navigator.share) {
+      navigator.share({ text: txt }).catch(() => {});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(txt).catch(() => {});
+    }
+  }
+
+  function hintText() {
+    return "57AAA6919E46D193E4D3A219CC4145DB";
+  }
+
+  function stopSurv() {
+    if (survT) { clearTimeout(survT); survT = null; }
+  }
+
+  function survTick() {
+    if (state.over || !state.started) return;
+    const nt = spawn(false);
+    if (nt) { render([nt.id]); }
+    if (!canMove()) {
+      state.over = true;
+      stopAuto();
+      showOver();
+      return;
+    }
+    survT = setTimeout(survTick, Math.max(450, 1600 - Math.min(Number(state.score > 1000000n ? 1000000n : state.score), 3450) / 3));
+  }
+
+  function startSurv() {
+    $("startTxt").style.display = "none";
+    state.started = true;
+    stopSurv();
+    survT = setTimeout(survTick, 900);
+  }
+
+  function newGame() {
+    stopAuto();
+    stopSurv();
+    hideOv();
+    $("startTxt").style.display = "none";
+
+    state.gmode = "classic";
+    state.autoMode = "Random";
+
+    buildCells();
+    state.tiles = [];
+    state.score = 0n;
+    state.over = false;
+    state.started = true;
+    state.moveCount = 0;
+
+    const boardSize = currentMode()[2];
+    for (let i = 0; i < boardSize; i++) spawn(false);
+
+    $("hint").textContent = hintText();
+    fullRender();
+  }
+
+  function movable() {
+    return currentDirs().map((d, i) => {
+      const c = state.tiles.map(t => ({ ...t }));
+      const r = step(c, d);
+      return r.moved ? { i, g: r.gained, free: cells.length - c.filter(t => !t.dead).length } : null;
+    }).filter(Boolean);
+  }
+
+  function pickDir() {
+    const mv = movable();
+    if (!mv.length) return -1;
+    return mv[Math.floor(Math.random() * mv.length)].i;
+  }
+
+  function stopAuto() {
+    isAutoRunning = false;
+    if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+    $("bAuto").classList.remove("on");
+    $("board").style.removeProperty("--d");
+    $("board").style.removeProperty("--d-spawn");
+  }
+
+  function runAutoLoop() {
+    if (!isAutoRunning || state.over || !state.started) {
+      stopAuto();
+      return;
+    }
+
+    const d = pickDir();
+    if (d < 0) {
+      stopAuto();
+      return;
+    }
+
+    doMove(d, (moved) => {
+      if (!moved || !isAutoRunning) {
+        stopAuto();
+        return;
+      }
+      autoTimer = setTimeout(runAutoLoop, 50);
+    });
+  }
+
+  function startAuto() {
+    stopAuto();
+    state.autoMode = "Random";
+    isAutoRunning = true;
+    $("bAuto").classList.add("on");
+
+    $("board").style.setProperty("--d", MOVE_DURATION + "ms");
+    $("board").style.setProperty("--d-spawn", SPAWN_DURATION + "ms");
+
+    runAutoLoop();
+  }
+
+  function dirFromVec(dx, dy) {
+    const ds = currentDirs();
+    let bi = 0, bs = -2;
+    const len = Math.hypot(dx, dy);
+
+    ds.forEach((d, i) => {
+      let vx, vy;
+      if (currentMode()[1] === "hex") {
+        vx = 1.5 * d[0]; vy = SQ3 * (d[1] + d[0] / 2);
+      } else {
+        vx = d[0]; vy = d[1];
+      }
+      const vl = Math.hypot(vx, vy);
+      const s = (dx * vx + dy * vy) / (len * vl);
+      if (s > bs) { bs = s; bi = i; }
+    });
+    return bi;
+  }
+
+  let sx = 0, sy = 0, down = false;
+  const bd = $("wrap");
+
+  bd.addEventListener("pointerdown", e => {
+    if (e.target.closest("#ov")) return;
+    down = true; sx = e.clientX; sy = e.clientY;
+  });
+
+  window.addEventListener("pointerup", e => {
+    if (!down) return;
+    down = false;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (Math.hypot(dx, dy) < 24) return;
+    doMove(dirFromVec(dx, dy));
+  });
+
+  window.addEventListener("keydown", e => {
+    const k = e.key.toLowerCase();
+    let di = -1;
+    if (currentMode()[1] === "hex") {
+      di = { w: 0, e: 1, d: 2, s: 3, a: 4, q: 5, arrowup: 0, arrowdown: 3 }[k] ?? -1;
+    } else {
+      di = {
+        arrowup: 0, w: 0,
+        arrowright: 2, d: 2,
+        arrowdown: 4, s: 4,
+        arrowleft: 6, a: 6,
+        e: 1, '9': 1,
+        c: 3, '3': 3,
+        z: 5, '1': 5,
+        q: 7, '7': 7
+      }[k] ?? -1;
+    }
+    if (di >= 0) {
+      e.preventDefault();
+      doMove(di);
+    }
+  });
+
+  function closeMenus() {
+    $("mm").style.display = "none";
+    $("hm").style.display = "none";
+  }
+
+  function openMenu(btn, items, cur, onPick) {
+    const m = $("mm");
+    const was = m.style.display === "block" && m.dataset.for === btn.id;
+    closeMenus();
+    if (was) return;
+
+    m.innerHTML = "";
+    m.dataset.for = btn.id;
+    items.forEach((x, i) => {
+      const d = document.createElement("div");
+      d.textContent = x;
+      if (i === cur) d.className = "sel";
+      d.onclick = ev => {
+        ev.stopPropagation();
+        closeMenus();
+        onPick(i, x);
+      };
+      m.appendChild(d);
+    });
+    m.style.left = Math.min(btn.offsetLeft, $("bar").clientWidth - 150) + "px";
+    m.style.display = "block";
+  }
+
+  $("bGrid").onclick = e => {
+    e.stopPropagation();
+    openMenu($("bGrid"), MODES.map(x => x[0]), state.mi, i => switchGrid(i));
+  };
+
+  // Auto gomb: egyszerű ki/be kapcsoló, mindig Random mód
+  $("bAuto").onclick = e => {
+    e.stopPropagation();
+    closeMenus();
+    if (isAutoRunning) {
+      stopAuto();
+    } else {
+      if (!state.over && state.started) startAuto();
+    }
+  };
+
+  // Save gomb az alsó sávban – csendes mentés
+  $("bSave").onclick = e => {
+    e.stopPropagation();
+    closeMenus();
+    saveGame();
+  };
+
+  $("menuBtn").onclick = e => {
+    e.stopPropagation();
+    const o = $("hm").style.display === "block";
+    closeMenus();
+    if (!o) $("hm").style.display = "block";
+  };
+
+  $("hm").onclick = e => {
+    e.stopPropagation();
+    const a = e.target.closest("[data-a]");
+    if (!a) return;
+    closeMenus();
+    if (a.dataset.a === "new") {
+      const pw = prompt("Új játék indításához add meg a jelszót:");
+      if (pw === null) return;
+      if (pw !== "1111") {
+        alert("Hibás jelszó! Az új játék nem indult el.");
+        return;
+      }
+      newGame();
+    }
+    else shareScore();
+  };
+
+  document.addEventListener("click", closeMenus);
+  $("startTxt").onclick = startSurv;
+  window.addEventListener("resize", () => { if (cells.length) fullRender(); });
+
+  state.gmode = "classic";
+  if (!loadGame()) newGame();
+})();
+</script>
+</body>
+</html>
