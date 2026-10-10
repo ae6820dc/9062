@@ -75,7 +75,25 @@
     document.getElementById('n2'),
     document.getElementById('n3'),
   ];
-  const STORAGE_KEY='v33_en_binmask_'+COLS+'x'+ROWS+'_combo16';
+  const STORAGE_KEY = 'E027CEC8E6B3A09B';
+  const STORAGE_MIGRATION_KEY = '73AF86A8A94C29DB';
+
+  // Preserve legacy data once, without reviving it after a reset.
+  (() => {
+    try {
+      if (localStorage.getItem(STORAGE_MIGRATION_KEY) === '1') return;
+      if (localStorage.getItem(STORAGE_KEY) === null) {
+        const legacyState = localStorage.getItem('v33_en_binmask_'+COLS+'x'+ROWS+'_combo16');
+        if (legacyState !== null) {
+          localStorage.setItem(STORAGE_KEY, legacyState);
+          if (localStorage.getItem(STORAGE_KEY) !== legacyState) return;
+        }
+      }
+      localStorage.setItem(STORAGE_MIGRATION_KEY, '1');
+    } catch (e) {
+      // Leave migration pending if storage is unavailable or the copy fails.
+    }
+  })();
 
   function maskFromButtons(){ return (activeButtons[0]?1:0) | (activeButtons[1]?2:0) | (activeButtons[2]?4:0) | (activeButtons[3]?8:0); }
   function renderBoardsDisplay(v){ elBoardsHex.innerHTML='<span class="real">'+v+'</span>'; requestAnimationFrame(()=>{ elBoardsHex.scrollLeft=elBoardsHex.scrollWidth; }); }

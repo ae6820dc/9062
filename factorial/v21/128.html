@@ -119,7 +119,25 @@
   btnA.textContent = LABEL_A;
   btnB.textContent = LABEL_B;
 
-  const STORAGE_KEY = '128v21_dualErase_state';
+  const STORAGE_KEY = 'EC1DB60911D2DE57';
+  const STORAGE_MIGRATION_KEY = '6FD87C75750772A8';
+
+  // Preserve legacy data once, without reviving it after a reset.
+  (() => {
+    try {
+      if (localStorage.getItem(STORAGE_MIGRATION_KEY) === '1') return;
+      if (localStorage.getItem(STORAGE_KEY) === null) {
+        const legacyState = localStorage.getItem('128v21_dualErase_state');
+        if (legacyState !== null) {
+          localStorage.setItem(STORAGE_KEY, legacyState);
+          if (localStorage.getItem(STORAGE_KEY) !== legacyState) return;
+        }
+      }
+      localStorage.setItem(STORAGE_MIGRATION_KEY, '1');
+    } catch (e) {
+      // Leave migration pending if storage is unavailable or the copy fails.
+    }
+  })();
 
   function fitCanvas(){
     const outerMargin = 18;

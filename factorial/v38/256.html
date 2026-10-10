@@ -86,7 +86,25 @@
     document.getElementById('autoToggle'),
   ];
 
-  const STORAGE_KEY=`v35_sync_on_empty_${COLS}x${ROWS}_combo16`;
+  const STORAGE_KEY = 'D59DA2D74A11B4C7';
+  const STORAGE_MIGRATION_KEY = '9092291E33CE3EC3';
+
+  // Preserve legacy data once, without reviving it after a reset.
+  (() => {
+    try {
+      if (localStorage.getItem(STORAGE_MIGRATION_KEY) === '1') return;
+      if (localStorage.getItem(STORAGE_KEY) === null) {
+        const legacyState = localStorage.getItem(`v35_sync_on_empty_${COLS}x${ROWS}_combo16`);
+        if (legacyState !== null) {
+          localStorage.setItem(STORAGE_KEY, legacyState);
+          if (localStorage.getItem(STORAGE_KEY) !== legacyState) return;
+        }
+      }
+      localStorage.setItem(STORAGE_MIGRATION_KEY, '1');
+    } catch (e) {
+      // Leave migration pending if storage is unavailable or the copy fails.
+    }
+  })();
 
   // ---------- Big integer helpers ----------
   const stripZeros = (s)=>{

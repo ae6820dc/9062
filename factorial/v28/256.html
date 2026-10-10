@@ -82,7 +82,25 @@
     document.getElementById('n4'),
   ];
 
-  const STORAGE_KEY='256v28_chessClock_state';
+  const STORAGE_KEY = 'DD9C3F05DD43D28D';
+  const STORAGE_MIGRATION_KEY = 'A102EF70FD716CCD';
+
+  // Preserve legacy data once, without reviving it after a reset.
+  (() => {
+    try {
+      if (localStorage.getItem(STORAGE_MIGRATION_KEY) === '1') return;
+      if (localStorage.getItem(STORAGE_KEY) === null) {
+        const legacyState = localStorage.getItem('256v28_chessClock_state');
+        if (legacyState !== null) {
+          localStorage.setItem(STORAGE_KEY, legacyState);
+          if (localStorage.getItem(STORAGE_KEY) !== legacyState) return;
+        }
+      }
+      localStorage.setItem(STORAGE_MIGRATION_KEY, '1');
+    } catch (e) {
+      // Leave migration pending if storage is unavailable or the copy fails.
+    }
+  })();
 
   function fitCanvas(){
     const outer=18, h1=document.querySelector('h1'), bar=document.querySelector('.bar');

@@ -65,7 +65,25 @@
   const btnA=document.getElementById('eraseA');
   const btnB=document.getElementById('eraseB');
   btnA.textContent=LABEL_A; btnB.textContent=LABEL_B;
-  const STORAGE_KEY='256v23_dualErase_state';
+  const STORAGE_KEY = '564832DA3B803669';
+  const STORAGE_MIGRATION_KEY = '4F53615D67409BD8';
+
+  // Preserve legacy data once, without reviving it after a reset.
+  (() => {
+    try {
+      if (localStorage.getItem(STORAGE_MIGRATION_KEY) === '1') return;
+      if (localStorage.getItem(STORAGE_KEY) === null) {
+        const legacyState = localStorage.getItem('256v23_dualErase_state');
+        if (legacyState !== null) {
+          localStorage.setItem(STORAGE_KEY, legacyState);
+          if (localStorage.getItem(STORAGE_KEY) !== legacyState) return;
+        }
+      }
+      localStorage.setItem(STORAGE_MIGRATION_KEY, '1');
+    } catch (e) {
+      // Leave migration pending if storage is unavailable or the copy fails.
+    }
+  })();
 
   function fitCanvas(){
     const outer=18,h1=document.querySelector('h1'),bar=document.querySelector('.bar');

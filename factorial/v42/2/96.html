@@ -86,7 +86,25 @@
   const frame = document.getElementById('frame');
   const btns = [document.getElementById('n0'), document.getElementById('n1'), document.getElementById('n2'), document.getElementById('n3'), document.getElementById('autoToggle')];
 
-  const STORAGE_KEY = `v56_factseq_${COLS}x${ROWS}_combo16`;
+  const STORAGE_KEY = '2B43FC44E719ADAB';
+  const STORAGE_MIGRATION_KEY = 'ED14AFA4D592FCE4';
+
+  // Preserve legacy data once, without reviving it after a reset.
+  (() => {
+    try {
+      if (localStorage.getItem(STORAGE_MIGRATION_KEY) === '1') return;
+      if (localStorage.getItem(STORAGE_KEY) === null) {
+        const legacyState = localStorage.getItem(`v56_factseq_${COLS}x${ROWS}_combo16`);
+        if (legacyState !== null) {
+          localStorage.setItem(STORAGE_KEY, legacyState);
+          if (localStorage.getItem(STORAGE_KEY) !== legacyState) return;
+        }
+      }
+      localStorage.setItem(STORAGE_MIGRATION_KEY, '1');
+    } catch (e) {
+      // Leave migration pending if storage is unavailable or the copy fails.
+    }
+  })();
 
   // Big integer helpers (ugyanaz)
   const stripZeros = s => (s || '0').replace(/^(-?)0+(?=\d)/, '$1') || '0';

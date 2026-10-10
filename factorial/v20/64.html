@@ -102,7 +102,25 @@
   const hud = document.getElementById('hud');
   const frame = document.getElementById('frame');
 
-  const STORAGE_KEY = '64v20_state';
+  const STORAGE_KEY = '9ACB302C5FF95985';
+  const STORAGE_MIGRATION_KEY = '02F01450AD338CFC';
+
+  // Preserve legacy data once, without reviving it after a reset.
+  (() => {
+    try {
+      if (localStorage.getItem(STORAGE_MIGRATION_KEY) === '1') return;
+      if (localStorage.getItem(STORAGE_KEY) === null) {
+        const legacyState = localStorage.getItem('64v20_state');
+        if (legacyState !== null) {
+          localStorage.setItem(STORAGE_KEY, legacyState);
+          if (localStorage.getItem(STORAGE_KEY) !== legacyState) return;
+        }
+      }
+      localStorage.setItem(STORAGE_MIGRATION_KEY, '1');
+    } catch (e) {
+      // Leave migration pending if storage is unavailable or the copy fails.
+    }
+  })();
 
   function fitCanvas(){
     const outerMargin = 18;

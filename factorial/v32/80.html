@@ -78,7 +78,25 @@
     document.getElementById('n3'),
     document.getElementById('n4'),
   ];
-  const STORAGE_KEY=`v32_en_binmask_${COLS}x${ROWS}_combo16`;
+  const STORAGE_KEY = '0B6D148F8D0A5551';
+  const STORAGE_MIGRATION_KEY = 'AFDE6C3D7AF83DDB';
+
+  // Preserve legacy data once, without reviving it after a reset.
+  (() => {
+    try {
+      if (localStorage.getItem(STORAGE_MIGRATION_KEY) === '1') return;
+      if (localStorage.getItem(STORAGE_KEY) === null) {
+        const legacyState = localStorage.getItem(`v32_en_binmask_${COLS}x${ROWS}_combo16`);
+        if (legacyState !== null) {
+          localStorage.setItem(STORAGE_KEY, legacyState);
+          if (localStorage.getItem(STORAGE_KEY) !== legacyState) return;
+        }
+      }
+      localStorage.setItem(STORAGE_MIGRATION_KEY, '1');
+    } catch (e) {
+      // Leave migration pending if storage is unavailable or the copy fails.
+    }
+  })();
   function maskFromButtons(){
     return (activeButtons[0]?1:0) | (activeButtons[1]?2:0) | (activeButtons[2]?4:0) | (activeButtons[3]?8:0);
   }
