@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="hu"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>README – Random Text Generator</title>
+<style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#101827;color:#edf2ff;font:16px/1.75 system-ui,Arial,sans-serif}main{max-width:900px;margin:auto;padding:36px 22px 70px}h1{font-size:clamp(28px,5vw,42px);line-height:1.2}h2{color:#bcd0ff;margin-top:34px;border-bottom:1px solid #3c4c68;padding-bottom:7px}p,li{color:#d1dcf0}strong{color:white}code{background:#263653;color:#dbe7ff;padding:2px 5px;border-radius:5px;overflow-wrap:anywhere}.subtitle{color:#a9bce1;font-size:18px}.tag{display:inline-block;border:1px solid #4b659d;border-radius:24px;padding:4px 12px;margin:3px 5px 3px 0;color:#e4edff}ul,ol{padding-left:24px}li{margin:6px 0}.note{border-left:3px solid #7296ec;padding:10px 15px;background:#1a2942;border-radius:0 8px 8px 0}footer{margin-top:40px;color:#9eacc5;font-size:14px}</style></head><body><main>
+<h1>🌐 Random Text Generator</h1>
+<p class="subtitle">README – A program bemutatása és használati útmutatója</p>
+<div><span class="tag">26 nyelv és karakterkészlet</span><span class="tag">Seed-alapú generálás</span><span class="tag">UTF-8 HTML-export</span><span class="tag">Offline használat</span></div>
+<h2>Mi ez a program?</h2>
+<p>A Random Text Generator egy böngészőben futó, önálló HTML-alkalmazás, amely különféle nyelvek karakterkészleteiből állít elő véletlenszerű karaktersorozatokat. Nem igényel telepítést vagy internetkapcsolatot. A létrehozott szövegek kimásolhatók és külön HTML-fájlba menthetők.</p>
+<p class="note"><strong>Fontos:</strong> a generátor nem nyelvtanilag helyes mondatokat vagy szótári szavakat készít, hanem az adott nyelvhez rendelt karakterekből véletlenszerű sorozatokat.</p>
+<h2>Támogatott nyelvek és karakterkészletek</h2>
+<p>Angol, Arab, Bengáli, Cseh, Finn, Francia, Görög, Hexadecimális, Héber, Japán, Koreai, Kínai, Latin, Lengyel, Magyar, Nepáli, Norvég, Német, Olasz, Orosz, Perzsa, Portugál, Spanyol, Svéd, Tibeti és Török.</p>
+<p>A választómenü magyar ábécérendben sorolja fel a lehetőségeket. A <strong>Hexadecimális</strong> mód a <code>0123456789ABCDEF</code> karaktereket használja. Az arab, héber és perzsa kimenet jobbról balra jelenik meg.</p>
+<h2>Karakterkészletek mérete nyelvenként</h2>
+<p>Az alábbi számok azt mutatják, hogy a generátor az egyes nyelveknél pontosan hány különböző karakterből választ véletlenszerűen. Ezek a programban meghatározott készletek méretei, nem az adott nyelv összes létező írásjele.</p>
+<ul>
+<li><strong>Angol:</strong> 26 karakter</li>
+<li><strong>Arab:</strong> 36 karakter</li>
+<li><strong>Bengáli:</strong> 53 karakter</li>
+<li><strong>Cseh:</strong> 41 karakter</li>
+<li><strong>Finn:</strong> 29 karakter</li>
+<li><strong>Francia:</strong> 42 karakter</li>
+<li><strong>Görög:</strong> 24 karakter</li>
+<li><strong>Hexadecimális:</strong> 16 karakter</li>
+<li><strong>Héber:</strong> 27 karakter</li>
+<li><strong>Japán:</strong> 21 168 karakter</li>
+<li><strong>Koreai:</strong> 11 172 karakter</li>
+<li><strong>Kínai:</strong> 20 992 karakter</li>
+<li><strong>Latin:</strong> 25 karakter</li>
+<li><strong>Lengyel:</strong> 35 karakter</li>
+<li><strong>Magyar:</strong> 35 karakter</li>
+<li><strong>Nepáli:</strong> 53 karakter</li>
+<li><strong>Norvég:</strong> 29 karakter</li>
+<li><strong>Német:</strong> 30 karakter</li>
+<li><strong>Olasz:</strong> 36 karakter</li>
+<li><strong>Orosz:</strong> 33 karakter</li>
+<li><strong>Perzsa:</strong> 33 karakter</li>
+<li><strong>Portugál:</strong> 39 karakter</li>
+<li><strong>Spanyol:</strong> 33 karakter</li>
+<li><strong>Svéd:</strong> 29 karakter</li>
+<li><strong>Tibeti:</strong> 45 karakter</li>
+<li><strong>Török:</strong> 32 karakter</li>
+</ul>
+<p class="note">A japán készlet hiragana, katakana és kínai eredetű írásjegyek megadott Unicode-tartományaiból áll; a kínai és koreai készlet szintén meghatározott Unicode-tartományt használ. A karakterek előfordulási valószínűsége a készleten belül egyenletes.</p>
+<h2>Főbb funkciók</h2>
+<ul>
+<li><strong>Szóhossz beállítása:</strong> a minimum és maximum 1–50 karakter között adható meg.</li>
+<li><strong>Oldalméret:</strong> 1 000, 10 000 vagy 50 000 generált szó oldalanként.</li>
+<li><strong>Seed:</strong> tetszőleges szöveg vagy szám használható a generálás kiindulópontjaként.</li>
+<li><strong>Újragenerálhatóság:</strong> azonos seed, nyelv, szóhossz, oldalméret és oldalszám mellett ugyanaz a kimenet készül.</li>
+<li><strong>Oldalszámozás:</strong> a következő és előző oldal gombokkal lehet lapozni; az oldalszám közvetlenül is beírható.</li>
+<li><strong>Új seed:</strong> a program véletlenszerű új seedet hoz létre, és visszaáll az első oldalra.</li>
+<li><strong>Másolás:</strong> a generált szöveg vágólapra másolható, amennyiben a böngésző engedélyezi.</li>
+<li><strong>HTML mentése:</strong> a létrehozott oldal önálló UTF-8 HTML-fájlként exportálható.</li>
+<li><strong>Világos és sötét téma:</strong> egyetlen gombbal váltható.</li>
+<li><strong>Statisztika:</strong> a program megjeleníti a szavak számát, a szöveg UTF-16 kódegységeinek számát, a generálási időt és az oldalszámot.</li>
+</ul>
+<h2>Használat</h2>
+<ol><li>Nyisd meg a generátor HTML-fájlját egy modern böngészőben.</li><li>Válassz nyelvet vagy karakterkészletet.</li><li>Állítsd be a minimum és maximum szóhosszt, valamint az oldalankénti szavak számát.</li><li>Add meg a seedet és az oldalszámot.</li><li>Kattints a <strong>🎲 Generálás</strong> gombra.</li><li>Lapozz, másold ki a szöveget, vagy kattints a <strong>HTML mentése</strong> gombra.</li></ol>
+<h2>Hogyan működik a seed?</h2>
+<p>A seed és a generálási beállítások együttesen határozzák meg az adott oldal tartalmát. A program determinisztikus pszeudovéletlen generátort használ: ugyanazokkal a beállításokkal bármikor előállítható ugyanaz az oldal. A különböző oldalszámok külön kimenetet eredményeznek.</p>
+<h2>Mit tartalmaz az exportált HTML?</h2>
+<p>A mentett fájl tartalmazza a generált szöveget, a nyelv kódját, az oldalszámot, a seedet, a mentés helyi időpontját, a Unix-időbélyeget ezredmásodpercben és a programazonosítót. Az export a választott világos vagy sötét színvilágot is követi.</p>
+<h2>Technikai információk</h2>
+<p>A program HTML, CSS és JavaScript használatával működik, külső könyvtár nélkül. A szöveg UTF-8 kódolású HTML-fájlba menthető. A rendkívül hosszú szövegek előállítása és megjelenítése a számítógép teljesítményétől függően időigényes lehet.</p>
+<footer>Random Text Generator · README · 26 nyelv és karakterkészlet</footer>
+</main></body></html>
