@@ -24,7 +24,7 @@ chars.math=mathCharacters();
 let unicodePoints=null;
 function getUnicodePoints(){
  if(unicodePoints)return unicodePoints;
- const assigned=/\\p{Assigned}/u, excluded=/[\\p{Cc}\\p{Cf}\\p{Cs}\\p{Co}]/u;
+ const assigned=/\p{Assigned}/u, excluded=/[\p{Cc}\p{Cf}\p{Cs}\p{Co}]/u;
  const out=[];
  for(let cp=0;cp<=0x10FFFF;cp++){
   if(cp>=0xD800&&cp<=0xDFFF){cp=0xDFFF;continue}
