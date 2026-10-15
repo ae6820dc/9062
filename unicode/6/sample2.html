@@ -41,15 +41,27 @@ let cachedPool=null;function pool(){if($('set').value==='unicode')return getUnic
 function updatePoolCount(){const n=$('set').value==='unicode'?pool().length:new Set(pool()).size;$('poolCount').textContent='Különböző karakterek száma: '+n.toLocaleString('hu-HU');}
 function uniquePool(){return $('set').value==='unicode'?pool():[...new Set(pool())];}
 function fitGlyph(){
- const screen=$('screen'), glyph=$('glyph');
- // A betű tényleges sorának is marad hely, nem csak a rajzolt jelnek.
+ const screen=$('screen'),glyph=$('glyph');
  const availableH=Math.max(80,screen.clientHeight-48);
  const availableW=Math.max(80,screen.clientWidth-48);
+ // A ténylegesen kirajzolt karakter körvonalát is mérjük: egyes
+ // ékírásos és díszítő jelek túlnyúlnak a szokásos betűdobozon.
+ const canvas=fitGlyph.canvas||(fitGlyph.canvas=document.createElement('canvas'));
+ const ctx=canvas.getContext('2d');
+ const font=getComputedStyle(glyph).fontFamily;
+ const character=glyph.textContent||'';
  let size=Math.min(430,availableH/1.55,availableW/1.25);
- glyph.style.fontSize=Math.floor(size)+'px';
- // További méretcsökkentés, ha a böngésző betűmetrikája megkívánja.
- for(let n=0;n<12&&(glyph.scrollHeight>availableH||glyph.scrollWidth>availableW);n++){
-  size*=0.9;glyph.style.fontSize=Math.floor(size)+'px';
+ for(let n=0;n<20;n++){
+  glyph.style.fontSize=Math.max(1,Math.floor(size))+'px';
+  ctx.font=Math.max(1,Math.floor(size))+'px '+font;
+  const m=ctx.measureText(character);
+  const inkW=(m.actualBoundingBoxLeft||0)+(m.actualBoundingBoxRight||0);
+  const inkH=(m.actualBoundingBoxAscent||0)+(m.actualBoundingBoxDescent||0);
+  // A vászon-mérésen felül tartalékot hagyunk a különleges fontoknak.
+  const safeW=Math.max(glyph.scrollWidth,inkW*1.18);
+  const safeH=Math.max(glyph.scrollHeight,inkH*1.35);
+  if(safeW<=availableW&&safeH<=availableH)break;
+  size*=Math.min(0.9,availableW/Math.max(safeW,1),availableH/Math.max(safeH,1));
  }
 }
 window.addEventListener('resize',fitGlyph);
