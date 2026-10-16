@@ -464,8 +464,8 @@
     ];
 
     // ==================== TÖBB OSZTÁLY KEZELÉSE ====================
-    const STORAGE_KEY = 'orarend256Class';
-    const SELECTED_CLASS_KEY = 'orarendSelectedClass';
+    const STORAGE_KEY = 'E4A19B72C05D8F36';
+    const SELECTED_CLASS_KEY = '91F0C6A2D7B4385E';
 
     // Létrehozzuk az összes osztályt (00-FF)
     function createAllClasses() {
@@ -478,7 +478,7 @@
     }
 
     function getOsszesOsztaly() {
-        const stored = localStorage.getItem(STORAGE_KEY);
+        const stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('orarend256Class');
         if (stored) {
             try {
                 const parsed = JSON.parse(stored);
@@ -502,7 +502,7 @@
     }
 
     function getSelectedClass() {
-        const stored = localStorage.getItem(SELECTED_CLASS_KEY);
+        const stored = localStorage.getItem(SELECTED_CLASS_KEY) || localStorage.getItem('orarendSelectedClass');
         if (stored && osszesAdat[stored]) {
             return stored;
         }
