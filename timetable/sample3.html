@@ -347,7 +347,6 @@
 <div class="container">
     <h1>📅 Heti órarend</h1>
     <p class="subtitle" style="overflow-wrap:anywhere;font-family:monospace">Program ID: D7B20E94A61C3F85B09D42E7C5186A3F</p>
-    <p class="subtitle">256 osztály (00 – FF)</p>
 
     <div class="class-selector">
         <label for="classSelect">🏫 Osztály:</label>
@@ -563,7 +562,7 @@
         frissitNezet();
         
         document.getElementById('statusMsg').className = 'status-msg';
-        document.getElementById('statusMsg').textContent = `📖 Osztály: ${ujOsztaly} – Olvasó mód`;
+        document.getElementById('statusMsg').textContent = '';
     }
 
     // ==================== RANDOM ÓRAREND ====================
