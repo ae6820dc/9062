@@ -52,7 +52,7 @@ function fitGlyph(){
 }
 window.addEventListener('resize',fitGlyph);
 document.addEventListener('fullscreenchange',()=>requestAnimationFrame(fitGlyph));
-function display(){const items=uniquePool();if(!items.length){$('glyph').textContent='—';$('counter').textContent='Nincs karakter';return}index=((index%items.length)+items.length)%items.length;$('glyph').textContent=items[index];fitGlyph();$('counter').textContent=(index+1).toLocaleString('hu-HU')+' / '+items.length.toLocaleString('hu-HU')+' · Léptetések: '+count.toLocaleString('hu-HU');}
+function display(){const items=uniquePool();if(!items.length){$('glyph').textContent='—';$('counter').textContent='Nincs karakter';return}index=((index%items.length)+items.length)%items.length;$('glyph').textContent=items[index];fitGlyph();$('counter').textContent=(index+1).toLocaleString('hu-HU')+' / '+items.length.toLocaleString('hu-HU')+' · Lépések: '+count.toLocaleString('hu-HU');}
 function stop(){if(timer!==null){clearInterval(timer);timer=null}$('start').textContent='▶ Indítás';}
 function step(delta){const items=uniquePool();if(!items.length){stop();display();return}index=(index+delta+items.length)%items.length;positions[$('set').value]=index;count++;display();save();}
 function start(){const seconds=Number($('speed').value);if(!Number.isFinite(seconds)||seconds<0.05||seconds>3600){$('status').textContent='Az időköz 0,05 és 3600 másodperc között legyen.';return}if(!uniquePool().length){$('status').textContent='Adj meg legalább egy karaktert.';return}if(timer!==null){stop();$('status').textContent='Szüneteltetve';save();return}timer=setInterval(()=>step(1),seconds*1000);$('start').textContent='⏸ Szünet';$('status').textContent='Lejátszás';save();}
