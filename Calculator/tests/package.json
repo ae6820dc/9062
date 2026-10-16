@@ -1,0 +1,11 @@
+{
+  "name": "advanced-calculator-tests",
+  "private": true,
+  "scripts": {
+    "test": "node engine.test.cjs",
+    "test:browser": "node browser.test.cjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2"
+  }
+}
