@@ -27,7 +27,10 @@ jobs:
       - name: Install Chromium for Playwright
         run: npx --prefix Calculator/tests playwright install --with-deps chromium
       - name: Configure installed Chromium path
-        run: echo "CHROMIUM_PATH=$(node -e \"console.log(require('./Calculator/tests/node_modules/@playwright/test').chromium.executablePath())\")" >> "$GITHUB_ENV"
+        run: |
+          CHROMIUM_BIN="$(node -p "require('./Calculator/tests/node_modules/playwright-core').chromium.executablePath()")"
+          test -x "$CHROMIUM_BIN"
+          printf 'CHROMIUM_PATH=%s\n' "$CHROMIUM_BIN" >> "$GITHUB_ENV"
       - name: Original mathematical engine tests
         run: node Calculator/tests/engine.test.cjs
       - name: Mathematics Studio II engine tests
