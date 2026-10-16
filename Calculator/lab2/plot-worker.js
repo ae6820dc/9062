@@ -1,0 +1,2 @@
+importScripts('../advanced-algebra/math.js','../advanced-algebra/engine.js');
+onmessage=e=>{try{const a=Number(e.data.a),b=Number(e.data.b),expressions=e.data.expressions.trim().split('\n');if(!Number.isFinite(a)||!Number.isFinite(b)||a>=b||expressions.length>6)throw Error('Use finite increasing bounds and at most six curves.');const curves=expressions.map(s=>{const f=Lab.expr(s).f;return Array.from({length:1001},(_,i)=>{const x=a+(b-a)*i/1000;try{return[x,f({x})]}catch{return[x,null]}})});postMessage({curves})}catch(e){postMessage({error:e.message})}};

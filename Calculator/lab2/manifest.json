@@ -1,0 +1,32 @@
+[
+  {
+    "folder": "advanced-algebra",
+    "title": "Algebra & Equations",
+    "id": "c5c43b6d337fd28ee7ea6055279e2556",
+    "key": "e72af7405fd201ca"
+  },
+  {
+    "folder": "calculus-analysis",
+    "title": "Calculus & Analysis",
+    "id": "f2086f323de4cd7cfd05cc6c1624a7f4",
+    "key": "f3a0a72cc02e3ce3"
+  },
+  {
+    "folder": "matrix-lab",
+    "title": "Matrix Laboratory",
+    "id": "db347567eee603503751d7489892a3f5",
+    "key": "e58eaa6a2f142016"
+  },
+  {
+    "folder": "statistics-probability",
+    "title": "Statistics & Probability",
+    "id": "a273aa144eea1d0735ba4ca79bc6a95d",
+    "key": "63ffefd096bc5ddb"
+  },
+  {
+    "folder": "number-theory",
+    "title": "Number Theory Studio",
+    "id": "a7276af74dee172fae452d764f7aa961",
+    "key": "78a8c50ef6f895ec"
+  }
+]
