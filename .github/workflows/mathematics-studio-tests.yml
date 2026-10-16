@@ -1,0 +1,60 @@
+name: Mathematics Studio tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'Calculator/**'
+      - '.github/workflows/mathematics-studio-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  mathematics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: Calculator/tests/package-lock.json
+      - name: Install browser test dependencies
+        run: npm ci --prefix Calculator/tests
+      - name: Install Chromium for Playwright
+        run: npx --prefix Calculator/tests playwright install --with-deps chromium
+      - name: Original mathematical engine tests
+        run: node Calculator/tests/engine.test.cjs
+      - name: Mathematics Studio II engine tests
+        run: node Calculator/lab2/test.cjs
+      - name: Start local HTTP server
+        run: |
+          python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/mathematics-http.log 2>&1 &
+          echo $! > /tmp/mathematics-http.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/Calculator/lab2/manifest.json >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/mathematics-http.log
+          exit 1
+      - name: Original browser tests
+        env:
+          CHROMIUM_PATH: /usr/bin/chromium
+          TEST_BASE_URL: http://127.0.0.1:8000
+        run: node Calculator/tests/browser.test.cjs
+      - name: Mathematics Studio II browser tests
+        env:
+          CHROMIUM_PATH: /usr/bin/chromium
+          TEST_BASE_URL: http://127.0.0.1:8000
+          TEST_ARTIFACTS: /tmp
+        run: node Calculator/lab2/browser.test.cjs
+      - name: Upload browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathematics-studio-screenshots
+          path: /tmp/*-v2.png
+          if-no-files-found: ignore
