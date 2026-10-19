@@ -21,15 +21,15 @@ function updatePoolCount(){const n=new Set(pool()).size;$('poolCount').textConte
 function uniquePool(){return [...new Set(pool())];}
 function fitGlyph(){
  const screen=$('screen'),glyph=$('glyph');
- const availableH=Math.max(80,screen.clientHeight-48);
- const availableW=Math.max(80,screen.clientWidth-48);
+ const availableH=Math.max(40,screen.clientHeight-96);
+ const availableW=Math.max(40,screen.clientWidth-96);
  // A ténylegesen kirajzolt karakter körvonalát is mérjük: egyes
  // ékírásos és díszítő jelek túlnyúlnak a szokásos betűdobozon.
  const canvas=fitGlyph.canvas||(fitGlyph.canvas=document.createElement('canvas'));
  const ctx=canvas.getContext('2d');
  const font=getComputedStyle(glyph).fontFamily;
  const character=glyph.textContent||'';
- let size=Math.min(430,availableH/1.55,availableW/1.25);
+ let size=Math.min(220,availableH/2.7,availableW/2.1);
  for(let n=0;n<20;n++){
   glyph.style.fontSize=Math.max(1,Math.floor(size))+'px';
   ctx.font=Math.max(1,Math.floor(size))+'px '+font;
