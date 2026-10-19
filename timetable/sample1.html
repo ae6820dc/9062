@@ -284,6 +284,7 @@
         .kemia { background-color: #f0e6d9; }
         .biologia { background-color: #d5f5e3; }
         .foldrajz { background-color: #d9f0e6; }
+        .sakk { background-color: #d9c8f2; color: #35234d; }
         .szabad { background-color: #f2f2f2; color: #888; font-style: italic; }
         .etika { background-color: #f5e6d9; }
         .osztalyfo { background-color: #d9e6f5; }
@@ -359,6 +360,9 @@
         <button class="random-btn" onclick="randomOrarend()">🎲 Random</button>
     </div>
 
+    <div id="tantargyKeresDoboz" style="display:none;margin:0 auto 16px;max-width:420px">
+        <input id="tantargyKereses" type="search" placeholder="🔎 Tantárgy keresése…" aria-label="Tantárgy keresése" oninput="szuresTantargyak()" style="width:100%;padding:12px 16px;border:2px solid #d0dbe8;border-radius:14px;font:inherit">
+    </div>
     <div id="statusMsg" class="status-msg"></div>
 
     <table id="orarendTabla">
@@ -381,7 +385,7 @@
 <script>
     // ==================== TANTÁRGYAK LISTÁJA ====================
     const TANTARGYAK = [
-        "Szabad", "Matematika", "Magyar nyelv és irodalom", "Történelem", "Informatika",
+        "Szabad", "Sakk", "Matematika", "Magyar nyelv és irodalom", "Történelem", "Informatika",
         "Testnevelés", "Fizika", "Kémia", "Biológia", "Földrajz",
         "Etika", "Osztályfőnöki", "Rajz és vizuális kultúra", "Ének-zene", "Technika és életvitel",
         "Honvédelem", "Digitális kultúra", "Környezetismeret", "Egészségtan", "Munkavédelem",
@@ -406,10 +410,55 @@
         "Szomáli nyelv", "Berber nyelv", "Tigrinya nyelv", "Szanszkrit nyelv", "Páli nyelv"
     ];
 
+    // A tantárgyak rendezése csak a választó megjelenését érinti.
+    const TANTARGY_CSOPORTOK = [
+        ['🌍 Nyelvek', t => t.endsWith(' nyelv')],
+        ['🧮 Matematika és logika', t => ['Matematika','Sakk','Logika','Statisztika'].includes(t)],
+        ['🛠️ Műszaki és digitális', t => ['Informatika','Digitális kultúra','Technika és életvitel','Munkavédelem','Közlekedésismeret','Adatkezelés','Ergonómia','Biztonságtechnika','Tűzvédelem','Minőségbiztosítás'].includes(t)],
+        ['🔬 Természettudományok', t => ['Fizika','Kémia','Biológia','Földrajz','Környezetismeret','Természetismeret','Környezetvédelem','Fenntarthatóság','Kutatásmódszertan'].includes(t)],
+        ['📚 Humán és társadalom', t => ['Magyar nyelv és irodalom','Történelem','Etika','Filozófia','Pszichológia','Szociológia','Jogi ismeretek','Könyvtárhasználat','Kommunikáció','Kreatív írás'].includes(t)],
+        ['🎨 Művészet és kultúra', t => ['Rajz és vizuális kultúra','Ének-zene','Művészettörténet','Médiaismeret','Dráma és színház','Tánc és mozgás'].includes(t)],
+        ['🏃 Sport és egészség', t => ['Testnevelés','Fizikai kultúra','Sport','Egészségtan','Egészségfejlesztés','Elsősegély','Táplálkozástan'].includes(t)],
+        ['💼 Gazdaság és szervezés', t => ['Pénzügyi és vállalkozási ismeretek','Gazdálkodási ismeretek','Vállalkozásfejlesztés','Projektmunka','Prezentáció','Csapatépítés','Vezetés és szervezés','Pályaorientáció'].includes(t)],
+        ['📌 Egyéb', t => true]
+    ];
+    function feltoltTantargySelect(select, value, keresett = '') {
+        select.replaceChildren();
+        const keres = keresett.toLocaleLowerCase('hu').trim();
+        const maradek = new Set(TANTARGYAK);
+        // Az aktuálisan kiválasztott érték szűrésnél is megmarad.
+        for (const [cim, feltetel] of TANTARGY_CSOPORTOK) {
+            const lista = TANTARGYAK.filter(t => maradek.has(t) && feltetel(t));
+            lista.forEach(t => maradek.delete(t));
+            const lathato = lista.filter(t => !keres || t.toLocaleLowerCase('hu').includes(keres) || t === value);
+            if (!lathato.length) continue;
+            const group = document.createElement('optgroup');
+            group.label = cim;
+            lathato.forEach(t => {
+                const option = document.createElement('option');
+                option.value = t;
+                option.textContent = t;
+                group.appendChild(option);
+            });
+            select.appendChild(group);
+        }
+        if (!TANTARGYAK.includes(value)) {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            select.prepend(option);
+        }
+        select.value = value;
+    }
+    function szuresTantargyak() {
+        const keres = document.getElementById('tantargyKereses').value;
+        document.querySelectorAll('.ora-select').forEach(select => feltoltTantargySelect(select, select.value, keres));
+    }
+
     // ==================== SZÍN MEGHATÁROZÁS ====================
     function getOsztaly(nev) {
         const map = {
-            'Matematika': 'matematika', 'Magyar nyelv és irodalom': 'magyar',
+            'Sakk': 'sakk', 'Matematika': 'matematika', 'Magyar nyelv és irodalom': 'magyar',
             'Történelem': 'tori', 'Angol nyelv': 'angol', 'Német nyelv': 'nemet',
             'Francia nyelv': 'francia', 'Orosz nyelv': 'orosz', 'Spanyol nyelv': 'spanyol',
             'Olasz nyelv': 'olasz', 'Japán nyelv': 'japan', 'Latin nyelv': 'latin',
@@ -604,21 +653,14 @@
         select.dataset.row = rowIdx;
         select.dataset.col = colKey;
 
-        TANTARGYAK.forEach(targy => {
-            const option = document.createElement('option');
-            option.value = targy;
-            option.textContent = targy;
-            if (targy === value) {
-                option.selected = true;
-            }
-            select.appendChild(option);
-        });
+        feltoltTantargySelect(select, value, document.getElementById('tantargyKereses').value);
 
         return select;
     }
 
     // ==================== TABLA MEGJELENÍTÉS ====================
     function renderTabla(adatok, editMode) {
+        document.getElementById('tantargyKeresDoboz').style.display = editMode ? 'block' : 'none';
         const tbody = document.getElementById('orarendTest');
         tbody.innerHTML = '';
 
@@ -672,6 +714,7 @@
         const jelszo = prompt('🔐 Add meg a szerkesztési jelszót:', '');
         if (jelszo === '1111') {
             szerkesztesAktiv = true;
+            document.getElementById('tantargyKereses').value = '';
             frissitNezet();
             document.getElementById('statusMsg').className = 'status-msg success';
             document.getElementById('statusMsg').textContent = `✏️ Szerkesztő mód aktív (${aktualisOsztaly}) – válassz a legördülő menüből, majd kattints a Mentés gombra!`;
