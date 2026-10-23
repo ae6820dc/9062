@@ -2,7 +2,7 @@
 Installs both APKs without clearing data. Uses only the debug WebView inspector.
 Run on a dedicated test emulator: this changes app preferences for testing.
 """
-import json, os, subprocess, time, urllib.request
+import json, os, subprocess, sys, time, urllib.request
 from pathlib import Path
 import websocket
 sdk=Path(os.environ['ANDROID_HOME']); adb=str(sdk/'platform-tools/adb')
@@ -31,8 +31,10 @@ def evaluate(ws,expr,gesture=False):
         if response.get('id')==seq:
             if 'exceptionDetails' in response.get('result',{}):raise RuntimeError(response)
             return response['result']['result'].get('value')
+assert run('get-serialno').startswith('emulator-'), 'Run this test on an Android emulator.'
 packages=['io.github.ae6820dc.unicode71','io.github.ae6820dc.unicode91']
-for v in ('7','9'): print(run('install','-r',str(root/f'unicode/{v}/sample1.apk')))
+if '--skip-install' not in sys.argv:
+    for v in ('7','9'): print(run('install','-r',str(root/f'unicode/{v}/sample1.apk')))
 print(run('shell','cmd','connectivity','airplane-mode','enable'))
 expected={}
 for v,pkg,key in [('7',packages[0],'E71B4A90D63F2C85'),('9',packages[1],'A19F3D72C8E40B65')]:
@@ -51,8 +53,10 @@ for v,pkg,key in [('7',packages[0],'E71B4A90D63F2C85'),('9',packages[1],'A19F3D7
     if evaluate(ws,"$('jumpOverlay').classList.contains('open')"):
         run('shell','input','keyevent','4');time.sleep(1)
     assert not evaluate(ws,"$('jumpOverlay').classList.contains('open')")
+    before=evaluate(ws,"$('marquee').style.transform")
     assert evaluate(ws,"$('start').click();timer!==null")
     time.sleep(1)
+    assert evaluate(ws,"$('marquee').style.transform") != before
     assert evaluate(ws,"$('start').click();timer===null")
     evaluate(ws,"$('fullscreen').click()",True);time.sleep(1)
     assert evaluate(ws,'!!document.fullscreenElement')
@@ -65,7 +69,10 @@ for v,pkg,key in [('7',packages[0],'E71B4A90D63F2C85'),('9',packages[1],'A19F3D7
     ws.close()
     print(pkg+': offline render, controls, animation, fullscreen, Back, isolated storage, force-stop/relaunch PASS')
 for pkg in packages: assert pkg in run('shell','pm','list','packages',pkg)
-print('Both packages installed simultaneously. Rebooting emulator to verify persistence.')
+print('Both packages installed simultaneously.')
+if '--skip-reboot' in sys.argv:
+    print('PASS (emulator only; reboot and physical-device tests not performed)');sys.exit(0)
+print('Rebooting emulator to verify persistence.')
 run('reboot');run('wait-for-device')
 for _ in range(180):
     if run('shell','getprop','sys.boot_completed')=='1':break

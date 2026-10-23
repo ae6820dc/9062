@@ -17,6 +17,12 @@ Signing certificate SHA-256: `01059a5e2a9f61d6b88aff4f2b47bc4e33195b352ba0187285
 
 ## Runtime tests
 
-Emulator installation/launch test pending. This workspace has no `/dev/kvm`; a software-rendered Android 16 emulator is being prepared. No physical-device test has been performed.
+An Android 16 / API 36 AOSP x86_64 emulator was started with Android Emulator 37.2.12, `-accel off`, and SwiftShader. ADB confirmed Android release 16 and SDK 36. This workspace has no `/dev/kvm`; `emulator -accel-check` reports `KVM requires a CPU that supports vmx or svm`.
+
+The emulator remained in first-boot compilation/startup. Its package manager rejected the installation attempt with `Error: device is still booting.` Installation, simultaneous installation, launch, interactive controls, and runtime persistence tests therefore **did not complete**. This is an emulator startup limitation, not a successful install test or an APK signature/package rejection. No physical-device or device-reboot test was performed. Persistent storage and fullscreen configuration were verified in source and packaged APK metadata; their runtime behavior is not claimed as emulator-tested.
+
+Both uploaded APKs were downloaded again from GitHub and compared byte for byte with the locally verified APKs. The full `build-apks.sh` script completed successfully. The GitHub Actions workflow is committed; a hosted workflow run was not observed during this session.
 
 To repeat the optional runtime test on a dedicated booted emulator, install `websocket-client`, set `ANDROID_HOME`, and run `python3 android-build/emulator-smoke.py`. It installs both APKs without clearing data, enables airplane mode, changes app settings for the test, exercises controls and Back/fullscreen, force-stops/relaunches, and reboots to check saved state.
+
+The smoke script accepts `--skip-install` for previously installed packages and `--skip-reboot` to omit reboot testing. It checks that the connected target is an emulator before changing settings.
