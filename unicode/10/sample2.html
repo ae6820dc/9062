@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Character Player</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23081224%22/%3E%3Cpath d=%22M7 47h50%22 stroke=%22%2327d8ff%22 stroke-width=%223%22 opacity=%22.5%22/%3E%3Ctext x=%2232%22 y=%2242%22 font-size=%2235%22 text-anchor=%22middle%22 fill=%22%2348e9ff%22 font-family=%22Arial%22 font-weight=%22bold%22%3E%E2%86%90%3C/text%3E%3Ccircle cx=%2251%22 cy=%2217%22 r=%224%22 fill=%22%23ffce56%22/%3E%3C/svg%3E"><link rel="manifest" href="sample2.webmanifest"><style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#080e1c;color:#eaf1ff;font-family:system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:16px}h1{font-size:clamp(22px,4vw,32px);margin:8px 0}p{color:#a7b6d2;margin:6px 0 18px}.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:end;background:#17233a;border:1px solid #30415d;border-radius:16px;padding:14px}label{display:grid;gap:6px;font-size:14px;color:#cbd8ed;flex:1 1 160px}select,input,button{font:inherit;border:1px solid #526583;border-radius:9px;padding:11px;background:#0b1427;color:#fff;min-width:0}button{cursor:pointer;background:#345bdb;border:0;font-weight:650}button:hover{background:#4971ee}.actions{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}.actions button{flex:1 1 95px;padding:10px 7px;font-size:clamp(12px,2.8vw,16px)}.screen{min-height:48vh;height:clamp(320px,55vh,760px);border:1px solid #30415d;border-radius:18px;background:radial-gradient(circle at center,#172745,#070d19);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}.glyph{font-size:clamp(140px,35vw,430px);line-height:1;max-width:100%;text-align:center;overflow-wrap:anywhere;user-select:none;font-family:system-ui,'Noto Sans',sans-serif}.meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;color:#a7b6d2;font-size:16px;margin-top:12px}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #9cc2ff}@media(max-width:600px){.screen{height:52vh;min-height:260px}.glyph{font-size:clamp(120px,45vw,300px)}}
+
+/* Biztonságos karakter-megjelenítés: a teljes írásjel elfér a keretben. */
+.screen{padding:18px;overflow:hidden}
+.glyph{font-family:'Microsoft YaHei','Microsoft JhengHei','Yu Gothic','Malgun Gothic','Noto Sans CJK SC',system-ui,sans-serif;line-height:1.45;display:block;flex:0 0 auto;white-space:nowrap;overflow:visible;max-width:none;font-size:100px}
+@media(max-width:600px){.glyph{font-size:100px}}
+ .jump-overlay{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:100;padding:16px}.jump-overlay.open{display:flex}.jump-panel{background:#17233a;border:1px solid #526583;border-radius:16px;padding:22px;width:min(100%,420px);display:grid;gap:14px}.jump-panel h2{margin:0;font-size:22px}.jump-options{display:flex;gap:18px;flex-wrap:wrap}.jump-options label{display:flex;align-items:center;gap:6px;flex:initial}.jump-buttons{display:flex;gap:10px}.jump-buttons button{flex:1}.jump-error{color:#ffb2b2;min-height:1.2em;font-size:14px}  .screen{justify-content:flex-start;padding:0}#marquee{display:flex;align-items:center;position:absolute;left:0;top:0;height:100%;will-change:transform}.glyph{width:150px;flex:none;font-size:100px;text-align:center;text-shadow:0 0 20px #4bf8;overflow:visible} #status{display:none!important}#counter{margin-left:auto}</style><meta name="theme-color" content="#081224"><meta name="mobile-web-app-capable" content="yes"></head><body><main><header style="margin:8px 0 18px;overflow-wrap:anywhere;font-size:14px">Program ID: B41D8E20A76C3F95D0B12E4A9C785F63</header><div class="controls"><label>Karakterkészlet<select id="set"><option value="en">Angol</option><option value="ar">Arab</option><option value="bn">Bengáli</option><option value="cs">Cseh</option><option value="fi">Finn</option><option value="fr">Francia</option><option value="el">Görög</option><option value="he">Héber</option><option value="ja">Japán</option><option value="zh">Kínai</option><option value="ko">Koreai</option><option value="la">Latin</option><option value="pl">Lengyel</option><option value="hu">Magyar</option><option value="math">Matematika</option><option value="de">Német</option><option value="ne">Nepáli</option><option value="no">Norvég</option><option value="it">Olasz</option><option value="ru">Orosz</option><option value="fa">Perzsa</option><option value="pt">Portugál</option><option value="es">Spanyol</option><option value="sv">Svéd</option><option value="bo">Tibeti</option><option value="tr">Török</option><option value="unicode">Unicode</option><option value="vi">Vietnámi</option></select></label><label>Váltás (másodperc)<input id="speed" type="number" min="0.05" max="3600" step="0.05" value="1"></label></div><p id="poolCount" style="margin:12px 0;color:#a7b6d2">Karakterkészlet mérete: –</p><div class="actions"><button id="start">▶ Indítás</button><button id="prev">⏮ Előző</button><button id="next">⏭ Következő</button><button id="jumpButton">⌕ Keresés</button><button id="fullscreen">⛶ Teljes képernyő</button></div><div class="screen" id="screen"><div id="marquee"><div class="glyph" id="glyph">A</div></div></div><div class="meta"><span id="status">Készen áll</span><span id="counter">Megjelenítve: 0</span></div></main><div class="jump-overlay" id="jumpOverlay" role="dialog" aria-modal="true" aria-labelledby="jumpTitle"><div class="jump-panel"><div class="jump-options"><label><input type="radio" name="jumpMode" value="position" checked> Sorszám</label><label><input type="radio" name="jumpMode" value="unicode"> Unicode</label></div><label id="jumpLabel">Karakter sorszáma<input id="jumpInput" type="text" inputmode="numeric" autocomplete="off"></label><div class="jump-error" id="jumpError"></div><div class="jump-buttons"><button id="jumpCancel" type="button">Mégse</button><button id="jumpGo" type="button">Ugrás</button></div></div></div><script>
+'use strict';const $=id=>document.getElementById(id);
+const latin='abcdefghijklmnopqrstuvwxyz';
+// A nyelvválasztó automatikusan magyar ábécérendbe rendezi az opciókat.
+const languageSelect=document.getElementById('set');
+const languageOptions=Array.from(languageSelect.options).sort((a,b)=>a.textContent.localeCompare(b.textContent,'hu',{sensitivity:'base'}));
+languageSelect.replaceChildren(...languageOptions);
+const sets={en:latin,de:latin+'äöüß',fr:latin+'àâæçéèêëîïôœùûüÿ',es:latin+'áéíñóúü',it:latin+'àèéìíîòóùú',ru:'абвгдеёжзийклмнопрстуфхцчшщъыьэюя',la:'abcdefghijklmnopqrstuvxyz',ar:'ابتثجحخدذرزسشصضطظعغفقكلمنهويءآأإؤئىة',hu:latin+'áéíóöőúüű',he:'אבגדהוזחטיכלמנסעפצקרשתךםןףץ',fa:'آابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی',bn:'অআইঈউঊঋএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলশষসহড়ঢ়য়ৎংঃঁ',ne:'अआइईउऊऋएऐओऔकखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसहक्षत्रज्ञ',no:latin+'æøå',fi:latin+'äöå',sv:latin+'åäö',el:'αβγδεζηθικλμνξοπρστυφχψω',tr:latin+'çğıöşü',cs:latin+'áčďéěíňóřšťúůýž',pl:latin+'ąćęłńóśźż',pt:latin+'áâãàçéêíóôõúü',vi:latin+'ăâđêôơưàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ'};
+const ranges={bo:[[0x0f40,0x0f6c]],ko:[[0xac00,0xd7a3]],ja:[[0x3041,0x3096],[0x30a1,0x30fa],[0x4e00,0x9fff]],zh:[[0x4e00,0x9fff]]};
+// Unicode matematikai szimbólumblokkok, valamint kiegészítő matematikai operátorok.
+// A nem kiosztott Unicode-kódpontokat a Unicode property escape szűri.
+const mathRanges=[[0x2200,0x22FF],[0x27C0,0x27EF],[0x2980,0x29FF],[0x2A00,0x2AFF],[0x1D400,0x1D7FF],[0x2100,0x214F],[0x2190,0x21FF],[0x27F0,0x27FF],[0x2900,0x297F],[0x2B00,0x2BFF],[0x2300,0x23FF],[0x25A0,0x25FF],[0x2070,0x209F],[0x00D7,0x00D7],[0x00F7,0x00F7]];
+const mathExtras='+-=<>%‰‱°′″‴∕⁄√∛∜∞πΠΣΔΩαβγδεθλμρστφχψω∂∇∫∬∭∮∯∰∑∏∐!|¦¬±×÷^~:;.,()[]{}⌈⌉⌊⌋';
+const numberRanges=[[48,57],[178,179],[185,185],[188,190],[1632,1641],[1776,1785],[1984,1993],[2406,2415],[2534,2543],[2548,2553],[2662,2671],[2790,2799],[2918,2927],[2930,2935],[3046,3058],[3174,3183],[3192,3198],[3302,3311],[3416,3422],[3430,3448],[3558,3567],[3664,3673],[3792,3801],[3872,3891],[4160,4169],[4240,4249],[4969,4988],[5870,5872],[6112,6121],[6128,6137],[6160,6169],[6470,6479],[6608,6618],[6784,6793],[6800,6809],[6992,7001],[7088,7097],[7232,7241],[7248,7257],[8304,8304],[8308,8313],[8320,8329],[8528,8578],[8581,8585],[9312,9371],[9450,9471],[10102,10131],[11517,11517],[12295,12295],[12321,12329],[12344,12346],[12690,12693],[12832,12841],[12872,12879],[12881,12895],[12928,12937],[12977,12991],[42528,42537],[42726,42735],[43056,43061],[43216,43225],[43264,43273],[43472,43481],[43504,43513],[43600,43609],[44016,44025],[65296,65305],[65799,65843],[65856,65912],[65930,65931],[66273,66299],[66336,66339],[66369,66369],[66378,66378],[66513,66517],[66720,66729],[67672,67679],[67705,67711],[67751,67759],[67835,67839],[67862,67867],[68028,68029],[68032,68047],[68050,68095],[68160,68168],[68221,68222],[68253,68255],[68331,68335],[68440,68447],[68472,68479],[68521,68527],[68858,68863],[68912,68921],[69216,69246],[69405,69414],[69457,69460],[69573,69579],[69714,69743],[69872,69881],[69942,69951],[70096,70105],[70113,70132],[70384,70393],[70736,70745],[70864,70873],[71248,71257],[71360,71369],[71472,71483],[71904,71922],[72016,72025],[72784,72812],[73040,73049],[73120,73129],[73552,73561],[73664,73684],[74752,74862],[92768,92777],[92864,92873],[93008,93017],[93019,93025],[93824,93846],[119488,119507],[119520,119539],[119648,119672],[120782,120831],[123200,123209],[123632,123641],[124144,124153],[125127,125135],[125264,125273],[126065,126123],[126125,126127],[126129,126132],[126209,126253],[126255,126269],[127232,127244],[130032,130041]];
+function mathCharacters(){const result=new Set(Array.from(mathExtras).filter(c=>c.trim()));for(const [a,b] of [...mathRanges,...numberRanges]){for(let cp=a;cp<=b;cp++){const c=String.fromCodePoint(cp);if(/\p{Assigned}/u.test(c)&&!/\p{Control}|\p{Format}|\p{Private_Use}|\p{Surrogate}/u.test(c))result.add(c)}}return [...result]}
+const chars={};for(const [k,v] of Object.entries(sets))chars[k]=[...new Set(Array.from(v))].sort((a,b)=>a.codePointAt(0)-b.codePointAt(0));for(const [k,rr] of Object.entries(ranges)){chars[k]=[];for(const [a,b] of rr)for(let cp=a;cp<=b;cp++)chars[k].push(String.fromCodePoint(cp));chars[k].sort((a,b)=>a.codePointAt(0)-b.codePointAt(0));}
+
+chars.math=mathCharacters();
+// Unicode: csak kiosztott, megjelenítésre szánt kódpontok; egyszeri, tömör index.
+let unicodePoints=null;
+function getUnicodePoints(){
+ if(unicodePoints)return unicodePoints;
+ const assigned=/\p{Assigned}/u, excluded=/[\p{Cc}\p{Cf}\p{Cs}\p{Co}]/u;
+ const out=[];
+ for(let cp=0;cp<=0x10FFFF;cp++){
+  if(cp>=0xD800&&cp<=0xDFFF){cp=0xDFFF;continue}
+  const c=String.fromCodePoint(cp);
+  if(assigned.test(c)&&!excluded.test(c))out.push(cp);
+ }
+ unicodePoints=Uint32Array.from(out);
+ return unicodePoints;
+}
+const STORAGE_KEY='B70E2A94D1C63F85';
+let timer=null,count=0,positions={},index=0;
+function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({set:$('set').value,speed:$('speed').value,positions,index,count,playing:timer!==null}))}catch(e){$('status').textContent='A helyi mentés nem elérhető.'}}
+let cachedPool=null;function pool(){if($('set').value==='unicode')return getUnicodePoints();if(cachedPool)return cachedPool;const value=$('set').value;return cachedPool=Array.from(chars[value]).filter(c=>c.trim()!=='');}
+function updatePoolCount(){const n=$('set').value==='unicode'?pool().length:new Set(pool()).size;$('poolCount').textContent='Különböző karakterek száma: '+n.toLocaleString('hu-HU');}
+function uniquePool(){return $('set').value==='unicode'?pool():[...new Set(pool())];}
+let last=0,offset=0,slot=150,marqueeIndex=0;
+const rtl=()=>!['ar','fa','he'].includes($('set').value);
+function display(){const items=uniquePool(),track=$('marquee');track.replaceChildren();if(!items.length)return;index=(index%items.length+items.length)%items.length;slot=Math.max(100,Math.min(200,$('screen').clientWidth/3));marqueeIndex=index;const right=rtl();for(let i=0;i<16;i++){const el=document.createElement('div');el.className='glyph';el.style.width=slot+'px';const n=(index+(right?15-i:i))%items.length;el.textContent=$('set').value==='unicode'?String.fromCodePoint(items[n]):items[n];track.append(el)}offset=right?-slot*16:$('screen').clientWidth;track.style.transform='translateX('+offset+'px)';$('counter').textContent=(index+1).toLocaleString('hu-HU')+' / '+items.length.toLocaleString('hu-HU')+' · Lépések: '+count.toLocaleString('hu-HU')}
+function fitGlyph(){display()}
+window.addEventListener('resize',fitGlyph);
+document.addEventListener('fullscreenchange',()=>requestAnimationFrame(fitGlyph));
+function stop(){if(timer!==null)cancelAnimationFrame(timer);timer=null;last=0;$('start').textContent='▶ Indítás'}
+function step(delta){const items=uniquePool();if(!items.length)return;index=(index+delta+items.length)%items.length;positions[$('set').value]=index;count++;display();save()}
+function frame(t){if(timer===null)return;if(!last)last=t;const dt=Math.min(.1,(t-last)/1000);last=t;const items=uniquePool(),track=$('marquee'),right=rtl();offset+=(right?1:-1)*dt*slot/Number($('speed').value);if(right){while(offset>=$('screen').clientWidth-slot*15){offset-=slot;const el=track.lastElementChild;el.remove();marqueeIndex=(marqueeIndex+1)%items.length;const n=(marqueeIndex+15)%items.length;el.textContent=$('set').value==='unicode'?String.fromCodePoint(items[n]):items[n];track.prepend(el);index=(index+1)%items.length;count++;positions[$('set').value]=index;save()}}else{while(offset<=-slot){offset+=slot;const el=track.firstElementChild;el.remove();marqueeIndex=(marqueeIndex+1)%items.length;const n=(marqueeIndex+15)%items.length;el.textContent=$('set').value==='unicode'?String.fromCodePoint(items[n]):items[n];track.append(el);index=(index+1)%items.length;count++;positions[$('set').value]=index;save()}}track.style.transform='translateX('+offset+'px)';$('counter').textContent=(index+1).toLocaleString('hu-HU')+' / '+items.length.toLocaleString('hu-HU')+' · Lépések: '+count.toLocaleString('hu-HU');timer=requestAnimationFrame(frame)}
+function start(){const seconds=Number($('speed').value);if(!Number.isFinite(seconds)||seconds<.05||seconds>3600){$('status').textContent='Érvénytelen időköz';return}if(timer!==null){stop();save();return}last=0;timer=requestAnimationFrame(frame);$('start').textContent='⏸ Szünet';save()}
+$('start').onclick=start;
+// Egy másodperces nyomva tartás mindkét léptetőn ugyanazt az ugrási ablakot nyitja.
+let jumpWasPlaying=false;
+function openJump(){
+ jumpWasPlaying=timer!==null;stop();save();
+ $('jumpOverlay').classList.add('open');
+ $('jumpError').textContent='';
+ document.querySelector('input[name="jumpMode"][value="position"]').checked=true;
+ $('jumpInput').value=String(index+1);updateJumpMode();
+ $('jumpInput').focus();$('jumpInput').select();
+}
+function closeJump(){ $('jumpOverlay').classList.remove('open');$('status').textContent='Szüneteltetve';save(); }
+function updateJumpMode(){
+ const unicode=document.querySelector('input[name="jumpMode"]:checked').value==='unicode';
+ $('jumpLabel').firstChild.textContent=unicode?'Unicode-kódpont (hexadecimális)':'Karakter sorszáma';
+ $('jumpInput').inputMode=unicode?'text':'numeric';
+ const items=uniquePool();
+ $('jumpInput').value=unicode?(items.length?($('set').value==='unicode'?items[index]:items[index].codePointAt(0)).toString(16).toUpperCase():''):String(index+1);
+ $('jumpError').textContent='';
+}
+document.querySelectorAll('input[name="jumpMode"]').forEach(r=>r.addEventListener('change',updateJumpMode));
+$('jumpCancel').onclick=closeJump;
+$('jumpOverlay').addEventListener('click',e=>{if(e.target===$('jumpOverlay'))closeJump()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('jumpOverlay').classList.contains('open'))closeJump();if(e.key==='Enter'&&$('jumpOverlay').classList.contains('open'))performJump()});
+function performJump(){
+ const items=uniquePool(),raw=$('jumpInput').value.trim();
+ const unicode=document.querySelector('input[name="jumpMode"]:checked').value==='unicode';
+ let target=-1;
+ if(unicode){
+  const hex=raw.replace(/^U\\+/i,'');
+  if(/^[0-9a-fA-F]{1,6}$/.test(hex)){
+   const cp=parseInt(hex,16);
+   if(cp<=0x10FFFF){
+    if($('set').value==='unicode'){
+     let lo=0,hi=items.length-1;
+     while(lo<=hi){const mid=(lo+hi)>>>1;if(items[mid]===cp){target=mid;break}if(items[mid]<cp)lo=mid+1;else hi=mid-1}
+    }else target=items.findIndex(c=>c.codePointAt(0)===cp);
+   }
+  }
+ }else if(/^[0-9]+$/.test(raw)){const n=Number(raw);if(Number.isSafeInteger(n)&&n>=1&&n<=items.length)target=n-1}
+ if(target<0){$('jumpError').textContent=unicode?'Ez a kódpont nincs a kiválasztott karakterkészletben.':'Érvényes sorszám: 1–'+items.length.toLocaleString('hu-HU');return}
+ index=target;positions[$('set').value]=index;display();save();
+ $('jumpOverlay').classList.remove('open');$('status').textContent='Ugrás kész · szüneteltetve';save();
+}
+$('jumpGo').onclick=performJump;
+$('prev').onclick=()=>{step(-1);$('status').textContent='Előző karakter'};
+$('next').onclick=()=>{step(1);$('status').textContent='Következő karakter'};
+$('jumpButton').onclick=openJump;
+
+$('set').onchange=()=>{const playing=timer!==null;stop();cachedPool=null;index=Number(positions[$('set').value])||0;updatePoolCount();display();save();if(playing)start()};
+$('speed').onchange=()=>{const playing=timer!==null;stop();save();if(playing)start()};
+$('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('screen').requestFullscreen()}catch(e){$('status').textContent='A teljes képernyő nem támogatott ebben a böngészőben.'}};
+try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');if(saved&&typeof saved==='object'){if(saved.set==='hex')saved.set='math';if([...$('set').options].some(o=>o.value===saved.set))$('set').value=saved.set;if(saved.speed!==undefined)$('speed').value=saved.speed;if(saved.positions&&typeof saved.positions==='object')positions=saved.positions;index=Number.isSafeInteger(saved.index)?saved.index:0;count=Number.isSafeInteger(saved.count)?saved.count:0;}}catch(e){}updatePoolCount();display();$('status').textContent='';save();
+</script><script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}</script></body></html>
