@@ -1,0 +1,20 @@
+[
+  {
+    "file": "android-distributions/mathematics-studio.apk",
+    "package": "io.github.ae6820dc.mathematicsstudio",
+    "versionCode": 1,
+    "bytes": 1453041,
+    "sha256": "dca33cdb3cdaa345f85b5e7235007d4963e1718e083bd5af1c78d6b8aed2b9d3",
+    "programs": 10,
+    "originalAssets": 116
+  },
+  {
+    "file": "android-distributions/unicode-studio.apk",
+    "package": "io.github.ae6820dc.unicodestudio",
+    "versionCode": 1,
+    "bytes": 282502,
+    "sha256": "38da794ec263900b5836d745bf1a110e8e3aa050e6f2e5947f46a30882876018",
+    "programs": 27,
+    "originalAssets": 27
+  }
+]
