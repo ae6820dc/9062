@@ -60,7 +60,10 @@ public final class SmokeInstrumentation extends Instrumentation {
                 }
             });
             require(menuMatches[0],"Programs menu contains every catalog entry and label");
-            sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
+            runOnMainSync(()->{for(View root:android.view.inspector.WindowInspector.getGlobalWindowViews()){
+                View cancel=root.findViewById(android.R.id.button2);
+                if(cancel instanceof android.widget.Button && "Cancel".equalsIgnoreCase(((android.widget.Button)cancel).getText().toString()))cancel.performClick();
+            }});
             for(JSONObject p:programs){
                 CountDownLatch switched=new CountDownLatch(1);
                 runOnMainSync(()->{try{leave.invoke(activity,(Runnable)()->{try{open.invoke(activity,p);switched.countDown();}catch(Exception e){throw new RuntimeException(e);}});}catch(Exception e){throw new RuntimeException(e);}});
