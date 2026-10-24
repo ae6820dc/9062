@@ -342,7 +342,7 @@
 
   const el = id => document.getElementById(id);
   // --- ÚJ FUNKCIÓ: Beállítások mentése/betöltése ---
-  const STORAGE_KEY = 'chess_moves_settings';
+  const STORAGE_KEY = 'ff3b369400c2641d';
 
   function saveSettings() {
       const settings = {
@@ -358,7 +358,7 @@
   }
 
   function loadSettings() {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('chess_moves_settings');
       if (stored) {
           const settings = JSON.parse(stored);
           
@@ -433,6 +433,7 @@
   function randChoice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
   function isValidMove(piece, start, end){
+    if(start===end) return false;
     const start_col = start[0], start_row = +start[1];
     const end_col = end[0], end_row = +end[1];
     const dx = Math.abs(start_col.charCodeAt(0) - end_col.charCodeAt(0));
@@ -464,6 +465,8 @@
 
       const piece = randChoice(pieces);
       const start = randChoice(columns) + randChoice(rows);
+      if(piece==='pawn' && ((color==='white' && start[1]==='1') ||
+                            (color==='black' && start[1]==='8'))) continue;
 
       // En passant (5%) a gyalog külön ága
       if(withEnPassant && piece==='pawn' && Math.random()<0.05){
