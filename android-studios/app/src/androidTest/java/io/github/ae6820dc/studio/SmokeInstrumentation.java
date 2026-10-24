@@ -29,12 +29,10 @@ public final class SmokeInstrumentation extends Instrumentation {
         while(System.currentTimeMillis()<deadline){if("true".equals(eval(js)))return;Thread.sleep(250);}
         throw new AssertionError("Page timeout: "+js);
     }
-    private boolean menuRows(android.view.accessibility.AccessibilityNodeInfo node,int expected){
-        if(node==null)return false;
-        android.view.accessibility.AccessibilityNodeInfo.CollectionInfo info=node.getCollectionInfo();
-        if(info!=null && info.getRowCount()==expected)return true;
-        for(int i=0;i<node.getChildCount();i++)if(menuRows(node.getChild(i),expected))return true;
-        return false;
+    private android.widget.ListView dialogList(View view){
+        if(view instanceof android.widget.ListView)return (android.widget.ListView)view;
+        if(view instanceof ViewGroup){ViewGroup group=(ViewGroup)view;for(int i=0;i<group.getChildCount();i++){android.widget.ListView list=dialogList(group.getChildAt(i));if(list!=null)return list;}}
+        return null;
     }
     @Override public void onStart(){
         Bundle result=new Bundle();
@@ -52,8 +50,16 @@ public final class SmokeInstrumentation extends Instrumentation {
             Method leave=MainActivity.class.getDeclaredMethod("leave",Runnable.class);leave.setAccessible(true);
             Method menu=MainActivity.class.getDeclaredMethod("menu");menu.setAccessible(true);
             runOnMainSync(()->{try{menu.invoke(activity);}catch(Exception e){throw new RuntimeException(e);}});
-            getUiAutomation().waitForIdle(500,10000);
-            require(menuRows(getUiAutomation().getRootInActiveWindow(),programs.size()),"Programs menu contains every catalog entry");
+            final boolean[] menuMatches={false};
+            runOnMainSync(()->{
+                for(View root:android.view.inspector.WindowInspector.getGlobalWindowViews()){
+                    android.widget.ListView list=dialogList(root);if(list==null)continue;
+                    android.widget.ListAdapter adapter=list.getAdapter();boolean matches=adapter.getCount()==programs.size();
+                    for(int i=0;matches && i<programs.size();i++){JSONObject p=programs.get(i);matches=(p.optString("group")+" · "+p.optString("name")).equals(String.valueOf(adapter.getItem(i)));}
+                    menuMatches[0]|=matches;
+                }
+            });
+            require(menuMatches[0],"Programs menu contains every catalog entry and label");
             sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
             for(JSONObject p:programs){
                 CountDownLatch switched=new CountDownLatch(1);
@@ -94,12 +100,12 @@ public final class SmokeInstrumentation extends Instrumentation {
                     Method importResult=MainActivity.class.getDeclaredMethod("onActivityResult",int.class,int.class,Intent.class);importResult.setAccessible(true);
                     Intent imported=new Intent().setData(android.net.Uri.fromFile(backup));
                     runOnMainSync(()->{try{importResult.invoke(activity,3,Activity.RESULT_OK,imported);}catch(Exception e){throw new RuntimeException(e);}});
-                    getUiAutomation().waitForIdle(500,10000);
-                    boolean confirmed=false;
-                    for(android.view.accessibility.AccessibilityNodeInfo node:getUiAutomation().getRootInActiveWindow().findAccessibilityNodeInfosByText("Import")){
-                        if("Import".equalsIgnoreCase(String.valueOf(node.getText())) && node.isClickable())confirmed=node.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK);
-                    }
-                    require(confirmed,"native backup import confirmation");
+                    final boolean[] confirmed={false};
+                    runOnMainSync(()->{for(View root:android.view.inspector.WindowInspector.getGlobalWindowViews()){
+                        View button=root.findViewById(android.R.id.button1);
+                        if(button instanceof android.widget.Button && "Import".equalsIgnoreCase(((android.widget.Button)button).getText().toString()))confirmed[0]=button.performClick();
+                    }});
+                    require(confirmed[0],"native backup import confirmation");
                     waitFor("!window.__beforeNativeImport && document.readyState==='complete' && localStorage.getItem('studio-native-backup')==='restored' && !!window.studioDownload");
                     require(JSONObject.quote(id).equals(eval("localStorage.getItem('studio.instrumentation.probe')")),"native backup restores isolated state");
                     backup.delete();
