@@ -97,7 +97,7 @@ public final class SmokeInstrumentation extends Instrumentation {
                     getUiAutomation().waitForIdle(500,10000);
                     boolean confirmed=false;
                     for(android.view.accessibility.AccessibilityNodeInfo node:getUiAutomation().getRootInActiveWindow().findAccessibilityNodeInfosByText("Import")){
-                        if("Import".contentEquals(node.getText()==null?"":node.getText()) && node.isClickable())confirmed=node.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK);
+                        if("Import".equalsIgnoreCase(String.valueOf(node.getText())) && node.isClickable())confirmed=node.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK);
                     }
                     require(confirmed,"native backup import confirmation");
                     waitFor("!window.__beforeNativeImport && document.readyState==='complete' && localStorage.getItem('studio-native-backup')==='restored' && !!window.studioDownload");
