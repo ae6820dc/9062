@@ -39,15 +39,15 @@ jobs:
         with:
           name: android-studios
           path: |
-            android-distributions/*.apk
+            android-distributions/unicode-studio-1-11.apk
             android-distributions/checksums.json
       - name: Commit built APKs to their separate distribution directory
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add android-distributions/*.apk android-distributions/checksums.json
+          git add android-distributions/unicode-studio-1-11.apk android-distributions/checksums.json
           if ! git diff --cached --quiet; then
-            git commit -m 'Build android-studios debug APKs'
+            git commit -m 'Build Unicode Studio 1–11 signed APK'
             git pull --rebase origin "${GITHUB_REF_NAME}"
             git push origin HEAD:"${GITHUB_REF_NAME}"
           fi

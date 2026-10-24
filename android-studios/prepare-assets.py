@@ -31,7 +31,7 @@ for flavor in spec:
         for folder in folders+['lab2']:
             sources += [p for p in (repo/'calculator'/folder).rglob('*') if p.is_file() and p.suffix in extensions and not p.name.endswith('.test.cjs')]
     elif flavor=='unicode':
-        for version in range(1,10):
+        for version in range(1,12):
             for sample in range(1,4):
                 p=repo/f'unicode/{version}/sample{sample}.html';html=p.read_text();sources.append(p)
                 key=re.search(r"const STORAGE_KEY=['\"]([^'\"]+)",html)

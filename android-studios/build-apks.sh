@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")"
-./gradlew --no-daemon assembleMathematicsDebug lintMathematicsDebug assembleUnicodeDebug lintUnicodeDebug
-mkdir -p ../android-distributions
-cp "app/build/outputs/apk/mathematics/debug/app-mathematics-debug.apk" "../android-distributions/mathematics-studio.apk"
-cp "app/build/outputs/apk/unicode/debug/app-unicode-debug.apk" "../android-distributions/unicode-studio.apk"
+output=../android-distributions/unicode-studio-1-11.apk
+# Published APKs are immutable. A later release must use a new filename.
+if [[ -e "$output" ]]; then
+  echo "Existing release retained: $output"
+else
+  ./gradlew --no-daemon assembleUnicodeRelease lintUnicodeRelease
+  mkdir -p ../android-distributions
+  (set -o noclobber; cat app/build/outputs/apk/unicode/release/app-unicode-release.apk > "$output")
+fi
 python3 verify-apks.py

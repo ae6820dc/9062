@@ -2,13 +2,15 @@
 Not a replacement for Android runtime tests. Requires Playwright and Chromium.
 """
 from pathlib import Path
-import http.server,json,os,ssl,subprocess,tempfile,threading,urllib.parse,zipfile
+import argparse,base64,http.server,json,os,ssl,subprocess,tempfile,threading,urllib.parse,zipfile
+parser=argparse.ArgumentParser();parser.add_argument("--unicode-only",action="store_true");args=parser.parse_args()
 from playwright.sync_api import sync_playwright
 project=Path(__file__).resolve().parent;repo=project.parent
-names={'mathematics':'mathematics-studio','unicode':'unicode-studio','creditChess':'credit-chess'}
+names={'mathematics':'mathematics-studio','unicode':'unicode-studio-1-11','creditChess':'credit-chess'}
 with tempfile.TemporaryDirectory() as tmp:
  temp=Path(tmp);mapping={};entries=[]
  for flavor in json.loads((project/'project.json').read_text()):
+  if args.unicode_only and flavor!='unicode':continue
   directory=temp/flavor;directory.mkdir()
   with zipfile.ZipFile(repo/f'android-distributions/{names[flavor]}.apk') as archive:archive.extractall(directory)
   catalog=json.loads((directory/'assets/catalog.json').read_text())
@@ -54,9 +56,30 @@ with tempfile.TemporaryDirectory() as tmp:
    else:
     result=page.evaluate("""async()=>{const {StockfishAdapter}=await import('./engine.js');const {Chess}=await import('./vendor/chess.js');const a=new StockfishAdapter();try{const range=await a.ready,game=new Chess(),moves=[];for(let i=0;i<4;i++){const move=await a.move({moves,difficulty:'MAX',milliseconds:50});if(!game.move({from:move.slice(0,2),to:move.slice(2,4),promotion:move[4]}))throw Error('Illegal engine move');moves.push(move)}return {range,moves}}finally{a.close()}}""")
     assert len(result['moves'])==4;print('Packaged Stockfish WASM proof:',result,flush=True)
+   if p['kind']=='unicode':
+    # Exercise the host's real export helper and the native import algorithm.
+    page.evaluate("delete window.__download; window.studioExport()")
+    page.wait_for_function('!!window.__download')
+    backup=json.loads(base64.b64decode(page.evaluate('window.__download.data')))
+    assert backup['schema']==1 and backup['program']==p['id']
+    page.evaluate("localStorage.clear()")
+    page.evaluate("v=>{for(const k of Object.keys(v))localStorage.setItem(k,v[k])}",backup['localStorage'])
+    page.reload();page.evaluate((assets/'host.js').read_text())
+    assert page.evaluate("localStorage.getItem('studio-test')")==p['id']
+    if p['storageKey']:assert page.locator('#set').input_value()=='hu'
+    if p['group'] in ('Unicode 10','Unicode 11'):
+     languages=page.locator('#set option').evaluate_all('(els)=>els.map(e=>e.value)')
+     for language in languages:
+      page.locator('#set').select_option(language)
+      delta=page.evaluate("""()=>{if(timer!==null)cancelAnimationFrame(timer);display();const before=offset;timer=1;last=1000;frame(1050);cancelAnimationFrame(timer);timer=null;return offset-before}""")
+      assert delta>0 if p['group']=='Unicode 10' else delta<0,(p['id'],language,delta)
+     page.locator('#set').select_option('hu');page.locator('#next').click()
+     print(p['id']+f': direction verified for all {len(languages)} character sets',flush=True)
    for width,height in [(320,740),(740,320),(800,1280),(1280,800)]:
     page.set_viewport_size({'width':width,'height':height})
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),(p['id'],width)
+    if p['kind']=='unicode':
+     assert page.evaluate("""id=>{const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){const start=n.textContent.indexOf(id);if(start<0)continue;const r=document.createRange();r.setStart(n,start);r.setEnd(n,start+id.length);return [...r.getClientRects()].every(b=>b.left>=-1&&b.right<=innerWidth+1)}return false}""",p['programId']),(p['id'],'Program ID clipping',width)
    print(p['id']+': original ID, isolated origin, local resources and responsive geometry PASS',flush=True)
   for p,assets in entries:
    page.goto(f'https://{p["id"]}.appassets.androidplatform.net:{port}/'+p['path']);page.evaluate((assets/'host.js').read_text())

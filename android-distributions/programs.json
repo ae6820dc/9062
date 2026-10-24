@@ -368,5 +368,65 @@
     "kind": "unicode",
     "programId": "C72A19F0E5D843B6A91C0F2D7E4B6385",
     "storageKey": "C84D1F90A6B273E5"
+  },
+  {
+    "application": "unicode",
+    "id": "unicode-10-1",
+    "group": "Unicode 10",
+    "name": "Sample 1",
+    "path": "unicode/10/sample1.html",
+    "kind": "unicode",
+    "programId": "CDD04D2DBA3D7797E8FEEE21F91F1DFE",
+    "storageKey": "0A03FC83B5E45E54"
+  },
+  {
+    "application": "unicode",
+    "id": "unicode-10-2",
+    "group": "Unicode 10",
+    "name": "Sample 2",
+    "path": "unicode/10/sample2.html",
+    "kind": "unicode",
+    "programId": "5CFF36F4ED96463C5CAB5E7877FF33A4",
+    "storageKey": "998AB310C7D770FF"
+  },
+  {
+    "application": "unicode",
+    "id": "unicode-10-3",
+    "group": "Unicode 10",
+    "name": "Sample 3",
+    "path": "unicode/10/sample3.html",
+    "kind": "unicode",
+    "programId": "00F89DA686DA5A93ACD74666B5C14E42",
+    "storageKey": "0440229E634E5049"
+  },
+  {
+    "application": "unicode",
+    "id": "unicode-11-1",
+    "group": "Unicode 11",
+    "name": "Sample 1",
+    "path": "unicode/11/sample1.html",
+    "kind": "unicode",
+    "programId": "AC860946BDD41697E0C629733B323731",
+    "storageKey": "C7389904A81372F1"
+  },
+  {
+    "application": "unicode",
+    "id": "unicode-11-2",
+    "group": "Unicode 11",
+    "name": "Sample 2",
+    "path": "unicode/11/sample2.html",
+    "kind": "unicode",
+    "programId": "E90D4A8DC99AA196395924037061661A",
+    "storageKey": "A3B65ACA9FB430D7"
+  },
+  {
+    "application": "unicode",
+    "id": "unicode-11-3",
+    "group": "Unicode 11",
+    "name": "Sample 3",
+    "path": "unicode/11/sample3.html",
+    "kind": "unicode",
+    "programId": "6B0CEC72AC93BDC3C18D0621C7621F68",
+    "storageKey": "7DA2BD8280A7FC9C"
   }
 ]

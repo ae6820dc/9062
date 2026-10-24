@@ -16,5 +16,16 @@
     "sha256": "38da794ec263900b5836d745bf1a110e8e3aa050e6f2e5947f46a30882876018",
     "programs": 27,
     "originalAssets": 27
+  },
+  {
+    "file": "android-distributions/unicode-studio-1-11.apk",
+    "package": "io.github.ae6820dc.unicodestudio",
+    "versionCode": 2,
+    "versionName": "1.1",
+    "bytes": 317749,
+    "sha256": "90af555e75431ea823d2441ca4435c93aa92677b84fe3f3e14cd9320b35bc5d5",
+    "programs": 33,
+    "originalAssets": 33,
+    "signingCertificateSHA256": "01059a5e2a9f61d6b88aff4f2b47bc4e33195b352ba01872858f71fd358ffb1e"
   }
 ]

@@ -54,3 +54,7 @@ The later GitHub Actions Android 16 run succeeded: [Android Studios run 40089486
 The binary commit is [2e34473bc7612883cc9826b181b936f96ee36daa](https://github.com/ae6820dc/9062/commit/2e34473bc7612883cc9826b181b936f96ee36daa). Both actual APKs were downloaded from this commit, compared with the committed checksums, passed apksigner and source-asset verification again, and passed the APK-extracted browser suite again. No old Unicode APK path was replaced. Factorial edits elsewhere in repository history were concurrent upstream changes; none of the Android Studio implementation commits modify Factorial files.
 
 Remaining limits: no physical device, Android tablet emulator, pre-API-36 runtime, or Android document-provider export/import roundtrip was tested. Tablet/phone responsive coverage is from the separately reported browser suites. Credit Chess's independent native results are recorded in the chess repository; they must not be inferred from this successful two-app run.
+
+## Unicode Studio 1–11 update
+
+The new versioned APK and its current verification results are documented separately in [Unicode Studio 1–11 verification](../android-distributions/unicode-studio-1-11-verification.md). The original APKs and the earlier results above remain historical records.

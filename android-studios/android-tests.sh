@@ -12,10 +12,19 @@ import json,os,subprocess
 from pathlib import Path
 adb=str(Path(os.environ['ANDROID_HOME'])/'platform-tools/adb')
 for flavor,spec in json.loads(Path('project.json').read_text()).items():
- for path in [f'app/build/outputs/apk/{flavor}/debug',f'app/build/outputs/apk/androidTest/{flavor}/debug']:
-  apk=next(Path(path).glob('*.apk'));subprocess.run([adb,'install','-r',str(apk)],check=True)
+ for path in [f'app/build/outputs/apk/androidTest/{flavor}/debug']:
+  apk=next(Path(path).glob('*.apk'));subprocess.run([adb,'install','-r','-t',str(apk)],check=True)
  runner=spec['package']+'.test/io.github.ae6820dc.studio.SmokeInstrumentation'
- for phase in ('seed','verify'):
+ if flavor=='unicode':
+  subprocess.run([adb,'install','-r','../android-distributions/unicode-studio.apk'],check=True)
+  baseline=subprocess.run([adb,'shell','am','instrument','-w','-e','phase','upgrade-seed',runner],text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=1800)
+  print(baseline.stdout,flush=True)
+  if baseline.returncode or 'PASS ' not in baseline.stdout or 'FAIL' in baseline.stdout:raise SystemExit('Baseline seed failed')
+  # Install the actual published release over the old APK, without clearing data.
+  subprocess.run([adb,'install','-r','../android-distributions/unicode-studio-1-11.apk'],check=True)
+ else:
+  subprocess.run([adb,'install','-r',str(next(Path(f'app/build/outputs/apk/{flavor}/debug').glob('*.apk')))],check=True)
+ for phase in (('upgrade','verify') if flavor=='unicode' else ('seed','verify')):
   subprocess.run([adb,'shell','settings','put','system','accelerometer_rotation','0'],check=True)
   subprocess.run([adb,'shell','settings','put','system','user_rotation','1' if phase=='verify' else '0'],check=True)
   result=subprocess.run([adb,'shell','am','instrument','-w','-e','phase',phase,runner],text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=1800)
