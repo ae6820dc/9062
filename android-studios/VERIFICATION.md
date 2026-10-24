@@ -6,12 +6,12 @@ Both repositories retain all original application HTML, JavaScript, CSS, Program
 
 ## Build and packaged assets
 
-All three application assemble and lint tasks passed locally. All three native test APKs also compiled. `verify-apks.py` passed ZIP integrity, apksigner v2 signature validation, package IDs, versionCode, API levels, non-fullscreen theme, absence of internet permission, original Program ID catalog uniqueness, and SHA-256/byte comparisons of every source asset with the APK. Signing uses the existing public test certificate SHA-256 `01059a5e2a9f61d6b88aff4f2b47bc4e33195b352ba01872858f71fd358ffb1e`. These are debug builds, not private-key production releases.
+All three application assemble and lint tasks passed locally. The table records the delivered CI-built APKs (Temurin JDK 21.0.12); these were downloaded from the committed repository paths and reverified locally. Their original assets and host helper script are byte-identical to the locally tested assets, although compiler/compression differences produce different APK hashes from the initial local JDK 21.0.8 builds. All three native test APKs also compiled. `verify-apks.py` passed ZIP integrity, apksigner v2 signature validation, package IDs, versionCode, API levels, non-fullscreen theme, absence of internet permission, original Program ID catalog uniqueness, and SHA-256/byte comparisons of every source asset with the APK. Signing uses the existing public test certificate SHA-256 `01059a5e2a9f61d6b88aff4f2b47bc4e33195b352ba01872858f71fd358ffb1e`. These are debug builds, not private-key production releases.
 
 | APK | Package | versionCode | Bytes | SHA-256 |
 | --- | --- | ---: | ---: | --- |
-| `android-distributions/mathematics-studio.apk` | `io.github.ae6820dc.mathematicsstudio` | 1 | 1469367 | `e6f2b28ecdb29d13c7a27a9e704547afff452b56b765153b1339a6978e727ff2` |
-| `android-distributions/unicode-studio.apk` | `io.github.ae6820dc.unicodestudio` | 1 | 298835 | `74cc16998369dbe00441b0ec0315eccfac81fb9c24719c42caa0e0d0a773ecf1` |
+| `android-distributions/mathematics-studio.apk` | `io.github.ae6820dc.mathematicsstudio` | 1 | 1453041 | `dca33cdb3cdaa345f85b5e7235007d4963e1718e083bd5af1c78d6b8aed2b9d3` |
+| `android-distributions/unicode-studio.apk` | `io.github.ae6820dc.unicodestudio` | 1 | 282502 | `38da794ec263900b5836d745bf1a110e8e3aa050e6f2e5947f46a30882876018` |
 
 The source catalog and original storage keys are recorded in `android-distributions/programs.json`. Mathematics Studio includes all five families in both editions (10 programs, 116 original resource files). Unicode Studio includes versions 1–9 with all three samples (27 programs). Credit Chess includes 34 original resources, including the actual Stockfish JS/WASM, chess.js, licenses and corresponding-source archive. Gzip assets are stored with an internal `.bin` suffix so AAPT does not decompress them; their original request URLs are mapped to the unchanged bytes.
 
@@ -39,3 +39,18 @@ The KVM-enabled GitHub Actions job builds and runs the included native instrumen
 ## Migration and installation
 
 The HTML readmes document browser export/import for calculators and Chess using their original validated backup controls. A browser-console export snippet handles Unicode versions 1–9, with explicit confirmation before native import. The native localStorage backup is scoped to one program and never substitutes for Credit Chess's full IndexedDB backup. New package IDs do not read or overwrite old browser/APK data. Existing APK paths are untouched. Compatible future signed updates should use `adb install -r` and a higher versionCode; never uninstall to preserve data.
+
+## Successful KVM-backed Android verification
+
+The later GitHub Actions Android 16 run succeeded: [Android Studios run 40089486267](https://github.com/ae6820dc/9062/actions/runs/40089486267). Both `build` and `android-runtime` jobs passed. This supersedes the local software-emulator limitation for the checks actually executed below; it does not claim a successful local emulator or physical-device test.
+
+- Mathematics Studio: 90 checks in the portrait seed process and 100 in a fresh landscape verification process (190 total).
+- Unicode Studio: 216 checks in the portrait seed process and 243 in a fresh landscape verification process (459 total).
+- All 37 catalog entries loaded from their isolated HTTPS origins in airplane mode, displayed their original Program IDs, and retained per-program state markers across reload, switching and separate instrumentation processes.
+- All 10 calculator entries executed an actual offline Web Worker calculation and displayed a result without an error.
+- Native window insets reported both status and navigation bars visible for every entry, and actual WebView bounds stayed between those system bars in portrait and landscape.
+- The native host switching methods were exercised directly by instrumentation; toolbar menu touch hit targets and file-picker/download roundtrips were not automated.
+
+The binary commit is [2e34473bc7612883cc9826b181b936f96ee36daa](https://github.com/ae6820dc/9062/commit/2e34473bc7612883cc9826b181b936f96ee36daa). Both actual APKs were downloaded from this commit, compared with the committed checksums, passed apksigner and source-asset verification again, and passed the APK-extracted browser suite again. No old Unicode APK path was replaced. Factorial edits elsewhere in repository history were concurrent upstream changes; none of the Android Studio implementation commits modify Factorial files.
+
+Remaining limits: no physical device, Android tablet emulator, pre-API-36 runtime, or Android document-provider export/import roundtrip was tested. Tablet/phone responsive coverage is from the separately reported browser suites. Credit Chess's independent native results are recorded in the chess repository; they must not be inferred from this successful two-app run.
