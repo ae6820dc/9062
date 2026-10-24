@@ -86,7 +86,8 @@ public final class SmokeInstrumentation extends Instrumentation {
                 }
                 if("Unicode 10".equals(p.optString("group")) || "Unicode 11".equals(p.optString("group"))){
                     String positive="Unicode 10".equals(p.getString("group"))?"true":"false";
-                    require("true".equals(eval("(()=>{const select=document.getElementById('set');for(const option of select.options){select.value=option.value;select.dispatchEvent(new Event('change'));if(timer!==null)cancelAnimationFrame(timer);display();const before=offset;timer=1;last=1000;frame(1050);cancelAnimationFrame(timer);timer=null;if((offset>before)!=="+positive+")return false;}return true})()")),"all character sets have required animation direction "+id);
+                    JSONObject proof=new JSONObject(eval("(()=>{try{const select=document.getElementById('set');for(const language of Array.from(select.options,o=>o.value)){select.value=language;select.dispatchEvent(new Event('change'));if(timer!==null)cancelAnimationFrame(timer);display();const before=offset;timer=1;last=1000;frame(1050);cancelAnimationFrame(timer);timer=null;if((offset>before)!=="+positive+")return {ok:false,language,before,after:offset,slot,speed:document.getElementById('speed').value};}return {ok:true}}catch(e){return {ok:false,error:String(e),stack:e.stack}}})()"));
+                    require(proof.optBoolean("ok"),"all character sets have required animation direction "+id+(proof.optBoolean("ok")?"":": "+proof));
                 }
                 if("unicode-10-1".equals(id)){
                     eval("localStorage.setItem('studio-native-backup', 'restored')");
