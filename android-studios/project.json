@@ -1,0 +1,10 @@
+{
+  "mathematics": {
+    "name": "Mathematics Studio",
+    "package": "io.github.ae6820dc.mathematicsstudio"
+  },
+  "unicode": {
+    "name": "Unicode Studio",
+    "package": "io.github.ae6820dc.unicodestudio"
+  }
+}
