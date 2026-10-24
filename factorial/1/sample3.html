@@ -8,7 +8,7 @@
 <button id="run">Számítás</button><button class="secondary" id="stop" disabled>Megszakítás</button><p id="status" role="status">Készen áll.</p>
 <small>0–1 000 000 közötti egész szám. Nagy számításoknál a készülék sebessége számít. Az eredmény soha nem kerekített.</small></section>
 <section><div class="stats"><div>Számjegyek: <strong id="digits">—</strong></div><div>Számítás: <strong id="elapsed">—</strong></div></div><p><label for="result">Teljes pontos eredmény</label><textarea id="result" readonly spellcheck="false" placeholder="Az eredmény itt jelenik meg."></textarea></p>
-<button id="htmlsave" class="secondary">HTML mentése</button><button id="copy" class="secondary">Eredmény másolása</button><button id="save" class="secondary">TXT mentése</button></section>
+<button id="copy" class="secondary">Eredmény másolása</button><button id="htmlsave" class="secondary">HTML mentése</button><button id="save" class="secondary">TXT mentése</button></section>
 <footer>STORAGE KEY: c5f0a93e7d2148b6 · Önálló HTML · Offline működés · BigInt</footer></main>
 <script>
 (()=>{'use strict';
@@ -42,6 +42,6 @@ worker.postMessage(n);
 $('stop').onclick=()=>{stop();setStatus('Megszakítva.');};
 $('copy').onclick=async()=>{if(!result)return;try{await navigator.clipboard.writeText(result);setStatus('Eredmény másolva.');}catch{ $('result').select();setStatus('Jelöld ki és másold a szöveget.');}};
 $('htmlsave').onclick=()=>{if(!result)return;const stamp=Date.now(),n=$('n').value,digits=result.length.toLocaleString('hu-HU');const html='<!doctype html><html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Factorial '+n+'!</title><style>body{font:16px system-ui;background:#0b1220;color:#f0f4ff;margin:24px auto;max-width:1100px;padding:0 18px}p{margin:10px 0}pre{background:#172036;padding:18px;border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.5 monospace}</style></head><body><h1>Factorial Studio – eredmény</h1><p>Program ID: d03a8c59f14e726b90c5d18e4f7a236b</p><p>Unix timestamp (ms): '+stamp+'</p><p>Faktoriális: '+n+'!</p><p>Számjegyek száma: '+digits+'</p><h2>Teljes pontos eredmény</h2><pre>'+result+'</pre></body></html>';const blob=new Blob([html],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='factorial-'+n+'-'+stamp+'.html';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
-$('save').onclick=()=>{if(!result)return;const blob=new Blob([result+'\n'],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='factorial-'+$('n').value+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+$('save').onclick=()=>{if(!result)return;const stamp=Date.now(),n=$('n').value;const content='Program ID: d03a8c59f14e726b90c5d18e4f7a236b\nUnix timestamp (ms): '+stamp+'\nFaktoriális: '+n+'!\nSzámjegyek száma: '+result.length+'\n\nTeljes pontos eredmény:\n'+result+'\n';const blob=new Blob([content],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='factorial-'+n+'-'+stamp+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 })();
 </script></body></html>
