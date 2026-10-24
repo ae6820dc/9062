@@ -342,7 +342,7 @@
 
   const el = id => document.getElementById(id);
   // --- ÚJ FUNKCIÓ: Beállítások mentése/betöltése ---
-  const STORAGE_KEY = 'ff3b369400c2641d';
+  const STORAGE_KEY = 'chess_moves_settings';
 
   function saveSettings() {
       const settings = {
@@ -358,7 +358,7 @@
   }
 
   function loadSettings() {
-      const stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('chess_moves_settings');
+      const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
           const settings = JSON.parse(stored);
           
