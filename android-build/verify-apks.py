@@ -14,9 +14,15 @@ for edition in ('7', '9'):
         dex = b''.join(archive.read(n) for n in archive.namelist() if re.fullmatch(r'classes[0-9]*\.dex', n))
         assert b'setJavaScriptEnabled' in dex and b'setDomStorageEnabled' in dex
         assert b'https://app.local/sample1.html' in dex
-    subprocess.run([str(tools/'apksigner'), 'verify', '--verbose', '--print-certs', str(apk)], check=True)
+    original_id = re.search(r'Program ID: ([A-F0-9]{32})</header>', html.read_text()).group(1)
+    assert len(original_id) == 32
+    print(f'Program ID: {original_id}')
+    signature = subprocess.check_output([str(tools/'apksigner'), 'verify', '--verbose', '--print-certs', str(apk)], text=True)
+    assert 'Signer #1 certificate SHA-256 digest: 01059a5e2a9f61d6b88aff4f2b47bc4e33195b352ba01872858f71fd358ffb1e' in signature
+    print(signature)
     info = subprocess.check_output([str(tools/'aapt'), 'dump', 'badging', str(apk)], text=True)
     assert f"package: name='io.github.ae6820dc.unicode{edition}1'" in info
+    assert "versionCode='2'" in info
     assert "targetSdkVersion:'36'" in info
     assert "sdkVersion:'26'" in info
     assert 'android.permission.INTERNET' not in info
@@ -24,6 +30,6 @@ for edition in ('7', '9'):
     assert 'android:allowBackup' in manifest
     resources = subprocess.check_output([str(tools/'aapt'), 'dump', '--values', 'resources', str(apk)], text=True)
     # android.R.attr.windowFullscreen = 0x0101020d
-    assert re.search(r'Key=0x0101020d.*\(boolean\) true', resources)
+    assert re.search(r'Key=0x0101020d.*\(boolean\) false', resources)
     print(f'{apk.relative_to(root)}: {apk.stat().st_size} bytes; SHA256 {hashlib.sha256(apk.read_bytes()).hexdigest()}')
-print('PASS: distinct IDs, signatures, API 36 target, embedded unchanged HTML, fullscreen theme, no network permission.')
+print('PASS: distinct IDs, signatures, API 36 target, embedded unchanged HTML, normal system-bar theme, no network permission.')
