@@ -86,7 +86,9 @@ public final class SmokeInstrumentation extends Instrumentation {
                 }
                 if("Unicode 10".equals(p.optString("group")) || "Unicode 11".equals(p.optString("group"))){
                     String positive="Unicode 10".equals(p.getString("group"))?"true":"false";
-                    JSONObject proof=new JSONObject(eval("(()=>{try{const select=document.getElementById('set');for(const language of Array.from(select.options,o=>o.value)){select.value=language;select.dispatchEvent(new Event('change'));if(timer!==null)cancelAnimationFrame(timer);display();const before=offset;timer=1;last=1000;frame(1050);cancelAnimationFrame(timer);timer=null;if((offset>before)!=="+positive+")return {ok:false,language,before,after:offset,slot,speed:document.getElementById('speed').value};}return {ok:true}}catch(e){return {ok:false,error:String(e),stack:e.stack}}})()"));
+                    eval("window.__directionProof=null;(async()=>{try{const select=document.getElementById('set'),speed=document.getElementById('speed'),button=document.getElementById('start'),track=document.getElementById('marquee');if(button.textContent.includes('⏸'))button.click();speed.value='1';speed.dispatchEvent(new Event('change'));for(const language of Array.from(select.options,o=>o.value)){select.value=language;select.dispatchEvent(new Event('change'));const row={language,before:new DOMMatrix(track.style.transform).m41};button.click();await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));button.click();row.after=new DOMMatrix(track.style.transform).m41;if((row.after>row.before)!=="+positive+"){window.__directionProof={ok:false,...row};return;}}window.__directionProof={ok:true};}catch(e){window.__directionProof={ok:false,error:String(e),stack:e.stack}}})()");
+                    waitFor("window.__directionProof!==null");
+                    JSONObject proof=new JSONObject(eval("window.__directionProof"));
                     require(proof.optBoolean("ok"),"all character sets have required animation direction "+id+(proof.optBoolean("ok")?"":": "+proof));
                 }
                 if("unicode-10-1".equals(id)){
