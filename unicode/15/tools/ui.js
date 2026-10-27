@@ -7,10 +7,9 @@ let timer=null,count=0,positions={},index=0,sequence=null;
 const pool=()=>inventories.get($('set').value);
 function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({set:$('set').value,speed:$('speed').value,positions,index,count,normal:$('normal').value,case:$('case').value,locale:$('locale').value}))}catch{$('status').textContent='A helyi mentés nem elérhető.'}}
 function fitGlyph(){
- const screen=$('screen'),glyph=$('glyph'),caption=$('codepoint');
- caption.style.maxWidth=Math.max(40,screen.clientWidth-60)+'px';
+ const screen=$('screen'),glyph=$('glyph');
  const availableW=Math.max(20,screen.clientWidth-96);
- const availableH=Math.max(12,screen.clientHeight-2*(caption.offsetHeight+30));
+ const availableH=Math.max(12,screen.clientHeight-36);
  const canvas=fitGlyph.canvas||(fitGlyph.canvas=document.createElement('canvas')),ctx=canvas.getContext('2d');
  const family=getComputedStyle(glyph).fontFamily;
  let size=Math.min(220,availableH/1.5,availableW/2.1);
@@ -23,7 +22,7 @@ function fitGlyph(){
  }
 }
 function display(){const p=pool();index=((index%p.length)+p.length)%p.length;const original=sequence||p.at(index),mapped=caseMap(original,$('case').value,$('locale').value),shown=normalize(mapped,$('normal').value);
- $('glyph').textContent=shown;$('codepoint').classList.toggle('sequence',points(shown).length>1);$('codepoint').textContent=label(shown)||'∅ (üres sorozat)';fitGlyph();
+ $('glyph').textContent=shown;$('codepointBox').classList.toggle('sequence',points(shown).length>1);$('codepoint').textContent=label(shown)||'∅ (üres sorozat)';fitGlyph();
  $('poolCount').textContent='Különböző kódpontbejegyzések száma: '+p.length.toLocaleString('hu-HU')+' · '+p.c.coverage;
  $('counter').textContent=(index+1).toLocaleString('hu-HU')+' / '+p.length.toLocaleString('hu-HU')+' · Lépések: '+count.toLocaleString('hu-HU');
  $('details').textContent=(sequence?'Egyedi sorozat; a készletet nem módosítja. ':'')+'Eredeti: '+label(original)+' · '+points(original).map(characterName).join('; ')+' | Megjelenítés: '+points(shown).length+' skalár, '+shown.length+' UTF-16 kódegység, '+graphemes(shown).length+' grafémaklaszter (UCD '+D.version+'). A láthatatlan jelek is valódi bejegyzések.';
@@ -51,7 +50,7 @@ $('jumpButton').onclick=openJump;$('jumpCancel').onclick=closeJump;$('jumpGo').o
 document.querySelectorAll('[name="jumpMode"]').forEach(r=>r.onchange=updateJumpMode);
 $('jumpOverlay').onclick=e=>{if(e.target===$('jumpOverlay'))closeJump()};
 document.addEventListener('keydown',e=>{if(!$('jumpOverlay').classList.contains('open'))return;if(e.key==='Escape'){e.preventDefault();closeJump()}if(e.key==='Enter'){e.preventDefault();performJump()}if(e.key==='Tab'){const nodes=[...$('jumpOverlay').querySelectorAll('input,button')],first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
-$('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('screen').requestFullscreen()}catch{$('status').textContent='A teljes képernyő nem támogatott ebben a böngészőben.'}};
+$('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('viewer').requestFullscreen()}catch{$('status').textContent='A teljes képernyő nem támogatott ebben a böngészőben.'}};
 window.addEventListener('resize',fitGlyph);document.addEventListener('fullscreenchange',()=>requestAnimationFrame(fitGlyph));
 try{const s=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');if(s&&typeof s==='object'){if(inventories.has(s.set))$('set').value=s.set;const speed=Number(s.speed);if(Number.isFinite(speed)&&speed>=.05&&speed<=3600)$('speed').value=speed;if(s.positions&&typeof s.positions==='object'&&!Array.isArray(s.positions))positions=s.positions;if(Number.isSafeInteger(s.index)&&s.index>=0)index=s.index;if(Number.isSafeInteger(s.count)&&s.count>=0)count=s.count;for(const id of ['normal','case','locale'])if([...$(id).options].some(o=>o.value===s[id]))$(id).value=s[id]}}catch{}
 display();save();

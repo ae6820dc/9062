@@ -20,136 +20,136 @@
       "sample": 1,
       "width": 1440,
       "height": 1000,
-      "startupMs": 452,
+      "startupMs": 1453,
       "collections": 582,
-      "milliseconds": 19179.199999999953,
-      "dom": 660
+      "milliseconds": 39791.70000000001,
+      "dom": 661
     },
     {
       "sample": 1,
       "width": 390,
       "height": 844,
-      "startupMs": 332,
+      "startupMs": 1116,
       "collections": 582,
-      "milliseconds": 19834.199999999953,
-      "dom": 660
+      "milliseconds": 57236.600000000006,
+      "dom": 661
     },
     {
       "sample": 1,
       "width": 320,
       "height": 568,
-      "startupMs": 343,
+      "startupMs": 1181,
       "collections": 582,
-      "milliseconds": 20737.899999999907,
-      "dom": 660
+      "milliseconds": 32826.59999999998,
+      "dom": 661
     },
     {
       "sample": 1,
       "width": 568,
       "height": 320,
-      "startupMs": 384,
+      "startupMs": 564,
       "collections": 582,
-      "milliseconds": 18830.899999999907,
-      "dom": 660
+      "milliseconds": 29363.899999999965,
+      "dom": 661
     },
     {
       "sample": 1,
       "width": 844,
       "height": 390,
-      "startupMs": 384,
+      "startupMs": 601,
       "collections": 582,
-      "milliseconds": 19359.799999999814,
-      "dom": 660
+      "milliseconds": 35207.70000000001,
+      "dom": 661
     },
     {
       "sample": 2,
       "width": 1440,
       "height": 1000,
-      "startupMs": 354,
+      "startupMs": 618,
       "collections": 582,
-      "milliseconds": 19593.200000000186,
-      "dom": 660
+      "milliseconds": 35629.59999999998,
+      "dom": 661
     },
     {
       "sample": 2,
       "width": 390,
       "height": 844,
-      "startupMs": 346,
+      "startupMs": 786,
       "collections": 582,
-      "milliseconds": 18932.40000000014,
-      "dom": 660
+      "milliseconds": 62652.600000000035,
+      "dom": 661
     },
     {
       "sample": 2,
       "width": 320,
       "height": 568,
-      "startupMs": 335,
+      "startupMs": 547,
       "collections": 582,
-      "milliseconds": 19973.199999999953,
-      "dom": 660
+      "milliseconds": 45955.600000000035,
+      "dom": 661
     },
     {
       "sample": 2,
       "width": 568,
       "height": 320,
-      "startupMs": 388,
+      "startupMs": 789,
       "collections": 582,
-      "milliseconds": 27008,
-      "dom": 660
+      "milliseconds": 34229.69999999995,
+      "dom": 661
     },
     {
       "sample": 2,
       "width": 844,
       "height": 390,
-      "startupMs": 1419,
+      "startupMs": 711,
       "collections": 582,
-      "milliseconds": 18940.899999999907,
-      "dom": 660
+      "milliseconds": 39313.59999999998,
+      "dom": 661
     },
     {
       "sample": 3,
       "width": 1440,
       "height": 1000,
-      "startupMs": 346,
+      "startupMs": 680,
       "collections": 582,
-      "milliseconds": 19298.5,
-      "dom": 660
+      "milliseconds": 29794.29999999993,
+      "dom": 661
     },
     {
       "sample": 3,
       "width": 390,
       "height": 844,
-      "startupMs": 356,
+      "startupMs": 1200,
       "collections": 582,
-      "milliseconds": 19385.5,
-      "dom": 660
+      "milliseconds": 33300.09999999998,
+      "dom": 661
     },
     {
       "sample": 3,
       "width": 320,
       "height": 568,
-      "startupMs": 313,
+      "startupMs": 979,
       "collections": 582,
-      "milliseconds": 19024,
-      "dom": 660
+      "milliseconds": 31756.800000000047,
+      "dom": 661
     },
     {
       "sample": 3,
       "width": 568,
       "height": 320,
-      "startupMs": 377,
+      "startupMs": 646,
       "collections": 582,
-      "milliseconds": 19530,
-      "dom": 660
+      "milliseconds": 30874.5,
+      "dom": 661
     },
     {
       "sample": 3,
       "width": 844,
       "height": 390,
-      "startupMs": 340,
+      "startupMs": 530,
       "collections": 582,
-      "milliseconds": 19788.200000000186,
-      "dom": 660
+      "milliseconds": 31607,
+      "dom": 661
     }
   ],
   "errors": []
