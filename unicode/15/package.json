@@ -7,7 +7,8 @@
     "build": "python3 tools/build.py",
     "test": "python3 tests/inventories.py && node tests/core.cjs",
     "test:browser": "node tests/browser.cjs && node tests/layout.cjs",
-    "test:pages": "node tests/pages.cjs"
+    "test:pages": "node tests/pages.cjs",
+    "test:description": "node tests/description-layout.cjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

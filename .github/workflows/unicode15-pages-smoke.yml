@@ -26,6 +26,10 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Verify published files and desktop/mobile browser behavior
         run: node tests/pages.cjs
+      - name: Verify fixed description panel during navigation and playback
+        env:
+          VIEWER_BASE_URL: https://ae6820dc.github.io/9062/unicode/15/
+        run: npm run test:description
       - name: Upload Pages verification evidence
         if: always()
         uses: actions/upload-artifact@v4
