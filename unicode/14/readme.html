@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unicode Character Player – 14. verzió – használati útmutató</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#080e1c;color:#eaf1ff;font:16px/1.65 system-ui,sans-serif}main{max-width:1000px;margin:auto;padding:20px}h1{font-size:clamp(24px,5vw,36px)}h2{margin-top:32px}a{color:#9cc2ff}code{overflow-wrap:anywhere}table{border-collapse:collapse;width:100%;margin:16px 0}th,td{border:1px solid #526583;padding:10px;text-align:left;vertical-align:top}nav{display:flex;gap:16px;flex-wrap:wrap}.table-wrap{overflow-x:auto}p,li{color:#cbd8ed}
+</style>
+</head>
+<body><main>
+<h1>Unicode Character Player – 14. verzió</h1>
+<p>A karakterlejátszó a kiválasztott karakterkészlet jeleit egyenként, nagy méretben, középre igazítva mutatja. A 14. programverzió egyetlen új funkciója a teljes kis- és nagybetűs vietnámi karakterkészlet. A 13. verzió nagyított kódpontcímkéje és minden korábbi működése változatlan. A „14” az alkalmazás verziószáma, nem a Unicode szabvány kiadásának száma.</p>
+<nav aria-label="Mintaprogramok"><a href="sample1.html">1. minta</a><a href="sample2.html">2. minta</a><a href="sample3.html">3. minta</a><a href="../13/readme.html">13. verzió útmutatója</a></nav>
+<h2>Indítás és alapvető használat</h2>
+<ol><li>Nyisd meg valamelyik mintafájlt egy korszerű, JavaScriptet támogató böngészőben.</li><li>A <strong>Karakterkészlet</strong> listából válaszd ki a megjelenítendő nyelv vagy témakör készletét. Ez a karaktereket választja ki; a kezelőfelület nyelve magyar marad.</li><li>A <strong>Váltás (másodperc)</strong> mezőben add meg a léptetés időközét, majd nyomd meg az <strong>Indítás</strong> gombot.</li><li>A karakter feletti címkén az aktuális jel kódpontja, alatta a nagy karakter látható. A képernyő alatti számláló a pozíciót és a lépések számát mutatja.</li></ol>
+<h2>Az összes kezelőszerv</h2>
+<dl>
+<dt><strong>Karakterkészlet</strong></dt><dd>A készlet váltásakor a program az adott készlet korábban mentett pozícióját használja, ennek hiányában az első karaktert mutatja. Ha a lejátszás futott, a váltás után folytatódik. A „Különböző karakterek száma” sor az egyedi jelek számát jelzi.</dd>
+<dt><strong>Váltás (másodperc)</strong></dt><dd>Az automatikus léptetés időköze 0,05 és 3600 másodperc között adható meg; a mező lépésköze 0,05 másodperc. Futó lejátszásnál az érték módosítása újraindítja az időzítőt. A tényleges ütemezést a böngésző, különösen a háttérbe tett lapok időzítőinek korlátozása befolyásolhatja.</dd>
+<dt><strong>▶ Indítás / ⏸ Szünet</strong></dt><dd>Elindítja vagy megállítja az automatikus, előrefelé haladó lejátszást. A készlet végén a lejátszó az elejére lép.</dd>
+<dt><strong>⏮ Előző / ⏭ Következő</strong></dt><dd>Egy karakterrel hátra vagy előre lép. Az első karakter előtt az utolsó, az utolsó után az első következik. A kézi léptetés önmagában nem állítja le a futó lejátszást.</dd>
+<dt><strong>⌕ Keresés</strong></dt><dd>Megnyitja az ugrási ablakot, és szünetelteti a lejátszást. A keresés a kiválasztott karakterkészleten belül történik, nem szöveges névkeresés.</dd>
+<dt><strong>⛶ Teljes képernyő</strong></dt><dd>A karaktert és a fölötte látható kódpontot tartalmazó megjelenítőterületet teljes képernyőre váltja, ha ezt a böngésző engedélyezi. Kilépéshez használd a böngésző teljesképernyő-kilépését, asztali gépen jellemzően az Esc billentyűt. A teljes képernyős működés a böngésző és az eszköz támogatásától függ.</dd>
+</dl>
+<h2>Keresés és ugrás</h2>
+<ul><li><strong>Sorszám:</strong> az 1-től kezdődő pozíciót kell megadni egész, tízes számrendszerbeli számként. A felső határ a kiválasztott készlet egyedi karaktereinek száma.</li><li><strong>Unicode:</strong> a kódpontot hexadecimális számként add meg, például <code>0041</code>, <code>00C1</code>, <code>4E2D</code> vagy <code>1F600</code>. Kis- és nagybetűs hexadecimális számjegyek egyaránt használhatók. A biztos, a 13. verzióval azonos beviteli forma az előtag nélküli szám.</li><li>A kódpontnak szerepelnie kell az éppen kiválasztott készletben. Az <code>1F600</code> kereséséhez válaszd a <strong>Unicode</strong> készletet; az Angol készlet nem tartalmazza ezt az emojit.</li><li>Az <strong>Ugrás</strong> gomb vagy az Enter végrehajtja a keresést. Érvénytelen sorszám vagy hiányzó kódpont esetén az ablak hibaüzenetet jelez, a karakter nem változik.</li><li>A <strong>Mégse</strong>, az Esc vagy az ablakon kívüli sötét területre kattintás bezárja az ablakot. Bezárás és sikeres ugrás után is szüneteltetve marad a lejátszás; az Indítás gombbal folytatható.</li></ul>
+<h2>A Unicode-kódpont kijelzése</h2>
+<p>A Unicode-kódpontcímke a korábbi betűméret 200%-ával, magasabban jelenik meg a nagy karakter fölött. A reszponzív betűméret 32–48 képpont (6vw), a karakter és a címke közötti térköz 12 képpont. A karakter mérete és középső pozíciója, valamint a megjelenítőterület méretei változatlanok. A címke Android-méretű mobilnézetben, táblagépen, asztali böngészőben és teljes képernyőn is a kereten belül marad. Formátuma <code>U+</code> és legalább négy nagybetűs hexadecimális számjegy. A címke a karakterrel együtt, ugyanabban a megjelenítési műveletben frissül: induláskor, mentett állapot betöltésekor, automatikus lejátszásnál, előző/következő lépésnél, készletváltáskor és sikeres ugráskor.</p>
+<table><thead><tr><th>Karakter</th><th>Kijelzett kódpont</th></tr></thead><tbody><tr><td>A</td><td><code>U+0041</code></td></tr><tr><td>Á</td><td><code>U+00C1</code></td></tr><tr><td>ワ</td><td><code>U+30EF</code></td></tr><tr><td>中</td><td><code>U+4E2D</code></td></tr><tr><td>😀</td><td><code>U+1F600</code></td></tr></tbody></table>
+<p>A megvalósítás a <code>codePointAt(0)</code> értékét használja, nem a <code>charCodeAt(0)</code> UTF-16-kódegységét. Ezért a kiegészítő síkok karakterei is helyes értéket kapnak: a 😀 kódpontja <code>1F600</code>, nem a helyettesítőpár első tagja, <code>D83D</code>. A készletek a 13. verzióhoz hasonlóan egyedi kódpontokat tartalmaznak; a program nem kapcsolja össze őket összetett grafémákká vagy többelemű emojisorozatokká.</p>
+<h2>Támogatott karakterkészletek</h2>
+<p>A meglévő készletek tartalma és sorrendje a 13. verzióval azonos; a lista végén, a magyar betűrend szerinti helyén a Vietnámi készlet jelenik meg. A nyelvi listák a forrásban megadott betűkészletek, nem az adott nyelv minden lehetséges írásjelének teljes gyűjteményei.</p>
+<ul><li><strong>Betűlisták:</strong> Angol, Arab, Bengáli, Cseh, Finn, Francia, Görög, Héber, Latin, Lengyel, Magyar, Német, Nepáli, Norvég, Olasz, Orosz, Perzsa, Portugál, Spanyol, Svéd és Török és Vietnámi. A vietnámi kivételével a latin betűs listák alapvetően kisbetűsek; nagybetűk, például A vagy Á kereséséhez a Unicode készlet használható.</li><li><strong>Tibeti:</strong> U+0F40–U+0F6C.</li><li><strong>Koreai:</strong> U+AC00–U+D7A3 hangul szótagok.</li><li><strong>Japán:</strong> U+3041–U+3096 hiragana, U+30A1–U+30FA katakana, valamint U+4E00–U+9FFF CJK ideogrammák.</li><li><strong>Kínai:</strong> U+4E00–U+9FFF CJK ideogrammák.</li><li><strong>Matematika:</strong> matematikai operátorok és kiegészítő operátorok, matematikai alfanumerikus szimbólumok a kiegészítő síkon is, betűszerű jelek, nyilak, technikai és geometriai jelek, felső és alsó indexek, valamint számos írásrendszer számjegyei és számjelei. A forrás külön megadott alapjeleket és görög betűket is hozzáad. A nem kiosztott, vezérlő-, formázó-, magánhasználatú és helyettesítő karaktereket kiszűri.</li><li><strong>Unicode:</strong> a teljes U+0000–U+10FFFF tartomány böngésző által kiosztottnak ismert kódpontjai, a vezérlő-, formázó-, helyettesítő és magánhasználatú karakterek kizárásával. A lista egyszer készül el, majd gyorsítótárban marad. Mérete a böngésző Unicode-adatbázisától függ.</li></ul>
+<p>A tényleges rajzolat a telepített betűtípusoktól függ. Egy kiosztott jel megfelelő font hiányában helyettesítő négyzetként is megjelenhet; a kódpontcímke ettől még a helyes értéket mutatja. A szóközök és egyes kombináló jelek önmagukban kevéssé vagy egyáltalán nem láthatók.</p>
+<h2>Önálló minták és helyi mentés</h2>
+<p>A három HTML-fájl azonos működésű, önálló program. Nincs közös futásidejű JavaScript- vagy stílusfájl-függőségük. A fejlécben látható Program ID és a helyi tároló kulcsa mintánként különbözik:</p>
+<div class="table-wrap"><table><thead><tr><th>Fájl</th><th>Program ID</th><th>16 jegyű hexadecimális tárolókulcs</th></tr></thead><tbody><tr><td><a href="sample1.html">sample1.html</a></td><td><code>84ABE3DBF8C23C7C059E633757F96E7C</code></td><td><code>E575C375A80632A5</code></td></tr>
+<tr><td><a href="sample2.html">sample2.html</a></td><td><code>F7F98001AE1A971D9DC5D39DD03EE67B</code></td><td><code>93BCC48D47634FCD</code></td></tr>
+<tr><td><a href="sample3.html">sample3.html</a></td><td><code>53AC6E14A00FFEB924FDF337E56071AA</code></td><td><code>B8CD1040E004AF70</code></td></tr></tbody></table></div>
+<p>A böngésző <code>localStorage</code> tárolója őrzi a készletet, a sebességet, a készletenkénti pozíciókat, az aktuális indexet és a lépésszámot. A minták egymás mentését és az 1–13. verzió adatait nem írják felül. Újratöltéskor a pozíció visszaáll, de az automatikus lejátszás nem indul el magától. Ez a 13. verzió viselkedése is. Tiltott tárolás vagy privát böngészési korlátozás esetén a tartós mentés nem garantált. A mentés nem kerül szerverre.</p>
+<h2>Asztali és mobil használat</h2>
+<p>A kezelőszervek keskeny képernyőn több sorba rendeződnek. A karakter méretét a program a megjelenítőterülethez igazítja; az ablak átméretezése és a teljes képernyőre váltás újraméretezést indít. Mobilon a gombok érintéssel is használhatók. A kódpontcímke a nagy karakter fölött marad, és a karakter továbbra is középen helyezkedik el.</p>
+<h2>Mi változott a 13. verzióhoz képest?</h2>
+<ul><li>Új „Vietnámi” választási lehetőség az „Unicode” után, betűrendben.</li><li>A 8. verzió 89 kisbetűs vietnámi karakterének átvétele és kiegészítése 89 nagybetűs párral.</li><li>Három új Program ID és három egymástól, valamint a korábbi verzióktól eltérő, 16 jegyű hexadecimális mentési kulcs.</li><li>Részletes magyar dokumentáció. A karakter mérete, a megjelenítő, a 32–48 képpontos kódpontcímke és annak 12 képpontos térköze, a stílusok, a vezérlés, a keresés és a mentés kódja változatlan.</li></ul>
+<p>A 14-es szám az alkalmazás verziója; nem rögzíti a böngésző Unicode-adatbázisát a Unicode 14.0 szabványhoz. Az 1–13. verzió és az egyéb fájlok változatlanok.</p>
+<h2>A vietnámi ábécé és a tónusok</h2>
+<p>A 29 alapbetű: <strong>a ă â b c d đ e ê g h i k l m n o ô ơ p q r s t u ư v x y</strong>. Mindegyik kis- és nagybetűvel szerepel. A készlet először a 8. verzió kisbetűs sorrendjét járja be, majd ugyanebben a sorrendben a nagybetűket.</p>
+<p>A 12 magánhangzó (a, ă, â, e, ê, i, o, ô, ơ, u, ư, y) mind a hat tónussal szerepel: jelöletlen (ngang), éles (sắc), tompa (huyền), kampós (hỏi), hullámos (ngã) és alsó pontos (nặng). Ez 72 magánhangzóváltozat és 17 mássalhangzó mindkét betűmérettel, összesen <strong>178 egyedi karakter</strong>. A đ/Đ is a készlet része.</p>
+<p>Az összes tónusos alak előre összeállított, NFC-formájú Unicode-karakter: egy megjelenített betű egy kódpont, ezért a meglévő kódpontkijelzés és keresés változtatás nélkül működik. A készlet nem külön kombináló ékezeteket vagy több kódpontból álló, felbontott sorozatokat léptet.</p>
+<div class="table-wrap"><table><thead><tr><th>Alap</th><th>Hat tónus kisbetűvel</th><th>Hat tónus nagybetűvel</th></tr></thead><tbody>
+<tr><td>a / A</td><td>a á à ả ã ạ</td><td>A Á À Ả Ã Ạ</td></tr>
+<tr><td>ă / Ă</td><td>ă ắ ằ ẳ ẵ ặ</td><td>Ă Ắ Ằ Ẳ Ẵ Ặ</td></tr>
+<tr><td>â / Â</td><td>â ấ ầ ẩ ẫ ậ</td><td>Â Ấ Ầ Ẩ Ẫ Ậ</td></tr>
+<tr><td>e / E</td><td>e é è ẻ ẽ ẹ</td><td>E É È Ẻ Ẽ Ẹ</td></tr>
+<tr><td>ê / Ê</td><td>ê ế ề ể ễ ệ</td><td>Ê Ế Ề Ể Ễ Ệ</td></tr>
+<tr><td>i / I</td><td>i í ì ỉ ĩ ị</td><td>I Í Ì Ỉ Ĩ Ị</td></tr>
+<tr><td>o / O</td><td>o ó ò ỏ õ ọ</td><td>O Ó Ò Ỏ Õ Ọ</td></tr>
+<tr><td>ô / Ô</td><td>ô ố ồ ổ ỗ ộ</td><td>Ô Ố Ồ Ổ Ỗ Ộ</td></tr>
+<tr><td>ơ / Ơ</td><td>ơ ớ ờ ở ỡ ợ</td><td>Ơ Ớ Ờ Ở Ỡ Ợ</td></tr>
+<tr><td>u / U</td><td>u ú ù ủ ũ ụ</td><td>U Ú Ù Ủ Ũ Ụ</td></tr>
+<tr><td>ư / Ư</td><td>ư ứ ừ ử ữ ự</td><td>Ư Ứ Ừ Ử Ữ Ự</td></tr>
+<tr><td>y / Y</td><td>y ý ỳ ỷ ỹ ỵ</td><td>Y Ý Ỳ Ỷ Ỹ Ỵ</td></tr>
+</tbody></table></div>
+<p>Keresési példák a Vietnámi készletben (előtag nélküli hexadecimális bevitel): <code>0110</code> → Đ, <code>0111</code> → đ, <code>1EAE</code> → Ắ, <code>1EB7</code> → ặ, <code>1EDA</code> → Ớ, <code>1EF1</code> → ự, <code>1EF8</code> → Ỹ. A kijelzés például <code>U+1EAE</code>.</p>
+<h2>Ellenőrzés és korlátok</h2>
+<p>Mindhárom minta Chromium böngészőben sikeres ellenőrzésen ment át 1440 × 1000, 390 × 844, 320 × 568, 568 × 320 és 844 × 390 képpontos nézetben (összesen 15 eset). Mind a 178 vietnámi karaktert minden esetben kirajzoltuk: 2670 ellenőrzés igazolta a kódpont helyességét, a címke karakter fölötti helyzetét és a megjelenítő keretein belüli elhelyezést. Nem jelentkezett vízszintes oldaltúlcsordulás vagy JavaScript-futási hiba.</p>
+<p>A tesztek ellenőrizték a magyar betűrendet, a teljes vietnámi karakterkészletet független NFC-előállítással, a sorszámos és hexadecimális ugrást, a hibás sorszám jelzését, az előző/következő léptetést és a körbefordulást, a lejátszást és szünetet, a sebességet, a készletenkénti pozíciót, az újratöltés utáni visszaállítást, a teljes képernyőt, valamint a 😀 és 𝐀 kiegészítő síkbeli kódpontját. Közös webes eredeten külön teszt igazolta a három minta mentésének függetlenségét. Az asztali és mobil képernyőképek vizuális ellenőrzése is megtörtént.</p>
+<p>A források összehasonlítása igazolta, hogy a vietnámi készlet, annak listabejegyzése és az új azonosítók eltávolítása után mindhárom program pontosan megegyezik a megfelelő 13-as mintával. A mobilméretű böngészőteszt szimuláció, nem fizikai telefonon végzett ellenőrzés. Más böngészők és fizikai eszközök saját teljesképernyő- és betűtípus-támogatása eltérhet.</p>
+</main></body></html>
