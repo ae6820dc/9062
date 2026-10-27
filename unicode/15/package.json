@@ -1,0 +1,15 @@
+{
+  "name": "unicode-viewer-v15-nanobot",
+  "version": "15.0.0",
+  "private": true,
+  "description": "Build and validation tools only; the HTML programs have no runtime dependencies",
+  "scripts": {
+    "build": "python3 tools/build.py",
+    "test": "python3 tests/inventories.py && node tests/core.cjs",
+    "test:browser": "node tests/browser.cjs && node tests/layout.cjs",
+    "test:pages": "node tests/pages.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

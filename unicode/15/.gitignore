@@ -1,0 +1,4 @@
+node_modules/
+__pycache__/
+tests/pages-results.json
+tests/pages-sample*.png

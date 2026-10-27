@@ -1,0 +1,36 @@
+name: Unicode v15 GitHub Pages verification
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'unicode/15/**'
+      - '.github/workflows/unicode15-pages-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-published-viewers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: unicode/15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: unicode/15/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - name: Verify published files and desktop/mobile browser behavior
+        run: node tests/pages.cjs
+      - name: Upload Pages verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unicode15-pages-verification
+          path: |
+            unicode/15/tests/pages-results.json
+            unicode/15/tests/pages-sample*.png

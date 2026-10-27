@@ -1,0 +1,71 @@
+{
+  "version": "18.0.0",
+  "releaseTag": "final-18.0-20260916",
+  "commit": "e1521a0131d620999682a1f101252ad4b6024c7c",
+  "files": {
+    "UnicodeData.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/UnicodeData.txt",
+      "sha256": "0736451de439ae7baf1425136617da495e09ee5afbe6e394374db7009ea08950"
+    },
+    "Blocks.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/Blocks.txt",
+      "sha256": "a58f8d322f3c5e254f9f97b1cbf76a454a7e02de6ac35619a5e4f27aaabfd553"
+    },
+    "Scripts.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/Scripts.txt",
+      "sha256": "0071fd81b6aeae25f6e8bce8efec3066a6476a91b49bdb2f52dc76e817862a6a"
+    },
+    "ScriptExtensions.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/ScriptExtensions.txt",
+      "sha256": "5c9d34a922f687726f2a8bcf57d49f905987e51f1b21b58c95a00fbe255cec23"
+    },
+    "PropertyValueAliases.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/PropertyValueAliases.txt",
+      "sha256": "06c4c8eaf7b0bf34abe73b113da1215bd784ac254d4c223600b90267caa4bbbd"
+    },
+    "SpecialCasing.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/SpecialCasing.txt",
+      "sha256": "8538dea57c184f1ef3783885ea79677b10f6efa06423717157e63712f14d1ad2"
+    },
+    "CaseFolding.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/CaseFolding.txt",
+      "sha256": "a004797658a457bec4dc11683e39f69249ea3b595b752dbea6721c4c9f587b0d"
+    },
+    "CompositionExclusions.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/CompositionExclusions.txt",
+      "sha256": "c759b100e9ae8960ae6b50fc5765950a7581fd9f30d4ef95f68f25a6d97e818e"
+    },
+    "DerivedNormalizationProps.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/DerivedNormalizationProps.txt",
+      "sha256": "98ac7f67d985fe781e317f6182e885e94cabb0c314769e6dd73e48b226931ccd"
+    },
+    "NormalizationTest.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/NormalizationTest.txt",
+      "sha256": "25a50d816764b04abfb4a646d3eb2b2a803284c3873d9a06757b94fe4513dde3"
+    },
+    "DerivedCoreProperties.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/DerivedCoreProperties.txt",
+      "sha256": "09c928886a178fcafd93c29e4bd59073a058e5a100b716d425cb563ab50f68c9"
+    },
+    "PropList.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/PropList.txt",
+      "sha256": "f438f532e8737bb8a2702126cdf9c4af5e357c58c7acf9d9eb2fc7c1a1d955d6"
+    },
+    "auxiliary/GraphemeBreakProperty.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/auxiliary/GraphemeBreakProperty.txt",
+      "sha256": "0839dcb79e4ac639ecd538b1abf7c9d22e3f9dd265b7e182d33627aa4d75b45a"
+    },
+    "auxiliary/GraphemeBreakTest.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/auxiliary/GraphemeBreakTest.txt",
+      "sha256": "b0cf047ee94485bbdc846de2b902f5f8a815f6b674f9d04223cddadd91c9df31"
+    },
+    "emoji/emoji-data.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/emoji/emoji-data.txt",
+      "sha256": "80d00f8e616a0ef27fd6b8de3b758c06383b5d917e2977709578e68baf733bf1"
+    },
+    "ReadMe.txt": {
+      "url": "https://raw.githubusercontent.com/unicode-org/unicodetools/e1521a0131d620999682a1f101252ad4b6024c7c/unicodetools/data/ucd/dev/ReadMe.txt",
+      "sha256": "75a1ce9e5b14164a22d35b2a56fb5a8f927de323a08c43791c6fb050901f84f8"
+    }
+  }
+}
