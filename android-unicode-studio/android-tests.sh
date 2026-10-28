@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")"
+trap 'adb logcat -d -s AndroidRuntime chromium > runtime-logcat.txt; tail -100 runtime-logcat.txt' EXIT
 adb shell cmd connectivity airplane-mode enable
 adb shell svc wifi disable
 adb shell svc data disable
