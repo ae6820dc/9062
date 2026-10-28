@@ -1,8 +1,8 @@
 name: Unicode Studio 1–15
 on:
   push:
-    branches: [unicode-studio-1-15]
-    paths: ['android-unicode-studio/**', '.github/workflows/unicode-studio-1-15.yml']
+    branches: [main, unicode-studio-1-15]
+    paths: ['android-unicode-studio/**', 'unicode/**', '.github/workflows/unicode-studio-1-15.yml']
   workflow_dispatch:
 permissions:
   contents: write

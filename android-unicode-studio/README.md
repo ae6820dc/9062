@@ -20,3 +20,12 @@ Run `./gradlew assembleRelease lintRelease assembleDebug assembleDebugAndroidTes
 GitHub Actions workflow `.github/workflows/unicode-studio-1-15.yml` builds, runs lint and asset verification, then installs and launches on an Android 16 emulator with airplane mode enabled, Wi-Fi and mobile data disabled. Instrumentation clicks all version and sample buttons, checks original IDs/keys, separate origins, persisted local storage across navigation and process restart, and visible system bars after fullscreen requests. It tests both debug and the exact release APK. Only after those checks pass does the workflow upload an artifact and commit a uniquely named release to `android-distributions/unicode-studio-1-15-RUN_ID-ATTEMPT.apk`. Old APKs and Android projects are retained.
 
 As with the earlier repository builds, APKs use the repository's public test signing key. They are standalone, installable builds; production distribution should use a private release key.
+
+## Verified release — 2026-10-28
+
+[GitHub Actions run 40666514957](https://github.com/ae6820dc/9062/actions/runs/40666514957) succeeded. All 72 samples passed on Android 16 in airplane mode with Wi-Fi and mobile data disabled, across initial use, process restart, and installation of the actual release APK. Navigation, original IDs and keys, isolated persistent storage, and both visible system bars were checked. All 129 bundled original files matched repository bytes.
+
+- APK: [`android-distributions/unicode-studio-1-15-40666514957-1.apk`](../android-distributions/unicode-studio-1-15-40666514957-1.apk)
+- Size: **9,952,640 bytes**
+- [Actions artifact](https://github.com/ae6820dc/9062/actions/runs/40666514957/artifacts/12806343083)
+- [SHA-256](../android-distributions/unicode-studio-1-15-40666514957-1.apk.sha256)
