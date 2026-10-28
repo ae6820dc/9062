@@ -1,0 +1,20 @@
+plugins { id 'com.android.application' }
+android {
+ namespace 'io.github.ae6820dc.studio'
+ compileSdk 36
+ buildToolsVersion '36.0.0'
+ defaultConfig {
+  applicationId 'io.github.ae6820dc.unicodestudio'
+  minSdk 26
+  targetSdk 36
+  versionCode 3
+  versionName '1.2'
+  testInstrumentationRunner 'io.github.ae6820dc.studio.SmokeInstrumentation'
+ }
+ signingConfigs { stableDebug { storeFile file('../signing/studio-debug.jks'); storePassword 'android'; keyAlias 'unicode-test'; keyPassword 'android' } }
+ buildTypes { debug { signingConfig signingConfigs.stableDebug }; release { signingConfig signingConfigs.stableDebug; debuggable false } }
+ compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+ sourceSets.main.assets.srcDirs = [layout.buildDirectory.dir('generated/offline')]
+}
+tasks.register('prepareOfflineAssets', Exec) { workingDir rootProject.projectDir; commandLine 'python3', 'prepare-assets.py' }
+tasks.named('preBuild').configure { dependsOn 'prepareOfflineAssets' }
