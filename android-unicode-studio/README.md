@@ -35,3 +35,13 @@ As with the earlier repository builds, APKs use the repository's public test sig
 V2 is a fresh GitHub Actions build of all 81 repository samples, including all twelve Unicode 12 samples. No Unicode HTML files were changed. The application architecture, launcher icon, interface, navigation, host helpers, Program IDs, Storage Keys and sample origins are preserved. `previous-apks.json` records every pre-V2 APK digest; verification rejects any change to those files. The package retains the public test signing certificate for in-place updates with `adb install -r`.
 
 [Download the V2 APK](https://github.com/ae6820dc/9062/raw/refs/heads/main/android-distributions/unicode-studio-1-15-v2.apk). The workflow publishes this file and a GitHub Actions artifact only after lint, signature/package checks, byte-for-byte asset checks, and all 81 sample launch/navigation/storage/system-bar checks pass on an Android 16 emulator with networking disabled. The exact release is installed over the debug build and tested again. This is emulator verification; no physical device is claimed. The adjacent `.verification.txt` and `.sha256` files record package results, size and digest.
+
+### V2 verified results — 2026-10-28
+
+[GitHub Actions run 40681463949](https://github.com/ae6820dc/9062/actions/runs/40681463949) completed successfully on main. The new APK is **10,018,316 bytes** (9.55 MiB), version 2.0 / code 4, target Android 16 / API 36. The direct repository download returned HTTP 200 and matched the published APK byte for byte.
+
+- All **81 programs** are present; Unicode 12 has **12 samples**. All **138 original bundled files** match repository bytes.
+- Android 16 offline emulator: initial pass **2,017 checks**, process restart pass **2,011 checks**, exact release APK installation and launch pass **2,017 checks**. Each pass covered all 81 samples, menus, original IDs and keys, isolated persistent storage and visible system bars.
+- Lint, APK ZIP integrity, Android package metadata, signature verification, matching prior signing certificate and launcher icon passed. Every previous APK digest remains unchanged.
+- [APK artifact](https://github.com/ae6820dc/9062/actions/runs/40681463949/artifacts/12812419160) · [Verification logs](https://github.com/ae6820dc/9062/actions/runs/40681463949/artifacts/12813296531)
+- SHA-256: `8a7f387716cc30bdfa1dbae9e17b5b52ef5636570562b79eed22ecb183fda3ad`
