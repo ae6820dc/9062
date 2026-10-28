@@ -1,0 +1,1 @@
+PASS: 81 programs; Unicode 12 has 12 samples; 138 original files byte-identical; prior catalog identities, host, launcher icon and all previous APKs unchanged; matching signer; valid non-debug Android package; target API 36; no Internet permission; APK 10018316 bytes; SHA-256 8a7f387716cc30bdfa1dbae9e17b5b52ef5636570562b79eed22ecb183fda3ad
