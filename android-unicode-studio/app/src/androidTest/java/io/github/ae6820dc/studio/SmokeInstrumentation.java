@@ -32,6 +32,11 @@ public final class SmokeInstrumentation extends Instrumentation {
    if(!clicked[0])Thread.sleep(100);
   }
   require(clicked[0],"menu button "+label);waitForIdleSync();
+  if(label.equals("‹ Back") || label.equals("Samples") || label.equals("Home")){
+   boolean[] menuReady={false};until=System.currentTimeMillis()+30000;
+   while(!menuReady[0] && System.currentTimeMillis()<until){main(()->menuReady[0]=web.getParent()==null);if(!menuReady[0])Thread.sleep(100);}
+   require(menuReady[0],"completed native navigation "+label);
+  }
  }
  private void bars(){main(()->{View decor=activity.getWindow().getDecorView();WindowInsets insets=decor.getRootWindowInsets();require(insets.isVisible(WindowInsets.Type.statusBars())&&insets.isVisible(WindowInsets.Type.navigationBars()),"system bars visible");if(web.getParent()!=null){int[] pos=new int[2];web.getLocationOnScreen(pos);android.graphics.Insets safe=insets.getInsets(WindowInsets.Type.systemBars());require(pos[1]>=safe.top && pos[1]+web.getHeight()<=decor.getHeight()-safe.bottom,"content within system bars");}});}
  @Override public void onStart(){Bundle result=new Bundle();try{
