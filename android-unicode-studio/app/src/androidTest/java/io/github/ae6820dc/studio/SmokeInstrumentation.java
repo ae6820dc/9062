@@ -25,7 +25,14 @@ public final class SmokeInstrumentation extends Instrumentation {
  }
  private void waitFor(String js)throws Exception{long until=System.currentTimeMillis()+60000;while(System.currentTimeMillis()<until){if("true".equals(eval(js)))return;Thread.sleep(150);}throw new AssertionError("Page timeout: "+js);}
  private Button button(View view,String label){if(view instanceof Button && ((Button)view).getText().toString().equals(label))return (Button)view;if(view instanceof ViewGroup){ViewGroup g=(ViewGroup)view;for(int i=0;i<g.getChildCount();i++){Button b=button(g.getChildAt(i),label);if(b!=null)return b;}}return null;}
- private void click(String label){main(()->{Button b=button(activity.getWindow().getDecorView(),label);require(b!=null,"menu button "+label);b.performClick();});waitForIdleSync();}
+ private void click(String label)throws Exception{
+  long until=System.currentTimeMillis()+30000;boolean[] clicked={false};
+  while(!clicked[0] && System.currentTimeMillis()<until){
+   main(()->{Button b=button(activity.getWindow().getDecorView(),label);if(b!=null){b.performClick();clicked[0]=true;}});
+   if(!clicked[0])Thread.sleep(100);
+  }
+  require(clicked[0],"menu button "+label);waitForIdleSync();
+ }
  private void bars(){main(()->{View decor=activity.getWindow().getDecorView();WindowInsets insets=decor.getRootWindowInsets();require(insets.isVisible(WindowInsets.Type.statusBars())&&insets.isVisible(WindowInsets.Type.navigationBars()),"system bars visible");if(web.getParent()!=null){int[] pos=new int[2];web.getLocationOnScreen(pos);android.graphics.Insets safe=insets.getInsets(WindowInsets.Type.systemBars());require(pos[1]>=safe.top && pos[1]+web.getHeight()<=decor.getHeight()-safe.bottom,"content within system bars");}});}
  @Override public void onStart(){Bundle result=new Bundle();try{
   Intent launch=getTargetContext().getPackageManager().getLaunchIntentForPackage(getTargetContext().getPackageName());require(launch!=null,"launcher");launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);activity=startActivitySync(launch);
