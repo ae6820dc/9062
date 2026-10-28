@@ -43,9 +43,9 @@ public final class SmokeInstrumentation extends Instrumentation {
   Intent launch=getTargetContext().getPackageManager().getLaunchIntentForPackage(getTargetContext().getPackageName());require(launch!=null,"launcher");launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);activity=startActivitySync(launch);
   Field w=MainActivity.class.getDeclaredField("web");w.setAccessible(true);web=(WebView)w.get(activity);
   Field c=MainActivity.class.getDeclaredField("programs");c.setAccessible(true);@SuppressWarnings("unchecked") List<JSONObject> programs=(List<JSONObject>)c.get(activity);
-  require(programs.size()==72,"72 catalog entries");waitForIdleSync();Thread.sleep(1000);bars();
+  require(programs.size()==81,"81 catalog entries");waitForIdleSync();Thread.sleep(1000);bars();
   for(int version=1;version<=15;version++){
-   int count=version>=13?12:3;click("Unicode "+version+" · "+count+" samples");
+   int count=version>=12?12:3;click("Unicode "+version+" · "+count+" samples");
    for(JSONObject p:programs){if(!p.getString("group").equals("Unicode "+version))continue;
     click(p.getString("name"));String id=p.getString("id");
     waitFor("location.hostname==="+JSONObject.quote(id+".appassets.androidplatform.net")+" && document.readyState==='complete' && !!window.studioDownload");
@@ -63,6 +63,6 @@ public final class SmokeInstrumentation extends Instrumentation {
    click("‹ Back");
   }
   click("Unicode 15 · 12 samples");click("Sample 12");waitFor("!!window.studioDownload");click("Home");click("Unicode 1 · 3 samples");click("‹ Back");bars();
-  result.putString("stream","PASS "+checks+" checks: all 72 samples, menus, IDs, keys, offline storage and system bars\n");finish(Activity.RESULT_OK,result);
+  result.putString("stream","PASS "+checks+" checks: all 81 samples, menus, IDs, keys, offline storage and system bars\n");finish(Activity.RESULT_OK,result);
  }catch(Throwable e){result.putString("stream","FAIL after "+checks+" checks: "+e+"\n"+android.util.Log.getStackTraceString(e));finish(Activity.RESULT_CANCELED,result);}}
 }

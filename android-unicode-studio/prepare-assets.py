@@ -10,8 +10,8 @@ catalog=[];checksums={};inventory={}
 for version in range(1,16):
  folder=repo/'unicode'/str(version)
  samples=sorted(folder.glob('sample*.html'),key=lambda p:int(re.fullmatch(r'sample(\d+)\.html',p.name)[1]))
- expected=12 if version>=13 else 3
- assert len(samples)>=expected,(version,len(samples),expected)
+ expected=12 if version>=12 else 3
+ assert [p.name for p in samples]==[f"sample{s}.html" for s in range(1,expected+1)],(version,[p.name for p in samples],expected)
  inventory[str(version)]=[p.name for p in samples]
  for source in samples:
   html=source.read_text()
@@ -28,7 +28,9 @@ for version in range(1,16):
   target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,target)
   checksums[str(rel)]=hashlib.sha256(source.read_bytes()).hexdigest()
   assert source.read_bytes()==target.read_bytes()
-assert len({p['id'] for p in catalog})==len(catalog)
+assert len(catalog)==81
+assert len({p['id'] for p in catalog})==81
+assert len({p['programId'] for p in catalog})==81
 for name,data in [('catalog.json',catalog),('source-checksums.json',checksums),('inventory.json',inventory)]:
  (output/name).write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n')
 shutil.copyfile(project/'host.js',output/'host.js')

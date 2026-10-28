@@ -1,4 +1,4 @@
-name: Unicode Studio 1–15
+name: Unicode Studio Complete Edition V2
 on:
   push:
     branches: [main, unicode-studio-1-15]
@@ -31,7 +31,7 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Verify all 72 samples on Android 16 offline
+      - name: Verify all 81 samples on Android 16 offline
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 36
@@ -39,17 +39,17 @@ jobs:
           target: default
           profile: pixel_2
           script: android-unicode-studio/android-tests.sh
-      - name: Preserve a uniquely named APK
+      - name: Preserve the new V2 APK
         id: apk
         run: |
-          output="android-distributions/unicode-studio-1-15-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.apk"
+          output="android-distributions/unicode-studio-1-15-v2.apk"
           (set -o noclobber; cat android-unicode-studio/app/build/outputs/apk/release/app-release.apk > "$output")
           python3 android-unicode-studio/verify-apk.py "$output" | tee "$output.verification.txt"
           sha256sum "$output" > "$output.sha256"
           echo "path=$output" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with:
-          name: unicode-studio-1-15-${{ github.run_id }}-${{ github.run_attempt }}
+          name: unicode-studio-1-15-v2-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             ${{ steps.apk.outputs.path }}*
             android-unicode-studio/runtime-*.txt
@@ -58,7 +58,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add "${{ steps.apk.outputs.path }}"*
-          git commit -m 'Add verified Unicode Studio 1–15 APK'
+          git commit -m 'Add verified Unicode Studio Complete Edition V2 APK'
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin HEAD:"${GITHUB_REF_NAME}"
       - uses: actions/upload-artifact@v4

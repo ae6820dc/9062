@@ -7,8 +7,8 @@ android {
   applicationId 'io.github.ae6820dc.unicodestudio'
   minSdk 26
   targetSdk 36
-  versionCode 3
-  versionName '1.2'
+  versionCode 4
+  versionName '2.0'
   testInstrumentationRunner 'io.github.ae6820dc.studio.SmokeInstrumentation'
  }
  signingConfigs { stableDebug { storeFile file('../signing/studio-debug.jks'); storePassword 'android'; keyAlias 'unicode-test'; keyPassword 'android' } }
