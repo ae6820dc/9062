@@ -7,7 +7,7 @@ const path = require('node:path');
 const {spawnSync} = require('node:child_process');
 const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const root = path.resolve(__dirname,'..');
-const base = process.env.TRANSLATE_TEST_URL || 'https://ae6820dc.github.io/9062/translate/';
+const base = process.env.TRANSLATE_TEST_URL || 'https://ae6820dc.github.io/9062/translate/1/';
 const report = {baseUrl:base,commit:process.env.GITHUB_SHA || null,startedAt:new Date().toISOString(),files:[],samples:[]};
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const identities = [
@@ -16,7 +16,7 @@ const identities = [
   ['D50C935F9D572B7F','700603AD2F340E2A']
 ];
 (async () => {
-  assert.equal(new URL(base).pathname.endsWith('/translate/'),true,'Test the final /translate/ location');
+  assert.equal(new URL(base).pathname.endsWith('/translate/1/'),true,'Test the final /translate/1/ location');
   // Wait for deployment propagation, requiring the expected file bytes rather
   // than accepting any HTTP 200 or a previous deployment's application shell.
   const critical = ['index.html','sample1.html','sample2.html','sample3.html','readme.html',

@@ -1,4 +1,4 @@
-/* Scope is /translate/ only. Large lexical shards belong in IndexedDB, not CacheStorage. */
+/* Scope is /translate/1/ only. Large lexical shards belong in IndexedDB, not CacheStorage. */
 'use strict';
 const CACHE = 'unicode-translate-shell-v1';
 const SHELL = ['./','index.html','sample1.html','sample2.html','sample3.html','readme.html',

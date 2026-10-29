@@ -22,7 +22,7 @@ The corpus uses 978 concept shards and 1,347 lexical shards, with at most 1,024 
 
 ## Checks completed
 
-`python3 translate/tests/validate_data.py` — **PASS**:
+`python3 translate/1/tests/validate_data.py` — **PASS**:
 
 - Independently decompressed every partition; checked SHA-256, compressed/uncompressed sizes, record counts, sorted ranges and UTF-8 decoding.
 - Recomputed every headword count, headword–sense count and lookup-form count from the actual records.
@@ -33,7 +33,7 @@ The corpus uses 978 concept shards and 1,347 lexical shards, with at most 1,024 
 - Checked equivalent sample markup, six distinct hexadecimal identities and all local HTML links.
 - Confirmed no replacement characters in the generated lexical records. Empty/corrupt source forms are excluded: 56 from the Wiktionary English extract and one from FreeDict Japanese–German. Rejections are recorded in the manifest.
 
-`node translate/tests/browser.cjs` (with `PLAYWRIGHT_MODULE` pointing to Playwright) — **PASS**, 16 integration check groups. Machine-readable results are in `tests/browser-results.json`:
+`node translate/1/tests/browser.cjs` (with `PLAYWRIGHT_MODULE` pointing to Playwright) — **PASS**, 16 integration check groups. Machine-readable results are in `tests/browser-results.json`:
 
 - Queried all 72 directed pairs against the real WordNet water sense `14845743-n`, including result pagination.
 - Tested NFC/NFD Hungarian input, Latin macrons, Cyrillic and Japanese results.
@@ -65,3 +65,7 @@ The final live URLs are `https://ae6820dc.github.io/9062/1/sample1.html`, `sampl
 ## Relocation to `9062/translate/`
 
 The entire `1/` project was moved to `translate/`. All three sample HTML files, Program IDs, storage keys, application code, dictionary data and source notices remain byte-identical. Runtime links remain relative; current installation URLs and the Pages verification workflow now target `https://ae6820dc.github.io/9062/translate/`. Earlier test results above describe the previous location.
+
+## Numbered project location: `translate/1/`
+
+The complete first project now lives in `translate/1/`, leaving `translate/2/` and other numbered directories available for future projects. All sample identities, storage keys, dictionary data and runtime behavior are preserved. The current published URL is https://ae6820dc.github.io/9062/translate/1/ . Earlier relocation records describe historical locations.

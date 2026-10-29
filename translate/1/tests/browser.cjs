@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('node:zlib');
 const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const base = process.env.TRANSLATE_TEST_URL || 'http://localhost:8000/translate/';
+const base = process.env.TRANSLATE_TEST_URL || 'http://localhost:8000/translate/1/';
 const report = {startedAt:new Date().toISOString(),checks:[],browser:null,baseUrl:base};
 function passed(name) {report.checks.push(name); console.log('PASS',name);}
 (async () => {

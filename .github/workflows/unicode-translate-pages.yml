@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'translate/**'
+      - 'translate/1/**'
       - '.github/workflows/unicode-translate-pages.yml'
   workflow_dispatch:
 permissions:
@@ -28,16 +28,16 @@ jobs:
           node -e 'console.log("CHROMIUM_PATH="+require(process.argv[1]).chromium.executablePath())' "$RUNNER_TEMP/unicode-translate-tests/node_modules/playwright" >> "$GITHUB_ENV"
       - name: Verify actual published files and all three programs
         env:
-          TRANSLATE_TEST_URL: https://ae6820dc.github.io/9062/translate/
-        run: node translate/tests/pages.cjs
+          TRANSLATE_TEST_URL: https://ae6820dc.github.io/9062/translate/1/
+        run: node translate/1/tests/pages.cjs
       - name: Upload live Pages verification evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: unicode-translate-pages-verification
           path: |
-            translate/tests/pages-results.json
-            translate/tests/browser-results.json
-            translate/tests/pages-sample*.png
+            translate/1/tests/pages-results.json
+            translate/1/tests/browser-results.json
+            translate/1/tests/pages-sample*.png
             /tmp/unicode-translate-mobile.png
             /tmp/unicode-translate-desktop.png
