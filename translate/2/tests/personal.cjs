@@ -27,7 +27,7 @@ function pass(message){report.checks.push(message);console.log('PASS',message);}
    await page.waitForFunction(()=>!document.getElementById('search').disabled);
    assert((await page.locator('#results').innerText()).includes(expected));
   }
-  async function upload(entries,version=1){await page.locator('#personal-file').setInputFiles({name:'words.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({format:'unicode-translate-personal',version,entries}))});}
+  async function upload(entries,version=1){await page.locator('#personal-file').setInputFiles({name:'words.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({format:'unicode-translate-personal',version,entries}))});await page.waitForFunction(()=>document.getElementById('import-dialog').open||document.getElementById('personal-status').classList.contains('form-error'));}
   async function confirm(policy='keep'){await page.locator('#import-policy').selectOption(policy);await page.locator('#import-confirm').click();await page.locator('#import-dialog').waitFor({state:'hidden'});}
   await visit(1);await page.waitForFunction(()=>document.getElementById('shell-status').textContent.includes('ready offline'));
   await add({hu:'Kedvenc kifejezésem',en:'My favourite expression',ja:'私のお気に入りの表現',ru:'Моё любимое выражение'},'A personal note <script>literal text</script>');await count(1);

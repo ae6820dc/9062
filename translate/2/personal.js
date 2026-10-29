@@ -177,7 +177,7 @@ window.personal = (() => {
     $('personal-add').onclick=()=>{const terms={};if($('query').value.trim())terms[$('from').value]=$('query').value.trim();open({terms,note:'',attribution:[]});};
     $('personal-export').onclick=()=>{reload().then(exportEntries).catch(error=>status(error.message,true));};
     $('personal-import').onclick=()=>$('personal-file').click();
-    $('personal-file').onchange=async()=>{const file=$('personal-file').files[0];$('personal-file').value='';if(!file)return;try{await prepareImport(file);}catch(error){status(error.message,true);}};
+    $('personal-file').onchange=async()=>{const file=$('personal-file').files[0];$('personal-file').value='';if(!file)return;status('Checking import file…');try{await prepareImport(file);}catch(error){status(error.message,true);}};
     $('personal-filter').oninput=render;
     $('expression-close').onclick=()=>$('expression-dialog').close();
     $('import-close').onclick=()=>{$('import-dialog').close();importing=null;};
