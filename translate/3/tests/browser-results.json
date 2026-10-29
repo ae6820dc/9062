@@ -1,0 +1,29 @@
+{
+  "startedAt": "2026-10-29T22:26:18.958Z",
+  "checks": [
+    "Sample 1 initializes and service worker installs all sample shells",
+    "All 72 directed pairs return the actual common water sense, including pagination",
+    "NFC/NFD Hungarian and Latin macrons match; Cyrillic and Japanese returned in pair tests",
+    "Indexed Unicode prefix suggestions return at most eight real forms",
+    "Repeated cached lookup causes no dictionary network requests",
+    "Complete long translation phrases remain searchable in reverse lookup",
+    "Suggestion list opens, supports keyboard focus and dismisses with Escape",
+    "UI search, favorites, history, clipboard and attributed timestamped export",
+    "All three samples run the same engine with independent Storage Key settings",
+    "Language swap and clear controls",
+    "Paused source download keeps committed chunks and does not claim completeness",
+    "Full Latin offline download completes, reuses existing chunks and repeats without transfer",
+    "Offline reload and Latin → Japanese dictionary lookup; mobile and desktop layouts fit viewport",
+    "A different sample launches fully offline from the shared application shell",
+    "No uncaught browser application errors",
+    "Corrupt dictionary response is rejected without installing a shard"
+  ],
+  "browser": "156.0.4314.50",
+  "baseUrl": "http://localhost:8000/translate/3/",
+  "offlineLatin": {
+    "chunks": 140,
+    "compressedBytes": 14234309,
+    "sharedChunksBefore": 20
+  },
+  "completedAt": "2026-10-29T22:26:31.453Z"
+}

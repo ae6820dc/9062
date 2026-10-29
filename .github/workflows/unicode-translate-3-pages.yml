@@ -1,0 +1,49 @@
+name: Unicode Translate 3 GitHub Pages verification
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'translate/3/**'
+      - '.github/workflows/unicode-translate-3-pages.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: unicode-translate-3-pages
+  cancel-in-progress: true
+jobs:
+  verify-published-samples:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify translation service security and quota logic
+        run: node --test translate/3/server/server.test.mjs
+      - name: Install isolated browser test tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/unicode-translate-tests" --no-audit --no-fund playwright@1.56.1
+          "$RUNNER_TEMP/unicode-translate-tests/node_modules/.bin/playwright" install --with-deps chromium
+          echo "PLAYWRIGHT_MODULE=$RUNNER_TEMP/unicode-translate-tests/node_modules/playwright" >> "$GITHUB_ENV"
+          node -e 'console.log("CHROMIUM_PATH="+require(process.argv[1]).chromium.executablePath())' "$RUNNER_TEMP/unicode-translate-tests/node_modules/playwright" >> "$GITHUB_ENV"
+      - name: Verify actual published files and all twelve programs
+        env:
+          TRANSLATE_TEST_URL: https://ae6820dc.github.io/9062/translate/3/
+        run: node translate/3/tests/pages.cjs
+      - name: Upload live Pages verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unicode-translate-3-pages-verification
+          path: |
+            translate/3/tests/pages-results.json
+            translate/3/tests/browser-results.json
+            translate/3/tests/pages-sample*.png
+            /tmp/unicode-translate-mobile.png
+            /tmp/unicode-translate-desktop.png
+            translate/3/tests/personal-results.json
+            translate/3/tests/personal-*.png
+            translate/3/tests/google-results.json
+            translate/3/tests/google-*.png

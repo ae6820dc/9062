@@ -1,0 +1,1 @@
+{"name":"unicode-translate-3-service","private":true,"version":"1.0.0","type":"module","engines":{"node":">=22"},"packageManager":"pnpm@11.25.0","scripts":{"start":"node server.mjs","test":"node --test server.test.mjs"},"dependencies":{"google-auth-library":"11.3.2","@google-cloud/firestore":"9.4.0"}}

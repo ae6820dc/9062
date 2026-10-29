@@ -1,0 +1,9 @@
+# Unicode Translate 3 validation
+
+Location: `translate/3/`. Translate 1 and Translate 2 are preserved. Twelve samples have 24 new permanent identities, reproducible from `identities.json` and `tools/make_samples.py`. The original base corpus, manifest, source snapshots and license notices are unchanged.
+
+The original 16 browser integration groups, 13 personal dictionary groups and all twelve published sample checks are retained. `tests/google.cjs` adds ten controlled provider-boundary groups for lazy loading, explicit source/target selection, preservation of existing and in-flight edits, partial failures, stale responses, cancellation, invalid responses, expired login, quotas, token handling, machine-origin export and truthful unconfigured behavior. `server/server.test.mjs` covers request validation, account authorization, CORS, Unicode usage counts, daily reservations, request limits and provider failures. The Pages workflow executes server tests, verifies deployed bytes, tests all twelve identities/entries on desktop/mobile, and runs the browser suites. Evidence is uploaded as workflow artifacts.
+
+The official Google attribution badge is supplied locally so attribution survives offline use. Machine-derived entry metadata travels in personal backups. Translate 2 format version 1 imports are accepted; optional metadata is added without changing the base backup envelope version.
+
+**Not yet verified:** real Google sign-in, real Google translations, Cloud Run deployment, an actual Firestore transaction and container deployment. The owner has no Google Cloud project yet; `google-config.json` intentionally contains no service URL or client ID. Test provider responses are fixtures, not live translations. No paid Google requests, cloud provisioning or APK builds are performed by this task or by the Pages workflow. See `server/SETUP.hu.md` for activation steps and cost limits.

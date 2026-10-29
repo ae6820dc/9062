@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+tests/pages-results.json
+tests/pages-sample*.png
+
+tests/personal-results.json
+tests/personal-*.png
+
+server/node_modules/
+server/.env*
+!server/.env.example
+tests/google-results.json
+tests/google-*.png
