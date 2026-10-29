@@ -22,7 +22,7 @@ The corpus uses 978 concept shards and 1,347 lexical shards, with at most 1,024 
 
 ## Checks completed
 
-`python3 1/tests/validate_data.py` — **PASS**:
+`python3 translate/tests/validate_data.py` — **PASS**:
 
 - Independently decompressed every partition; checked SHA-256, compressed/uncompressed sizes, record counts, sorted ranges and UTF-8 decoding.
 - Recomputed every headword count, headword–sense count and lookup-form count from the actual records.
@@ -33,7 +33,7 @@ The corpus uses 978 concept shards and 1,347 lexical shards, with at most 1,024 
 - Checked equivalent sample markup, six distinct hexadecimal identities and all local HTML links.
 - Confirmed no replacement characters in the generated lexical records. Empty/corrupt source forms are excluded: 56 from the Wiktionary English extract and one from FreeDict Japanese–German. Rejections are recorded in the manifest.
 
-`node 1/tests/browser.cjs` (with `PLAYWRIGHT_MODULE` pointing to Playwright) — **PASS**, 16 integration check groups. Machine-readable results are in `tests/browser-results.json`:
+`node translate/tests/browser.cjs` (with `PLAYWRIGHT_MODULE` pointing to Playwright) — **PASS**, 16 integration check groups. Machine-readable results are in `tests/browser-results.json`:
 
 - Queried all 72 directed pairs against the real WordNet water sense `14845743-n`, including result pagination.
 - Tested NFC/NFD Hungarian input, Latin macrons, Cyrillic and Japanese results.
@@ -61,3 +61,7 @@ The complete committed implementation was copied from its original location and 
 The independent data validator passed again at `/1/`, including all 72 coverage recounts and all 29 original source hashes. The three-sample smoke check and all 16 browser integration groups passed from `http://localhost:8000/1/`. A separate cross-path browser check created favorites/history and cached lookup data at the old location, then verified the same localStorage settings and successful offline lookup at `/1/`. The data format, IndexedDB name, settings namespaces, IDs and appearance were not changed.
 
 The final live URLs are `https://ae6820dc.github.io/9062/1/sample1.html`, `sample2.html` and `sample3.html`. The `Unicode Translate GitHub Pages verification` workflow verifies deployed file hashes, tests each published sample on desktop/mobile, then runs all 72 directions and the complete offline/download browser suite on that actual origin. Its `unicode-translate-pages-verification` artifact records the live URLs, commit, results and screenshots. No APK is built by this workflow.
+
+## Relocation to `9062/translate/`
+
+The entire `1/` project was moved to `translate/`. All three sample HTML files, Program IDs, storage keys, application code, dictionary data and source notices remain byte-identical. Runtime links remain relative; current installation URLs and the Pages verification workflow now target `https://ae6820dc.github.io/9062/translate/`. Earlier test results above describe the previous location.
