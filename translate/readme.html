@@ -1,1 +1,161 @@
-
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Unicode Translate · Documentation & licenses</title><link rel="icon" href="icon.svg"><link rel="stylesheet" href="styles.css"><script src="documentation.js" defer></script></head><body><main class="doc card">
+<p class="eyebrow">UNICODE TRANSLATE · PROJECT DOCUMENTATION</p><h1>A dictionary you can<br><em>inspect and expand.</em></h1><p><a href="index.html">Choose a sample</a> · <a href="sample1.html">Sample 1</a> · <a href="sample2.html">Sample 2</a> · <a href="sample3.html">Sample 3</a></p>
+<p>A static HTML/CSS/JavaScript multilingual dictionary for Hungarian, English, German, French, Spanish, Italian, Russian, Japanese and Latin. All 72 directed pairs use the same lookup engine. It supports exact lookup, alternatives grouped by sense, available grammatical information, prefix suggestions, history, favorites, clipboard copying, JSON export and downloadable offline dictionaries. There is no external translation API, telemetry, CDN, remote font or runtime dependency.</p>
+<h2>Installation & use</h2><p>Serve this directory over HTTPS or localhost; keep its paths intact. No build, API key or package installation is required to run it. For local development, from the repository root:</p><pre><code>python3 -m http.server 8000
+# Open http://localhost:8000/translate/index.html</code></pre>
+<p>Choose a sample, choose distinct source and target languages, then search a dictionary base form or phrase. Accents are significant. Matching uses NFC Unicode normalization, Unicode default lowercase, then NFC again; it does not strip accents, transliterate, stem or infer translations. Suggestions use the same normalized prefix. Japanese forms, Cyrillic and Latin diacritics are retained exactly apart from canonical normalization and surrounding whitespace. Source spelling and historical orthographic quirks are not silently corrected.</p><p>Swap reverses the language direction; it keeps your query so you can edit or replace it. “Save” stores a favorite lookup, and “Recent” stores at most 50 searches. Favorites are capped at 500. Both stay on this device, separately for each sample. Exports contain the complete Program ID, Unix millisecond timestamp, dataset version, displayed lexical records, source/license metadata, favorites and history. Export filenames contain the Program ID and timestamp. Exported lexical data retains its original licensing obligations. Clipboard access depends on browser permissions.</p>
+<h2>Actual coverage</h2><p>The goal is <strong>100,000 genuine headwords per language</strong>, not a claim that every language has reached it. Counts below are computed from the actual bundled, validated records. Each lexical item is traceable to pinned source data. “Validated” means structural checks, provenance, counts, normalization and alignment consistency; it does not mean every crowd-sourced translation has been independently linguistically reviewed.</p>
+<div id="coverage-report"><div class="table-scroll"><table><caption>Bundled lexical coverage</caption><thead><tr><th>Language</th><th>Headwords</th><th>Headword–sense associations</th><th>Lookup forms</th><th>Gap to 100,000</th></tr></thead><tbody>
+<tr><th>Hungarian</th><td>142,513</td><td>267,432</td><td>168,201</td><td>0</td></tr>
+<tr><th>English</th><td>211,086</td><td>482,633</td><td>368,436</td><td>0</td></tr>
+<tr><th>German</th><td>25,626</td><td>34,420</td><td>205,423</td><td>74,374</td></tr>
+<tr><th>French</th><td>56,399</td><td>115,744</td><td>67,631</td><td>43,601</td></tr>
+<tr><th>Spanish</th><td>90,495</td><td>152,155</td><td>90,495</td><td>9,505</td></tr>
+<tr><th>Italian</th><td>50,272</td><td>85,454</td><td>50,429</td><td>49,728</td></tr>
+<tr><th>Russian</th><td>25,185</td><td>33,707</td><td>29,181</td><td>74,815</td></tr>
+<tr><th>Japanese</th><td>385,819</td><td>892,050</td><td>385,819</td><td>0</td></tr>
+<tr><th>Latin</th><td>9,085</td><td>16,156</td><td>9,108</td><td>90,915</td></tr>
+</tbody></table></div><div class="table-scroll"><table><caption>All 72 directed pairs: source lookup forms with at least one translation</caption><thead><tr><th>Source ↓ / Target →</th>
+<th>HU</th>
+<th>EN</th>
+<th>DE</th>
+<th>FR</th>
+<th>ES</th>
+<th>IT</th>
+<th>RU</th>
+<th>JA</th>
+<th>LA</th>
+</tr></thead><tbody>
+<tr><th>Hungarian</th>
+<td>—</td>
+<td title="142,513 source headwords; 519,432 aligned senses">168,201</td>
+<td title="9,537 source headwords; 8,519 aligned senses">9,537</td>
+<td title="10,525 source headwords; 9,537 aligned senses">10,525</td>
+<td title="10,638 source headwords; 9,646 aligned senses">10,638</td>
+<td title="9,934 source headwords; 8,904 aligned senses">9,934</td>
+<td title="9,532 source headwords; 8,533 aligned senses">9,532</td>
+<td title="10,064 source headwords; 9,041 aligned senses">10,064</td>
+<td title="3,423 source headwords; 2,775 aligned senses">3,423</td>
+</tr>
+<tr><th>English</th>
+<td title="100,028 source headwords; 519,432 aligned senses">100,028</td>
+<td>—</td>
+<td title="36,107 source headwords; 19,675 aligned senses">36,107</td>
+<td title="91,161 source headwords; 82,510 aligned senses">91,644</td>
+<td title="109,026 source headwords; 84,053 aligned senses">110,141</td>
+<td title="62,805 source headwords; 41,893 aligned senses">62,805</td>
+<td title="36,160 source headwords; 19,983 aligned senses">36,160</td>
+<td title="84,708 source headwords; 253,133 aligned senses">253,288</td>
+<td title="11,010 source headwords; 10,340 aligned senses">11,011</td>
+</tr>
+<tr><th>German</th>
+<td title="11,852 source headwords; 8,519 aligned senses">11,852</td>
+<td title="24,239 source headwords; 19,675 aligned senses">24,239</td>
+<td>—</td>
+<td title="22,854 source headwords; 18,354 aligned senses">22,854</td>
+<td title="23,256 source headwords; 18,706 aligned senses">23,256</td>
+<td title="22,233 source headwords; 24,403 aligned senses">22,270</td>
+<td title="19,883 source headwords; 15,407 aligned senses">19,883</td>
+<td title="21,214 source headwords; 126,367 aligned senses">199,497</td>
+<td title="5,558 source headwords; 11,074 aligned senses">11,229</td>
+</tr>
+<tr><th>French</th>
+<td title="14,724 source headwords; 9,537 aligned senses">14,724</td>
+<td title="56,399 source headwords; 82,510 aligned senses">56,590</td>
+<td title="24,788 source headwords; 18,354 aligned senses">24,788</td>
+<td>—</td>
+<td title="47,251 source headwords; 49,653 aligned senses">47,251</td>
+<td title="33,224 source headwords; 32,140 aligned senses">33,224</td>
+<td title="24,549 source headwords; 18,583 aligned senses">24,549</td>
+<td title="40,883 source headwords; 56,389 aligned senses">52,394</td>
+<td title="7,161 source headwords; 4,096 aligned senses">7,161</td>
+</tr>
+<tr><th>Spanish</th>
+<td title="18,865 source headwords; 9,646 aligned senses">18,865</td>
+<td title="90,495 source headwords; 84,053 aligned senses">90,495</td>
+<td title="31,180 source headwords; 18,706 aligned senses">31,180</td>
+<td title="63,968 source headwords; 49,653 aligned senses">63,968</td>
+<td>—</td>
+<td title="47,914 source headwords; 37,089 aligned senses">47,914</td>
+<td title="31,280 source headwords; 18,942 aligned senses">31,280</td>
+<td title="58,478 source headwords; 46,893 aligned senses">58,478</td>
+<td title="9,084 source headwords; 4,117 aligned senses">9,084</td>
+</tr>
+<tr><th>Italian</th>
+<td title="16,230 source headwords; 8,904 aligned senses">16,230</td>
+<td title="50,092 source headwords; 41,893 aligned senses">50,092</td>
+<td title="26,589 source headwords; 24,403 aligned senses">26,749</td>
+<td title="41,409 source headwords; 32,140 aligned senses">41,409</td>
+<td title="45,702 source headwords; 37,089 aligned senses">45,702</td>
+<td>—</td>
+<td title="26,128 source headwords; 16,410 aligned senses">26,128</td>
+<td title="39,800 source headwords; 30,776 aligned senses">39,800</td>
+<td title="8,011 source headwords; 3,945 aligned senses">8,011</td>
+</tr>
+<tr><th>Russian</th>
+<td title="12,762 source headwords; 8,533 aligned senses">12,762</td>
+<td title="25,185 source headwords; 19,983 aligned senses">25,185</td>
+<td title="21,082 source headwords; 15,407 aligned senses">21,082</td>
+<td title="23,928 source headwords; 18,583 aligned senses">23,928</td>
+<td title="24,225 source headwords; 18,942 aligned senses">24,225</td>
+<td title="21,616 source headwords; 16,410 aligned senses">21,616</td>
+<td>—</td>
+<td title="22,672 source headwords; 24,042 aligned senses">26,748</td>
+<td title="6,352 source headwords; 3,733 aligned senses">6,352</td>
+</tr>
+<tr><th>Japanese</th>
+<td title="35,938 source headwords; 9,041 aligned senses">35,938</td>
+<td title="385,812 source headwords; 253,133 aligned senses">385,812</td>
+<td title="242,880 source headwords; 126,367 aligned senses">242,880</td>
+<td title="101,455 source headwords; 56,389 aligned senses">101,455</td>
+<td title="87,062 source headwords; 46,893 aligned senses">87,062</td>
+<td title="72,696 source headwords; 30,776 aligned senses">72,696</td>
+<td title="63,191 source headwords; 24,042 aligned senses">63,191</td>
+<td>—</td>
+<td title="20,630 source headwords; 3,907 aligned senses">20,630</td>
+</tr>
+<tr><th>Latin</th>
+<td title="3,479 source headwords; 2,775 aligned senses">3,479</td>
+<td title="6,201 source headwords; 10,340 aligned senses">6,229</td>
+<td title="7,948 source headwords; 11,074 aligned senses">7,948</td>
+<td title="4,698 source headwords; 4,096 aligned senses">4,698</td>
+<td title="4,706 source headwords; 4,117 aligned senses">4,706</td>
+<td title="4,566 source headwords; 3,945 aligned senses">4,566</td>
+<td title="4,382 source headwords; 3,733 aligned senses">4,382</td>
+<td title="4,508 source headwords; 3,907 aligned senses">4,508</td>
+<td>—</td>
+</tr>
+</tbody></table></div></div>
+<p><strong>Definitions of counts:</strong> A headword is a distinct normalized form explicitly supplied as a lemma (WordNet) or source headword (FreeDict). Inflected forms, phrases, spelling variants and names genuinely present in a source remain separate when their normalized forms differ. Headword–sense associations count a headword once for each distinct source sense. Lookup forms include complete FreeDict target phrases indexed for reverse lookup; these are not added to the headword target merely because they can be searched. Pair coverage counts unique source lookup forms with at least one target form on the same attested sense. It does not count translation combinations, and its value may differ by direction. The full manifest also reports source headwords with a translation and aligned senses for every pair.</p>
+<h2>Sources, attribution & legal reuse</h2><p>Data is drawn from two pinned, open upstream repositories. The linked original files, byte-level SHA-256 hashes, precise revisions, license identifiers, attribution notices and compressed original source snapshots are recorded in <a href="data/manifest.json">data/manifest.json</a>. Original source files are distributed under <code>data/sources/</code>; they are not downloaded into the application database. Reuse must follow the corresponding source licenses. The original application and tools use the <a href="LICENSE.txt">MIT license</a>, which does not relicense the lexical data.</p>
+<ul><li><strong>Open Multilingual Wordnet</strong>, revision <code>406bf83b3c507a3d1f26e88252d5d66893fd36bf</code>, <a href="https://github.com/omwn/omw-data">omwn/omw-data</a>. Cite Francis Bond and Ryan Foster (2013), <em>Linking and Extending an Open Multilingual Wordnet</em>, ACL 2013, pp. 1352–1362, <a href="https://aclanthology.org/P13-1133/">paper</a>, together with the individual wordnets. Wiktionary-derived mappings for all nine languages use the supplied CC BY-SA 3.0 option (original notice also describes GFDL); attribution to Wiktionary contributors and OMW is retained. These mappings were automatically extracted and may have errors.</li>
+<li><strong>Princeton WordNet 3.0</strong>, © 2006 Princeton University, supplied through OMW, under the WordNet license. It supplies English lemmas and part of speech.</li>
+<li><strong>WOLF (French)</strong>, Benoît Sagot and Darja Fišer, <em>Building a free French wordnet from multilingual resources</em>, LREC 2008. CeCILL-C license; original license is supplied, including its original declared encoding.</li>
+<li><strong>MultiWordNet (Italian)</strong>, FBK; Emanuele Pianta, Luisa Bentivogli and Christian Girardi (2002), <em>MultiWordNet: Developing an Aligned Multilingual Database</em>, First International Conference on Global WordNet, pp. 293–302. CC BY 3.0.</li>
+<li><strong>ItalWordNet</strong>, Roberto Bartolini, maintained by Roberto Bartolini, ODC Attribution 1.0. Original metadata and citation are retained.</li>
+<li><strong>Japanese WordNet</strong>, © 2009, 2010 National Institute of Information and Communications Technology (NICT). The supplied Japanese WordNet permission/disclaimer applies; cite its original citation file.</li>
+<li><strong>Spanish MCR</strong> (Multilingual Central Repository), CC BY 3.0 for its Spanish data; English-derived information remains under the WordNet license. Original MCR citation and license are retained.</li>
+<li><strong>FreeDict</strong>, revision <code>5bdceeac8d0dba3298c1bebe734f60d54dad30f7</code>, <a href="https://github.com/freedict/fd-dictionaries">freedict/fd-dictionaries</a>. Fourteen bilingual dictionaries: deu–ita, eng–fra, eng–hun, eng–lat, fra–eng, hun–eng, ita–deu, jpn–deu, jpn–eng, jpn–fra, jpn–rus, lat–deu, lat–eng and spa–eng. Japanese dictionaries are the 2016 FreeDict conversion of JMdict, compiled by James William Breen and the Electronic Dictionary Research and Development Group and contributing authors, CC BY-SA 3.0. The other dictionaries use GPL 2.0 (only or later, exactly as individually recorded). Original authors, copyright, availability text and changes are preserved in the TEI headers and accompanying notices.</li></ul>
+<p><strong>Conversion notice:</strong> This project reformats the above sources into compressed JSON records, applies canonical normalization, indexes complete reverse phrases, removes duplicates and rejects empty, control-character or replacement-character forms. It does not author, generate or machine-translate lexical content. WordNet records combine forms linked by the upstream WordNet 3.0 sense identifier, preserving the source IDs for every form. FreeDict records remain separate bilingual senses with their own source IDs, notes and grammar. This reformatting does not assert that every synonym is interchangeable in every context. CC BY-SA, GPL, CeCILL-C, ODC attribution and other source terms continue to apply to the corresponding derived data; they are not superseded by the application's MIT license. Full original editable source snapshots and the conversion tools are included for source availability and modification.</p>
+<details><summary>Per-file originals, licenses, notices and citations</summary><div id="source-list" class="license-list"></div></details>
+<p>Full standard license texts: <a href="licenses/CC-BY-SA-3.0.txt">CC BY-SA 3.0</a>, <a href="licenses/CC-BY-3.0.txt">CC BY 3.0</a>, <a href="licenses/GPL-2.0-only.txt">GPL 2.0</a> (or later where specified), <a href="licenses/ODC-By-1.0.txt">ODC Attribution 1.0</a>, <a href="licenses/CECILL-C.txt">CeCILL-C</a>. Original WordNet and Japanese WordNet notices are linked per file above. These files are cached with the offline app.</p>
+<h2>Coverage & linguistic limitations</h2><p>Hungarian, English and Japanese exceed the 100,000-headword target in this release. German, French, Spanish, Italian, Russian and Latin remain below target. Each direction has real, nonzero coverage, but any given source sense may lack a target. The app shows an honest “no attested translation” response instead of filling gaps. Proper names, phrases, multiple spellings and inflected forms occur in the real datasets; counts are not restricted to single-word dictionary lemmas. FreeDict translation quotes can be explanatory phrases; reverse lookup requires the complete quoted phrase, not an arbitrary word inside it. Historical Hungarian FreeDict spelling sometimes uses õ/û where modern spelling uses ő/ű; accents are preserved rather than guessed. Latin macrons are only available when supplied in a source; the app does not manufacture macronized forms.</p><p>Wiktionary/WOLF mappings and source sense alignment can contain errors; WordNet synonyms need context. Some source records have only part of speech, not a definition or detailed morphology. No external sense mapping or bilingual-gloss pivot is used. Neither complete inflection tables, arbitrary sentence translation nor 100,000 words in every pair is promised. A current JMdict or newer larger wordnet can be integrated later after explicit license and alignment checks. Empty or visibly corrupted forms are rejected and rejection counts are recorded per source in the manifest.</p>
+<h2>Offline behavior & storage</h2><p>Open online once and wait for “Application shell ready offline.” Then choose a source language and press “Download.” Its lexical index and all sense partitions needed for translation to the other eight languages are saved in IndexedDB. Completed chunks are retained on pause, interruption, tab close, network failure or quota failure; repeating the download resumes without redownloading committed chunks. Download progress describes chunks and compressed transfer sizes, not the larger indexed storage footprint. Shared partitions are reused across downloads and all three samples. A lookup also caches only its required partitions, so previously searched terms can work offline without a full-language download. To guarantee all available terms for a source, finish its full download. Downloading a source does not guarantee reverse offline lookup until the reverse source's lexical data is present.</p><p>Browser quota, private mode and storage eviction can remove data. Persistent storage is requested when downloading; the browser may decline it. The app reports download/storage failures instead of marking missing data as complete. Use the browser's site-data controls to remove downloaded dictionaries. This also removes saved settings; all samples on this origin share the dictionary store. A reload while offline works only after the service worker has installed the application shell. <code>file://</code> is not supported; use HTTPS or localhost.</p>
+<h2>Technical architecture</h2><p>All three HTML samples load the same local CSS and JavaScript. A dedicated Web Worker fetches the versioned manifest, normalizes queries, locates sorted range shards using binary search, decompresses gzip with <code>DecompressionStream</code>, checks compressed size and SHA-256, validates uncompressed size and count, and commits at most 1,024 records per atomic IndexedDB transaction. The completion marker commits with the data, never before it. The worker does not load the full lexicon or sense database into memory. IndexedDB stores lexical keys and senses with a compound language/normalized-form index for exact and prefix lookup. Suggestions are debounced, limited to eight, and lookup results paginate in batches of twelve matching senses. A compact per-sense target-language bitmask skips partitions that cannot supply the requested language; no guessed links are added. There is no cross-product translation database in RAM.</p><p>The service worker is scoped to <code>/translate/</code>. It caches the three samples, launcher, shared app files, manifest and original license notices. Large dictionary partitions are not duplicated in CacheStorage. Lookup fetches only missing compressed partitions; in-flight duplicate requests within a worker are shared. Imports are limited to two concurrent shards, and superseded lookups stop before loading further sense partitions. Source snapshots are for developers and legal source distribution, not runtime loads. Dataset versioning changes the shared IndexedDB name. A production update must update the manifest version and shell cache version together; retained old databases may be removed through browser site settings. No unrelated service worker caches are deleted.</p>
+<h2>Reproducible data build & incremental expansion</h2><pre><code>git clone https://github.com/omwn/omw-data.git /tmp/omw-data
+ git -C /tmp/omw-data checkout 406bf83b3c507a3d1f26e88252d5d66893fd36bf
+git clone https://github.com/freedict/fd-dictionaries.git /tmp/fd-dictionaries
+ git -C /tmp/fd-dictionaries checkout 5bdceeac8d0dba3298c1bebe734f60d54dad30f7
+python3 translate/tools/build_data.py --omw /tmp/omw-data --freedict /tmp/fd-dictionaries
+python3 translate/tools/write_coverage.py
+python3 translate/tests/validate_data.py</code></pre>
+<p>Build tools use Python's standard library, a disk-backed SQLite staging database and bounded output shards. Original source files can also be extracted from <code>data/sources/</code>, with their upstream relative paths and hashes taken from the manifest. The importer requires pinned, clean source checkouts to prevent unrecorded provenance changes. All generated shards and gzip source snapshots are deterministic for fixed inputs and tooling. To expand, add a licensed dataset adapter, retain its source snapshot and notices, preserve its true sense identifiers (or explicitly reviewed mappings), regenerate the manifest and coverage, increment the dataset and shell versions, then run validation. Never merge distinct senses merely because they share an English string. Existing files in this directory are not deleted by the importer except its explicitly generated <code>data/lex</code>, <code>data/concepts</code> and <code>data/sources</code> artifact directories when replacing a successful build.</p>
+<h2>Program identities</h2><p>These permanent identifiers were independently generated with a cryptographic random generator. Program IDs and Storage Keys are distinct 16-character uppercase hexadecimal values. Settings keys have the format <code>unicode-translate:&lt;Storage Key&gt;:v1</code>; Program IDs identify the application and exports, not local settings. Dictionary data is deliberately shared independently of settings.</p><div class="table-scroll"><table><thead><tr><th>Sample</th><th>Program ID</th><th>Storage Key</th></tr></thead><tbody><tr><th>1</th><td><code>F78A948596C4566E</code></td><td><code>2FDB6E6E43A907F3</code></td></tr><tr><th>2</th><td><code>F825FE966F8B494F</code></td><td><code>E66887A1A48670D9</code></td></tr><tr><th>3</th><td><code>D50C935F9D572B7F</code></td><td><code>700603AD2F340E2A</code></td></tr></tbody></table></div>
+<h2>Future Android packaging</h2><p>No APK has been built. Package this whole directory, all compressed dictionary partitions, license notices and the sample selection menu <code>index.html</code> as local app assets. Use AndroidX <code>WebViewAssetLoader</code> on its HTTPS app-assets origin, a current Android System WebView with IndexedDB, workers, Web Crypto and DecompressionStream, and keep DOM storage enabled. Route all local paths, including worker fetches and gzip assets, to that asset origin without an HTTP Content-Encoding header on raw <code>.gz</code> files. Select a sample through the launcher to preserve independent identities. The app does not depend on service-worker support for locally packaged shell access; packaged assets provide it. A wrapper should add an explicit download/export bridge and clipboard integration if WebView's defaults are insufficient, test quota/storage lifecycle, back navigation and offline asset requests, and retain the licenses/source-access provisions when distributing data. The packaging step is separate from this web implementation.</p>
+<h2>Validation</h2><p>The data validator recomputes counts and all 72 pair coverages from the compressed records, validates provenance and Unicode round trips, checks lexical references and original source hashes, and checks every local HTML link. Browser tests exercise all 72 directions with real shared senses, suggestions, Unicode, sample isolation, history/favorites, export identity, clipboard action, responsive layout, resumable download and offline reload. Run:</p><pre><code>python3 translate/tests/validate_data.py
+# Install test tooling outside the repository (or use an existing Playwright).
+npm install --prefix /tmp/unicode-translate-tests playwright@1.56.1
+# Run against a local server whose document root is the repository:
+PLAYWRIGHT_MODULE=/path/to/node_modules/playwright node translate/tests/browser.cjs
+</code></pre><p>See <a href="VALIDATION.md">VALIDATION.md</a> for the recorded results and remaining limits.</p>
+</main></body></html>

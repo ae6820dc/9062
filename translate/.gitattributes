@@ -1,0 +1,4 @@
+# Original upstream notices retain their exact bytes, legacy encoding and whitespace.
+licenses/* -whitespace -text
+# Compressed partitions and original snapshots must not undergo line-ending conversion.
+data/**/*.gz binary
