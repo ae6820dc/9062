@@ -87,6 +87,14 @@ function pass(message){report.checks.push(message);console.log('PASS',message);}
   await page.locator('#personal-library summary').click();await page.locator('#personal-filter').fill('Offline personal');await page.locator('#personal-list button').first().click();await page.locator('#expression-delete').click();await page.locator('#expression-delete-no').click();await page.locator('#expression-close').click();await count(2);
   await page.locator('#personal-list button').first().click();await page.locator('#expression-delete').click();await page.locator('#expression-delete-yes').click();await page.locator('#expression-dialog').waitFor({state:'hidden'});await count(1);
   assert.deepEqual(errors,[]);pass('Deletion requires confirmation and no uncaught application errors occur');
+  await context.setOffline(false);
+  const bulk=await browser.newContext({acceptDownloads:true}),bulkPage=await bulk.newPage();
+  await bulkPage.goto(base+'sample1.html');await bulkPage.waitForFunction(()=>!document.getElementById('personal-add').disabled);
+  const bulkEntries=Array.from({length:1000},(_,i)=>({terms:{hu:'Saját tömeges kifejezés '+i,en:'Personal bulk expression '+i},note:'Import test'}));
+  const bulkFile={name:'bulk.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({format:'unicode-translate-personal',version:1,entries:bulkEntries}))};
+  for(let i=0;i<2;i++){await bulkPage.locator('#personal-file').setInputFiles(bulkFile);await bulkPage.locator('#import-confirm').click();await bulkPage.locator('#import-dialog').waitFor({state:'hidden'});await bulkPage.waitForFunction(()=>document.getElementById('personal-count').textContent==='1000');}
+  const bulkDownload=bulkPage.waitForEvent('download');await bulkPage.locator('#personal-export').click();assert.equal(JSON.parse(fs.readFileSync(await (await bulkDownload).path(),'utf8')).entries.length,1000);
+  await bulk.close();pass('A thousand-expression import, duplicate reimport and complete export round trip');
   await context.close();report.success=true;
  }finally{await browser.close();}
 })().catch(error=>{report.success=false;report.error=error.stack;console.error(error);process.exitCode=1;})

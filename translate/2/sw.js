@@ -1,6 +1,6 @@
 /* Scope is /translate/2/ only. Large lexical shards belong in IndexedDB, not CacheStorage. */
 'use strict';
-const CACHE = 'unicode-translate-2-shell-v1';
+const CACHE = 'unicode-translate-2-shell-v2';
 const SHELL = ['./','index.html','sample1.html','sample2.html','sample3.html','sample4.html','sample5.html','sample6.html','sample7.html','sample8.html','sample9.html','sample10.html','sample11.html','sample12.html','readme.html',
   'styles.css','personal.js','app.js','dictionary-worker.js','documentation.js','icon.svg','data/manifest.json','VALIDATION.md'];
 self.addEventListener('install', event => event.waitUntil((async () => {

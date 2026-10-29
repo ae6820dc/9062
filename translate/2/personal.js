@@ -5,7 +5,7 @@ window.personal = (() => {
   const norm = value => value.trim().normalize('NFC').toLowerCase().normalize('NFC');
   const MAX = 10000, FORMAT = 'unicode-translate-personal', VERSION = 1;
   let db, languages, rows = [], editId = null, attribution = [], importing = null;
-  let saving = false, initialized = false;
+  let saving = false, initialized = false, persistenceRequested = false;
   const channel = typeof BroadcastChannel === 'function' ? new BroadcastChannel('unicode-translate-personal:' + document.querySelector('meta[name="storage-key"]').content) : null;
   function node(tag, text, className) {
     const result = document.createElement(tag);
@@ -74,7 +74,7 @@ window.personal = (() => {
   }
   async function changed(message) {
     await reload(); channel?.postMessage('changed'); status(message);
-    if (navigator.storage?.persist) navigator.storage.persist().catch(()=>{});
+    if (!persistenceRequested && navigator.storage?.persist) {persistenceRequested=true;navigator.storage.persist().catch(()=>{});}
   }
   function open(entry) {
     if (!initialized) return;
@@ -104,20 +104,32 @@ window.personal = (() => {
     if (matches.length > 100) list.append(node('li','Showing 100 of '+matches.length+'. Narrow your search.', 'no-items'));
   }
   function plan(entries, policy) {
-    let next = rows.slice(), added = 0, skipped = 0, conflicts = 0, replaced = 0;
+    const next = new Map(), prints = new Map(), terms = new Map();
+    let added = 0, skipped = 0, conflicts = 0, replaced = 0;
+    function keys(row) {return Object.entries(row.terms).map(([lang,value])=>lang+':'+norm(value));}
+    function insert(row) {
+      next.set(row.id,row);
+      const print=fingerprint(row);if(!prints.has(print))prints.set(print,new Set());prints.get(print).add(row.id);
+      for(const key of keys(row)){if(!terms.has(key))terms.set(key,new Set());terms.get(key).add(row.id);}
+    }
+    function remove(id) {
+      const row=next.get(id),print=fingerprint(row);next.delete(id);prints.get(print).delete(id);if(!prints.get(print).size)prints.delete(print);
+      for(const key of keys(row)){terms.get(key).delete(id);if(!terms.get(key).size)terms.delete(key);}
+    }
+    rows.forEach(insert);
     for (const entry of entries) {
-      if (next.some(row=>fingerprint(row) === fingerprint(entry))) {skipped++; continue;}
-      const matches = next.filter(row=>overlaps(row,entry));
-      if (matches.length) {
+      if (prints.has(fingerprint(entry))) {skipped++; continue;}
+      const matches = new Set(keys(entry).flatMap(key=>[...(terms.get(key)||[])]));
+      if (matches.size) {
         conflicts++;
         if (policy === 'keep') continue;
-        if (policy === 'replace') {next = next.filter(row=>!matches.includes(row)); replaced += matches.length;}
+        if (policy === 'replace') {for(const id of matches)remove(id);replaced += matches.size;}
       }
-      next.push({...entry,id:crypto.randomUUID(),createdAt:entry.createdAt ?? Date.now(),updatedAt:entry.updatedAt ?? Date.now()}); added++;
+      insert({...entry,id:crypto.randomUUID(),createdAt:entry.createdAt ?? Date.now(),updatedAt:entry.updatedAt ?? Date.now()}); added++;
     }
-    if (next.length > MAX) throw new Error('A sample can hold up to '+MAX.toLocaleString('en-US')+' personal expressions. Split this file or export and remove older entries first.');
-    checkBackupSize(next);
-    return {next, added, skipped, conflicts, replaced};
+    if (next.size > MAX) throw new Error('A sample can hold up to '+MAX.toLocaleString('en-US')+' personal expressions. Split this file or export and remove older entries first.');
+    const result=[...next.values()];checkBackupSize(result);
+    return {next:result, added, skipped, conflicts, replaced};
   }
   async function prepareImport(file) {
     if (file.size > 10 * 1024 * 1024) throw new Error('Choose a JSON backup smaller than 10 MB.');
