@@ -4,14 +4,15 @@ const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('node:zlib');
 const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const base = process.env.TRANSLATE_TEST_URL || 'http://localhost:8000/translate/';
-const report = {startedAt:new Date().toISOString(),checks:[],browser:null};
+const base = process.env.TRANSLATE_TEST_URL || 'http://localhost:8000/1/';
+const report = {startedAt:new Date().toISOString(),checks:[],browser:null,baseUrl:base};
 function passed(name) {report.checks.push(name); console.log('PASS',name);}
 (async () => {
   const browser = await chromium.launch({executablePath:process.env.CHROMIUM_PATH || '/usr/bin/chromium',args:['--no-sandbox']});
   report.browser = browser.version();
   try {
     const context = await browser.newContext({permissions:['clipboard-read','clipboard-write'],acceptDownloads:true,viewport:{width:1365,height:950}});
+    context.setDefaultTimeout(Number(process.env.TRANSLATE_TEST_TIMEOUT_MS || 30000));
     const page = await context.newPage();
     const errors = [];
     page.on('pageerror',error => errors.push(error.message));

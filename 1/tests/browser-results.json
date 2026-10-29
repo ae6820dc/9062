@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-10-29T20:26:40.936Z",
+  "startedAt": "2026-10-29T20:49:34.654Z",
   "checks": [
     "Sample 1 initializes and service worker installs all sample shells",
     "All 72 directed pairs return the actual common water sense, including pagination",
@@ -19,10 +19,11 @@
     "Corrupt dictionary response is rejected without installing a shard"
   ],
   "browser": "154.0.8037.57",
+  "baseUrl": "http://localhost:8000/1/",
   "offlineLatin": {
     "chunks": 140,
     "compressedBytes": 14234309,
     "sharedChunksBefore": 20
   },
-  "completedAt": "2026-10-29T20:27:05.984Z"
+  "completedAt": "2026-10-29T20:49:58.197Z"
 }

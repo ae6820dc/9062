@@ -1,0 +1,4 @@
+__pycache__/
+*.py[cod]
+tests/pages-results.json
+tests/pages-sample*.png
