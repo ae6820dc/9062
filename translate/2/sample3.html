@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#163d36">
+<meta name="program-id" content="A007594DB808C7FD"><meta name="storage-key" content="3B1F7034647954AD">
+<meta name="description" content="A source-backed multilingual Unicode dictionary. Nine languages, 72 directions, offline downloads.">
+<title>Unicode Translate · Sample 3</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css">
+<script src="personal.js" defer></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<header class="header"><a class="brand" href="index.html"><span class="brand-icon" aria-hidden="true">字</span><span>Unicode <strong>Translate</strong><small>Nine languages. A world of meaning.</small></span></a>
+<div class="identity">SAMPLE 3 <code>A007594DB808C7FD</code><span id="connection">Starting…</span></div></header>
+<nav class="sample-nav" aria-label="Samples"><a href="index.html">All 12 samples</a><a href="readme.html">Guide & data licenses →</a></nav>
+<main>
+<section class="intro"><div><p class="eyebrow">THE MULTILINGUAL DICTIONARY</p><h1>Find the words.<br><em>Keep the meaning.</em></h1><p>Explore real lexical records across scripts and languages.<br>Download a language to take your dictionary offline.</p></div><div class="intro-mark" aria-hidden="true">Á <span>あ</span><b>Я</b></div></section>
+<div class="workspace">
+<section class="dictionary card" aria-label="Dictionary lookup">
+<form id="search-form">
+<div class="languages"><label>Translate from<select id="from" aria-label="Source language" disabled></select></label><button class="swap icon-button" id="swap" type="button" title="Swap languages" aria-label="Swap languages" disabled>⇄</button><label>Translate to<select id="to" aria-label="Target language" disabled></select></label></div>
+<label class="input-label" for="query">Word or phrase</label>
+<div class="search-box"><input id="query" type="search" maxlength="4096" placeholder="Type a word, in any script…" autocomplete="off" spellcheck="false" aria-controls="suggestions" disabled><button id="clear" type="button" class="icon-button" aria-label="Clear search" title="Clear search">×</button><button id="search" class="primary" disabled>Look up <span aria-hidden="true">→</span></button></div>
+<ul id="suggestions" class="suggestions" aria-label="Search suggestions" hidden></ul>
+<p class="hint">Accents matter. Unicode is preserved. Dictionary lookup, not sentence translation.</p>
+</form>
+<div class="result-toolbar"><p id="pair-count">Loading verified coverage…</p><div><button id="favorite" class="subtle" disabled>☆ Save</button><button id="copy" class="subtle" disabled>Copy</button><button id="export" class="subtle" title="Export current lookup, history and favorites">Export lookup</button></div></div>
+<p id="status" role="status" aria-live="polite">Preparing your dictionary…</p>
+<div id="results"><div class="empty"><span aria-hidden="true">Aa</span><h2>A word is a beginning.</h2><p>Choose two languages and look up a word.<br>Results include source attribution and available meanings.</p></div></div>
+<button id="more" class="secondary" hidden>More meanings</button>
+</section>
+<aside class="sidebar">
+<section class="card personal-card" aria-label="Personal dictionary"><p class="eyebrow">WORDS YOU KEEP</p><h2>Your own dictionary</h2><p>Add the expressions that matter to you.</p><div class="personal-actions"><button id="personal-add" class="secondary" disabled>＋ Add expression</button><button id="personal-import" class="subtle" disabled>Import</button><button id="personal-export" class="subtle" disabled>Export</button></div><p id="personal-status" role="status" aria-live="polite">Opening your personal dictionary…</p><details id="personal-library"><summary>Manage expressions <span id="personal-count">0</span></summary><label class="input-label" for="personal-filter">Find a saved expression</label><input id="personal-filter" type="search" placeholder="Search your expressions…" maxlength="4096"><ul id="personal-list"></ul></details><small>Saved on this device, separately for each sample. Export a backup to keep or transfer your words.</small><input id="personal-file" type="file" accept=".json,application/json" hidden></section>
+<section class="card downloads"><p class="eyebrow">ON YOUR DEVICE</p><h2>Your offline dictionary</h2><p>Download the source language and its shared meanings. All available target translations are included.</p><p id="download-info">Checking local storage…</p><progress id="download-progress" value="0" max="1" aria-label="Dictionary download progress"></progress><div class="button-row"><button id="download" class="secondary" disabled>Download source language</button><button id="cancel" class="subtle" hidden>Pause</button></div><p id="download-status" role="status" aria-live="polite"></p><small id="shell-status">Offline application not ready yet.</small><small>Browser storage can be evicted. Keep the original data files when packaging an APK.</small></section>
+<section class="card library"><div class="tabs" role="group" aria-label="Saved lookups"><button id="history-tab" class="tab active" aria-pressed="true">Recent</button><button id="favorites-tab" class="tab" aria-pressed="false">Favorites</button></div><ul id="library-list"></ul><button id="clear-history" class="subtle">Clear history</button></section>
+</aside>
+</div>
+<section class="coverage card"><div class="coverage-heading"><div><p class="eyebrow">TRANSPARENT BY DESIGN</p><h2>Real words. Measured coverage.</h2><p>100,000 headwords per language is the expansion target. These are the actual bundled counts.</p></div><span class="tag">9 LANGUAGES · 72 DIRECTIONS</span></div><div id="language-counts" class="language-counts"></div>
+<details><summary>View all 72 directed pairs and counting methodology</summary><p>Headwords are distinct normalized forms explicitly marked as lemmas or source headwords by the datasets. Lookup forms also include complete translation phrases for reverse lookup. Counts are validated from the bundled records, not independently reviewed translations. A pair count is source lookup forms with at least one attested target form; it is not the number of translation combinations.</p><div class="table-scroll"><table id="pair-table"><caption>Source lookup forms with at least one target translation</caption></table></div><p>Coverage varies by sense. No translation is inferred through an English gloss. See the <a href="readme.html">guide, sources and limitations</a>.</p></details></section>
+</main>
+<dialog id="expression-dialog" class="personal-dialog" aria-labelledby="expression-title"><form id="expression-form"><div class="dialog-heading"><h2 id="expression-title">Add expression</h2><button type="button" class="subtle" id="expression-close" aria-label="Close expression editor">✕</button></div><p>Enter matching expressions in at least two languages. Other languages are optional.</p><div id="expression-fields" class="expression-fields"></div><label class="input-label" for="expression-note">Note or example</label><textarea id="expression-note" maxlength="4096" rows="3"></textarea><p id="expression-attribution" class="sense-notes"></p><p id="expression-error" role="alert" class="form-error"></p><div class="dialog-actions"><button type="button" id="expression-delete" class="subtle" hidden>Delete expression</button><button class="primary" id="expression-save">Save expression</button></div><div id="expression-delete-confirm" hidden><p>Delete this expression from this sample?</p><button type="button" id="expression-delete-yes" class="secondary">Delete</button><button type="button" id="expression-delete-no" class="subtle">Keep it</button></div></form></dialog>
+<dialog id="import-dialog" class="personal-dialog" aria-labelledby="import-title"><form id="import-form"><div class="dialog-heading"><h2 id="import-title">Import expressions</h2><button type="button" id="import-close" class="subtle" aria-label="Close import preview">✕</button></div><p id="import-summary"></p><div id="import-preview" class="import-preview"></div><label class="input-label" for="import-policy">When the same expression has different translations or notes</label><select id="import-policy"><option value="keep">Keep my existing expressions</option><option value="alongside">Keep both versions</option><option value="replace">Use the imported version</option></select><p>Exact duplicates are skipped. Your other expressions stay in place.</p><p id="import-error" role="alert" class="form-error"></p><div class="dialog-actions"><button id="import-confirm" class="primary">Import expressions</button></div></form></dialog>
+<footer><span>Unicode Translate · Source-backed, sense-aware.</span><a href="readme.html">Attribution, licenses & documentation</a></footer>
+<noscript>This application requires JavaScript and IndexedDB for dictionary lookup.</noscript>
+</body></html>
