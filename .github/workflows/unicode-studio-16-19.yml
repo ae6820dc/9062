@@ -42,7 +42,7 @@ jobs:
       - name: Preserve the new V2 APK
         id: apk
         run: |
-          output="android-distributions/Unicode-Studio-16-19.apk"
+          output="android-distributions/Unicode-2.apk"
           (set -o noclobber; cat android-unicode-studio-16-19/app/build/outputs/apk/debug/app-debug.apk > "$output")
           python3 android-unicode-studio-16-19/verify-apk.py "$output" | tee "$output.verification.txt"
           sha256sum "$output" > "$output.sha256"
@@ -58,7 +58,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add "${{ steps.apk.outputs.path }}"*
-          git commit -m 'Add verified Unicode Studio 16–19 APK'
+          git commit -m 'Add verified Unicode 2 name-only APK'
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin HEAD:"${GITHUB_REF_NAME}"
       - uses: actions/upload-artifact@v4

@@ -7,7 +7,14 @@ def sha(b):return hashlib.sha256(b).hexdigest()
 for path,digest in json.loads((p/'previous-apks.json').read_text()).items():assert sha((r/path).read_bytes())==digest,path
 badging=tool('aapt','dump','badging',apk)
 assert "package: name='io.github.ae6820dc.unicodestudio1619'" in badging
-assert "application-label:'Unicode Studio 16–19'" in badging
+assert "application-label:'Unicode 2'" in badging
+# A name-only rebuild must retain every code, asset, icon and manifest byte.
+previous=r/'android-distributions/Unicode-Studio-16-19.apk'
+with zipfile.ZipFile(apk) as new, zipfile.ZipFile(previous) as original:
+ assert set(new.namelist())==set(original.namelist())
+ for name in original.namelist():
+  if name=='resources.arsc' or name.startswith('META-INF/'):continue
+  assert new.read(name)==original.read(name),('Unexpected APK change',name)
 assert 'application-debuggable' in badging and 'android.permission.INTERNET' not in badging
 signature=tool('apksigner','verify','--verbose','--print-certs',apk)
 old=r/'android-distributions/unicode-studio-1-15-v2.apk'
