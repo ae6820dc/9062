@@ -63,6 +63,8 @@ public final class SmokeInstrumentation extends Instrumentation {
    click("‹ Back");
   }
   bars();
+  // Let WebView commit its final asynchronous storage write before instrumentation exits.
+  Thread.sleep(5000);
   result.putString("stream","PASS "+checks+" checks: all catalog samples, menus, IDs, keys, offline storage and system bars\n");finish(Activity.RESULT_OK,result);
  }catch(Throwable e){result.putString("stream","FAIL after "+checks+" checks: "+e+"\n"+android.util.Log.getStackTraceString(e));finish(Activity.RESULT_CANCELED,result);}}
 }
