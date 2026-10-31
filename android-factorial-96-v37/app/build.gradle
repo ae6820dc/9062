@@ -1,0 +1,16 @@
+plugins { id 'com.android.application' }
+android {
+ namespace 'io.github.ae6820dc.factorial96v37'
+ compileSdk 36
+ defaultConfig {
+  applicationId 'io.github.ae6820dc.factorial96v37'
+  minSdk 26
+  targetSdk 36
+  versionCode 1
+  versionName '37.3.96'
+  testInstrumentationRunner 'io.github.ae6820dc.factorial96v37.SmokeInstrumentation'
+ }
+ signingConfigs { stableDebug { storeFile file('../signing/studio-debug.jks'); storePassword 'android'; keyAlias 'unicode-test'; keyPassword 'android' } }
+ buildTypes { debug { signingConfig signingConfigs.stableDebug } }
+ compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
