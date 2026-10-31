@@ -1,0 +1,2 @@
+PASS: Android 16 offline launch, Program ID, all 14 grids, Survival, X-Tile, native swipe and merge, Undo, saved progress after reopen, Auto.
+
