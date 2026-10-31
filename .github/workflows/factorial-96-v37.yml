@@ -23,7 +23,7 @@ jobs:
       - name: Build and inspect APK
         working-directory: android-factorial-96-v37
         run: |
-          ./gradlew --no-daemon assembleDebug lintDebug assembleDebugAndroidTest
+          bash build-sdk.sh
           cmp app/src/main/assets/index.html ../factorial/v37/3/96.html
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose app/build/outputs/apk/debug/app-debug.apk
       - name: Enable KVM
