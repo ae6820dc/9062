@@ -1,0 +1,1 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="io.github.ae6820dc.hexic2048v13.test"><application android:label="Hexic verification"/><instrumentation android:name="io.github.ae6820dc.hexic2048v13.SmokeInstrumentation" android:targetPackage="io.github.ae6820dc.hexic2048v13"/></manifest>

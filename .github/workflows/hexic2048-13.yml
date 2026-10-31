@@ -1,0 +1,66 @@
+name: Hexic 2048 13 APK
+on:
+  push:
+    branches: [main]
+    paths: ['android-hexic2048-13/**', '.github/workflows/hexic2048-13.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+          log-accepted-android-sdk-licenses: false
+      - run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Build and inspect APK
+        working-directory: android-hexic2048-13
+        run: |
+          bash build-sdk.sh
+          cmp app/src/main/assets/index.html ../hexic2048/13/sample1.html
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose app/build/outputs/apk/debug/app-debug.apk
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Android 16 offline runtime verification
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          arch: x86_64
+          target: default
+          profile: pixel_2
+          script: |
+            adb install android-hexic2048-13/app/build/outputs/apk/debug/app-debug.apk
+            adb install android-hexic2048-13/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            adb shell svc wifi disable
+            adb shell svc data disable
+            adb shell am instrument -w io.github.ae6820dc.hexic2048v13.test/io.github.ae6820dc.hexic2048v13.SmokeInstrumentation | tee runtime-hexic2048.txt
+            grep -q 'PASS: Android 16 offline launch' runtime-hexic2048.txt
+      - name: Preserve verified APK
+        run: |
+          cp android-hexic2048-13/app/build/outputs/apk/debug/app-debug.apk android-distributions/Hexic-2048-13.apk
+          cp runtime-hexic2048.txt android-distributions/Hexic-2048-13.verification.txt
+          sha256sum android-distributions/Hexic-2048-13.apk > android-distributions/Hexic-2048-13.apk.sha256
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add android-distributions/Hexic-2048-13*
+          git commit -m 'Add verified offline Hexic 2048 13 APK'
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Hexic-2048-13
+          path: |
+            android-distributions/Hexic-2048-13*
+            runtime-hexic2048.txt
+            android-hexic2048-13/app/build/reports/
