@@ -49,15 +49,17 @@ jobs:
             adb shell svc data disable
             adb shell am instrument -w -e mode upgrade io.github.ae6820dc.hexic2048v13.test/io.github.ae6820dc.hexic2048v13.SmokeInstrumentation | tee runtime-hexic2048.txt
             grep -q 'PASS: Android 16 offline launch' runtime-hexic2048.txt
+            adb shell am instrument -w -e mode stop_save io.github.ae6820dc.hexic2048v13.test/io.github.ae6820dc.hexic2048v13.SmokeInstrumentation | tee stop-save-hexic2048.txt
+            grep -q 'PASS: stop during animation' stop-save-hexic2048.txt
       - name: Preserve verified APK
         run: |
           cp android-hexic2048-13/app/build/outputs/apk/debug/app-debug.apk android-distributions/Hexic-2048.apk
-          cp runtime-hexic2048.txt android-distributions/Hexic-2048.verification.txt
+          cat runtime-hexic2048.txt stop-save-hexic2048.txt > android-distributions/Hexic-2048.verification.txt
           sha256sum android-distributions/Hexic-2048.apk > android-distributions/Hexic-2048.apk.sha256
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add android-distributions/Hexic-2048*
-          git commit -m 'Restore original light theme in Hexic 2048 APK'
+          git commit -m 'Publish Hexic 2048 APK with save on Auto stop'
           git pull --rebase origin main
           git push origin HEAD:main
       - uses: actions/upload-artifact@v4

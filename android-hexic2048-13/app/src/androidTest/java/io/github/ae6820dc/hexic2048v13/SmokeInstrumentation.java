@@ -54,6 +54,24 @@ public class SmokeInstrumentation extends Instrumentation {
     require("true".equals(js("document.getElementById('score').textContent===localStorage.getItem('upgrade_test_score')")),"Upgrade restored score");
     result.putString("stream","PASS: Android 16 offline launch, original light theme with dark system setting, app name Hexic 2048, complete save and score preserved through APK update.\n");finish(Activity.RESULT_OK,result);return;
    }
+   if("stop_save".equals(mode)){
+    js("localStorage.clear();localStorage.setItem('hex2048_manual_save_data_A442803514634F8E',JSON.stringify({mi:13,gmode:'classic',score:'0n',undos:10,uid:2,started:true,tiles:[{id:1,v:'1n',q:0,r:0},{id:2,v:'1n',q:0,r:1}],hist:[],bestScores:{}}));location.reload()");
+    Thread.sleep(1000);waitReady();
+    pick("bAuto",3);
+    js("document.getElementById('bAuto').click()");
+    require("true".equals(js("(()=>{const s=JSON.parse(localStorage.getItem('hex2048_manual_save_data_A442803514634F8E'));return s.moveCount===1 && s.auto.running===false && s.score.slice(0,-1)===document.getElementById('score').textContent})()")),"Stop during first move saved final board");
+    js("localStorage.setItem('stop_expected',localStorage.getItem('hex2048_manual_save_data_A442803514634F8E'))");
+    Thread.sleep(1200);
+    require("true".equals(js("localStorage.getItem('stop_expected')===localStorage.getItem('hex2048_manual_save_data_A442803514634F8E') && !document.getElementById('bAuto').classList.contains('on')")),"Stopped game stays saved");
+    js("location.reload()");Thread.sleep(1000);waitReady();
+    require("true".equals(js("(()=>{const s=JSON.parse(localStorage.getItem('stop_expected'));return document.querySelectorAll('#board .tw').length===s.tiles.length && document.getElementById('score').textContent===s.score.slice(0,-1) && !document.getElementById('bAuto').classList.contains('on')})()")),"Reopen restored stopped board");
+    pick("bAuto",3);
+    runOnMainSync(()->a.finish());waitForIdleSync();Thread.sleep(1500);
+    a=(MainActivity)startActivitySync(new Intent(getTargetContext(),MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    waitReady();
+    require("true".equals(js("(()=>{const s=JSON.parse(localStorage.getItem('hex2048_manual_save_data_A442803514634F8E'));return s.moveCount===2 && !s.auto.running && !document.getElementById('bAuto').classList.contains('on') && document.querySelectorAll('#board .tw').length===s.tiles.length && document.getElementById('score').textContent===s.score.slice(0,-1)})()")),"Native pause flushed second move and restored it");
+    result.putString("stream","PASS: stop during animation saves complete move below 100, Auto remains stopped, reload restores board and score, native pause saves remaining move.\\n");finish(Activity.RESULT_OK,result);return;
+   }
    require(js("document.getElementById('hint').textContent").contains("27A5431D1655F0FE7E95D6DBDC19A328"),"Program ID");
    int[] counts={7,19,37,61,91,127,169,16,25,36,49,64,81,100};
    for(int i=0;i<counts.length;i++){pick("bGrid",i);require(Integer.toString(counts[i]).equals(js("document.querySelectorAll('#board .cw').length")),"Grid "+i);}

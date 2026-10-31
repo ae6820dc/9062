@@ -46,7 +46,7 @@ public class MainActivity extends Activity {
   setContentView(root);
   web.loadUrl("file:///android_asset/index.html");
  }
- @Override protected void onPause(){web.onPause();web.pauseTimers();super.onPause();}
+ @Override protected void onPause(){web.evaluateJavascript("window.dispatchEvent(new Event('pagehide'));",null);web.onPause();web.pauseTimers();super.onPause();}
  @Override protected void onResume(){super.onResume();if(web!=null){web.onResume();web.resumeTimers();}}
  @Override protected void onDestroy(){web.destroy();super.onDestroy();}
 }
