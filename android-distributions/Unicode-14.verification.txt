@@ -1,0 +1,2 @@
+PASS: Android 16 offline launch, original ID, 28 sets, next/previous, codepoint display, ordinal and Unicode search, invalid input, Android Back, playback, Vietnamese set, saved state on reopen.
+
