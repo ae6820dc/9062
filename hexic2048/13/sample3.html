@@ -131,6 +131,9 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
   let isAutoRunning = false;
   let autoTimer = null;
   let autoStep = 0;
+  let pendingMove = null;
+  let moveEpoch = 0;
+  let saveDirty = false;
   const MOVE_DURATION = 320;
   const SPAWN_DURATION = 320;
 
@@ -149,7 +152,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
 
   function makeSnapshot() {
     return {
-      version: 3,
+      version: 4,
+      moveCount: state.moveCount,
       savedAt: Date.now(),
       mi: state.mi,
       gmode: state.gmode,
@@ -180,6 +184,33 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
     localStorage.setItem(SLOT_SAVE_KEY, JSON.stringify(slots));
   }
 
+  function finishPendingMove() {
+    if (!pendingMove) return;
+    const finish = pendingMove;
+    pendingMove = null;
+    finish();
+  }
+
+  function saveProgress() {
+    if (!saveDirty) return;
+    try {
+      const data = makeSnapshot();
+      const slots = readSlots();
+      slots[currentKey()] = data;
+      localStorage.setItem(SLOT_SAVE_KEY, JSON.stringify(slots));
+      localStorage.setItem(MANUAL_SAVE_KEY, JSON.stringify(data));
+      saveDirty = false;
+    } catch (e) {
+      console.warn("Auto-save failed:", e);
+    }
+  }
+
+  function flushProgress() {
+    stopAuto();
+    finishPendingMove();
+    saveProgress();
+  }
+
   function restoreSnapshot(s) {
     if (!s) return false;
     state.mi = s.mi ?? state.mi;
@@ -192,7 +223,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
     state.over = !!s.over;
     state.won = !!s.won;
     state.keepGoing = !!s.keepGoing;
-    state.moveCount = 0;
+    state.moveCount = Math.max(0, Number(s.moveCount) || 0);
     if (s.bestScores) {
       for (const [k,v] of Object.entries(s.bestScores)) state.bestScores[k] = BigInt(decVal(v));
     }
@@ -222,12 +253,14 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
   }
 
   function saveGame() {
+    finishPendingMove();
     try {
       const data = makeSnapshot();
       saveCurrentSlot();
       const json = JSON.stringify(data);
       localStorage.setItem(MANUAL_SAVE_KEY, json);
       if (localStorage.getItem(MANUAL_SAVE_KEY) !== json) throw new Error("A mentés nem olvasható vissza.");
+      saveDirty = false;
       alert("TELJES játékállás elmentve!");
     } catch(e) {
       console.error("Save failed:", e);
@@ -251,7 +284,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
       state.over = !!s.over;
       state.won = !!s.won;
       state.keepGoing = !!s.keepGoing;
-      state.moveCount = 0;
+      state.moveCount = Math.max(0, Number(s.moveCount) || 0);
 
       state.bestScores = {};
       if (s.bestScores) {
@@ -288,8 +321,9 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
 
   function switchGrid(next) {
     if (next === state.mi) return;
-    saveCurrentSlot();
     stopAuto();
+    finishPendingMove();
+    saveCurrentSlot();
     stopSurv();
     hideOv();
     $("startTxt").style.display = "none";
@@ -518,7 +552,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
   }
 
   function doMove(di, onComplete) {
-    if (state.over || !state.started) {
+    if (state.over || !state.started || pendingMove) {
       if (onComplete) onComplete(false);
       return false;
     }
@@ -544,15 +578,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
     if (state.hist.length > 10) state.hist.shift();
 
     state.moveCount++;
-    if (state.moveCount % 100 === 0) {
-      saveCurrentSlot();
-      try {
-        localStorage.setItem(MANUAL_SAVE_KEY, JSON.stringify(makeSnapshot()));
-        console.log("Auto-save completed at move", state.moveCount);
-      } catch(e) {
-        console.warn("Auto-save failed:", e);
-      }
-    }
+    saveDirty = true;
+    const epoch = moveEpoch;
 
     const dead = state.tiles.filter(t => t.dead);
     state.tiles = state.tiles.filter(t => !t.dead);
@@ -577,7 +604,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
       }
     });
 
-    setTimeout(() => {
+    const finish = () => {
       const nt = state.gmode === "survival" ? null : spawn(state.gmode === "x" && Math.random() < .08);
       if (nt) {
         render([nt.id], []);
@@ -590,10 +617,14 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
         showOver();
       }
 
+      if (state.moveCount % 100 === 0) saveProgress();
       setTimeout(() => {
-        if (onComplete) onComplete(true);
+        if (epoch === moveEpoch && onComplete) onComplete(true);
       }, SPAWN_DURATION);
-
+    };
+    pendingMove = finish;
+    setTimeout(() => {
+      if (pendingMove === finish) finishPendingMove();
     }, MOVE_DURATION);
 
     return true;
@@ -640,7 +671,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
   function survTick() {
     if (state.over || !state.started) return;
     const nt = spawn(false);
-    if (nt) { render([nt.id]); }
+    if (nt) { saveDirty = true; render([nt.id]); }
     if (!canMove()) {
       state.over = true;
       stopAuto();
@@ -659,6 +690,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
 
   function newGame() {
     stopAuto();
+    finishPendingMove();
     stopSurv();
     hideOv();
     $("startTxt").style.display = "none";
@@ -673,6 +705,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
     state.keepGoing = false;
     state.started = true;
     state.moveCount = 0;
+    saveDirty = true;
 
     const n = cells.length;
     if (state.gmode === "x") {
@@ -693,6 +726,9 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
 
   function undo() {
     if (state.undos <= 0 || !state.hist.length || state.gmode === "survival") return;
+    stopAuto();
+    finishPendingMove();
+    saveDirty = true;
     const h = state.hist.pop();
     state.undos--;
     state.over = false;
@@ -738,11 +774,18 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
   }
 
   function stopAuto() {
+    const wasRunning = isAutoRunning;
     isAutoRunning = false;
+    moveEpoch++;
     if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
     $("bAuto").classList.remove("on");
     $("board").style.removeProperty("--d");
     $("board").style.removeProperty("--d-spawn");
+    if (wasRunning) {
+      saveDirty = true;
+      finishPendingMove();
+      saveProgress();
+    }
   }
 
   function runAutoLoop() {
@@ -877,9 +920,10 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
     openMenu($("bMode"), MODE_NAMES, MODE_KEYS.indexOf(state.gmode), i => {
       const next = MODE_KEYS[i];
       if (next === state.gmode) return;
+      stopAuto();
+      finishPendingMove();
       saveCurrentSlot();
       const targetGrid = state.mi;
-      stopAuto();
       stopSurv();
       if (!loadSlot(targetGrid, next)) {
         state.gmode = next;
@@ -926,6 +970,12 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
   $("startTxt").onclick = startSurv;
   $("bUndo").onclick = undo;
   window.addEventListener("resize", () => { if (cells.length) fullRender(); });
+
+  window.addEventListener("pagehide", flushProgress);
+  window.addEventListener("beforeunload", flushProgress);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") flushProgress();
+  });
 
   if (!loadGame()) newGame();
 })();
