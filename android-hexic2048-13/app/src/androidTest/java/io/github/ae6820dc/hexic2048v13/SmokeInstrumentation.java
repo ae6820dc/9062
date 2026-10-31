@@ -6,7 +6,8 @@ import android.view.MotionEvent;
 import java.util.concurrent.*;
 public class SmokeInstrumentation extends Instrumentation {
  MainActivity a;
- @Override public void onCreate(Bundle b){super.onCreate(b);start();}
+ String mode;
+ @Override public void onCreate(Bundle b){super.onCreate(b);mode=b.getString("mode","");start();}
  String js(String s) throws Exception {
   ArrayBlockingQueue<String> q=new ArrayBlockingQueue<>(1);
   runOnMainSync(()->a.web.evaluateJavascript(s,q::add));
@@ -37,6 +38,16 @@ public class SmokeInstrumentation extends Instrumentation {
   try{
    a=(MainActivity)startActivitySync(new Intent(getTargetContext(),MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
    waitReady();
+   if("seed".equals(mode)){
+    js("localStorage.setItem('hex2048_manual_save_data_A442803514634F8E',JSON.stringify({mi:0,gmode:'classic',score:'128n',undos:7,uid:2,started:true,tiles:[{id:1,v:'1n',q:0,r:0},{id:2,v:'1n',q:0,r:1}],hist:[],bestScores:{}}))");
+    result.putString("stream","SEEDED saved progress for update test\n");finish(Activity.RESULT_OK,result);return;
+   }
+   require("Hexic 2048".contentEquals(getTargetContext().getApplicationInfo().loadLabel(getTargetContext().getPackageManager())),"App label");
+   require("true".equals(js("getComputedStyle(document.body).backgroundColor==='rgb(43, 38, 34)' && document.documentElement.dataset.theme==='dark'")),"Dark theme in light system mode");
+   if("upgrade".equals(mode)){
+    require("\"128\"".equals(js("document.getElementById('score').textContent")),"Upgrade preserved score");
+    require("\"7\"".equals(js("document.getElementById('badge').textContent")),"Upgrade preserved undo count");
+   }
    require(js("document.getElementById('hint').textContent").contains("27A5431D1655F0FE7E95D6DBDC19A328"),"Program ID");
    int[] counts={7,19,37,61,91,127,169,16,25,36,49,64,81,100};
    for(int i=0;i<counts.length;i++){pick("bGrid",i);require(Integer.toString(counts[i]).equals(js("document.querySelectorAll('#board .cw').length")),"Grid "+i);}
@@ -61,7 +72,7 @@ public class SmokeInstrumentation extends Instrumentation {
    pick("bAuto",0);Thread.sleep(1600);
    js("if(document.getElementById('bAuto').classList.contains('on'))document.getElementById('bAuto').click()");
    require("true".equals(js("!document.getElementById('bUndo').disabled")),"Auto mode made moves");
-   result.putString("stream","PASS: Android 16 offline launch, Program ID, all 14 grids, Survival, X-Tile, native swipe and merge, Undo, saved progress after reopen, Auto.\n");
+   result.putString("stream","PASS: Android 16 offline launch, dark theme, app name, saved progress through APK update, Program ID, all 14 grids, Survival, X-Tile, native swipe and merge, Undo, saved progress after reopen, Auto.\n");
    finish(Activity.RESULT_OK,result);
   }catch(Throwable e){result.putString("stream","FAIL: "+android.util.Log.getStackTraceString(e));finish(Activity.RESULT_CANCELED,result);}
  }

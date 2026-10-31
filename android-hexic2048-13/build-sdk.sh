@@ -6,7 +6,7 @@ bt="$sdk/build-tools/36.0.0"
 platform="$sdk/platforms/android-36/android.jar"
 mkdir -p build/classes build/dex build/test-classes build/test-dex app/build/outputs/apk/debug app/build/outputs/apk/androidTest/debug
 "$bt/aapt2" compile --dir app/src/main/res -o build/resources.zip
-"$bt/aapt2" link -I "$platform" --manifest app/src/main/AndroidManifest.xml --min-sdk-version 26 --target-sdk-version 36 --version-code 1 --version-name 13.1 -A app/src/main/assets -o build/app-unsigned.apk build/resources.zip
+"$bt/aapt2" link -I "$platform" --manifest app/src/main/AndroidManifest.xml --min-sdk-version 26 --target-sdk-version 36 --version-code 2 --version-name 1.1 -A app/src/main/assets -o build/app-unsigned.apk build/resources.zip
 javac -source 8 -target 8 -classpath "$platform" -d build/classes app/src/main/java/io/github/ae6820dc/hexic2048v13/MainActivity.java
 "$bt/d8" --min-api 26 --lib "$platform" --output build/dex $(find build/classes -name '*.class')
 (cd build/dex && zip -q ../app-unsigned.apk classes.dex)

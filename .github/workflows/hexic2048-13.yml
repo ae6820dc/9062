@@ -1,4 +1,4 @@
-name: Hexic 2048 13 APK
+name: Hexic 2048 APK
 on:
   push:
     branches: [main]
@@ -24,7 +24,7 @@ jobs:
         working-directory: android-hexic2048-13
         run: |
           bash build-sdk.sh
-          cmp app/src/main/assets/index.html ../hexic2048/13/sample1.html
+          cmp app/src/main/assets/index.html <(sed 's/<html lang="hu">/<html lang="hu" data-theme="dark">/' ../hexic2048/13/sample1.html)
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose app/build/outputs/apk/debug/app-debug.apk
       - name: Enable KVM
         run: |
@@ -39,28 +39,32 @@ jobs:
           target: default
           profile: pixel_2
           script: |
-            adb install android-hexic2048-13/app/build/outputs/apk/debug/app-debug.apk
             adb install android-hexic2048-13/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            adb install android-distributions/Hexic-2048-13.apk
+            adb shell am instrument -w -e mode seed io.github.ae6820dc.hexic2048v13.test/io.github.ae6820dc.hexic2048v13.SmokeInstrumentation | tee seed-hexic2048.txt
+            grep -q 'SEEDED' seed-hexic2048.txt
+            adb install -r android-hexic2048-13/app/build/outputs/apk/debug/app-debug.apk
+            adb shell cmd uimode night no
             adb shell svc wifi disable
             adb shell svc data disable
-            adb shell am instrument -w io.github.ae6820dc.hexic2048v13.test/io.github.ae6820dc.hexic2048v13.SmokeInstrumentation | tee runtime-hexic2048.txt
+            adb shell am instrument -w -e mode upgrade io.github.ae6820dc.hexic2048v13.test/io.github.ae6820dc.hexic2048v13.SmokeInstrumentation | tee runtime-hexic2048.txt
             grep -q 'PASS: Android 16 offline launch' runtime-hexic2048.txt
       - name: Preserve verified APK
         run: |
-          cp android-hexic2048-13/app/build/outputs/apk/debug/app-debug.apk android-distributions/Hexic-2048-13.apk
-          cp runtime-hexic2048.txt android-distributions/Hexic-2048-13.verification.txt
-          sha256sum android-distributions/Hexic-2048-13.apk > android-distributions/Hexic-2048-13.apk.sha256
+          cp android-hexic2048-13/app/build/outputs/apk/debug/app-debug.apk android-distributions/Hexic-2048.apk
+          cp runtime-hexic2048.txt android-distributions/Hexic-2048.verification.txt
+          sha256sum android-distributions/Hexic-2048.apk > android-distributions/Hexic-2048.apk.sha256
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add android-distributions/Hexic-2048-13*
-          git commit -m 'Add verified offline Hexic 2048 13 APK'
+          git add android-distributions/Hexic-2048*
+          git commit -m 'Add dark-theme Hexic 2048 APK without version in label'
           git pull --rebase origin main
           git push origin HEAD:main
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Hexic-2048-13
+          name: Hexic-2048
           path: |
-            android-distributions/Hexic-2048-13*
+            android-distributions/Hexic-2048*
             runtime-hexic2048.txt
             android-hexic2048-13/app/build/reports/
