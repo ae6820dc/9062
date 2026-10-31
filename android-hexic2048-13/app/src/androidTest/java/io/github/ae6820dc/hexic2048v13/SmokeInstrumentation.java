@@ -40,6 +40,9 @@ public class SmokeInstrumentation extends Instrumentation {
    waitReady();
    if("seed".equals(mode)){
     js("localStorage.setItem('hex2048_manual_save_data_A442803514634F8E',JSON.stringify({mi:0,gmode:'classic',score:'128n',undos:7,uid:2,started:true,tiles:[{id:1,v:'1n',q:0,r:0},{id:2,v:'1n',q:0,r:1}],hist:[],bestScores:{}}))");
+    js("location.reload()");Thread.sleep(1200);waitReady();
+    require("\"128\"".equals(js("document.getElementById('score').textContent")),"Seed score loaded");
+    runOnMainSync(()->a.finish());waitForIdleSync();Thread.sleep(2500);
     result.putString("stream","SEEDED saved progress for update test\n");finish(Activity.RESULT_OK,result);return;
    }
    require("Hexic 2048".contentEquals(getTargetContext().getApplicationInfo().loadLabel(getTargetContext().getPackageManager())),"App label");
