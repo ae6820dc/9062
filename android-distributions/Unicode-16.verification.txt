@@ -1,0 +1,2 @@
+PASS: Android 16 offline launch, original Program ID, 26 character sets, 128 characters, next/previous, playback, exact BigInt jump, saved state on reopen, length validation.
+
