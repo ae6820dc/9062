@@ -1,5 +1,5 @@
 const PREFIX = 'factorial-128-v37:' + self.registration.scope;
-const CACHE = PREFIX + 'v1';
+const CACHE = PREFIX + 'v2';
 const FILES = ['./128.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil((async () => {

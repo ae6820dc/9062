@@ -191,11 +191,14 @@
     el.innerHTML='<span class="real">'+v+'</span>';
     requestAnimationFrame(()=>{ el.scrollLeft=el.scrollWidth; });
   }
+  const SAVE_EVERY_STEPS = 100;
+  let unsavedSteps = 0;
+  let stateDirty = false;
+
   function syncHUD(){ 
     const b = boardsState[viewIndex];
     renderValue(elM, b.score);
     renderValue(elS, b.step);
-    saveState(); 
   }
 
   function toggleCell(r,c){
@@ -214,6 +217,9 @@
       b.score = halfUnsigned(b.step);
     }
 
+    unsavedSteps++;
+    stateDirty = true;
+    saveState();
     syncHUD();
     draw();
   }
@@ -239,6 +245,7 @@
       clearInterval(autoToggleInterval);
       autoToggleInterval = null;
     }
+    saveState(true);
   }
 
   function toggleAutoMode() {
@@ -315,7 +322,8 @@
       renderButtons();
       const m = maskFromButtons();
       viewIndex = m;
-      saveState();
+      stateDirty = true;
+      saveState(true);
       syncHUD();
       draw();
     }
@@ -357,10 +365,13 @@
     draw();
   }
 
-  function saveState(){ 
-    try{ 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({boardsState, activeButtons, viewIndex})); 
-    }catch(e){} 
+  function saveState(force = false){
+    if (!stateDirty || (!force && unsavedSteps < SAVE_EVERY_STEPS)) return;
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({boardsState, activeButtons, viewIndex}));
+      unsavedSteps = 0;
+      stateDirty = false;
+    }catch(e){}
   }
   function loadState(){
     try{
@@ -382,6 +393,12 @@
     }catch(e){ localStorage.removeItem(STORAGE_KEY); }
     return false;
   }
+
+  window.addEventListener('pagehide', () => saveState(true));
+  window.addEventListener('beforeunload', () => saveState(true));
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') saveState(true);
+  });
 
   window.addEventListener('resize', ()=>fitCanvas());
   window.addEventListener('orientationchange', ()=>fitCanvas());
