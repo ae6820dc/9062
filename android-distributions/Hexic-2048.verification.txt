@@ -1,2 +1,3 @@
 PASS: Android 16 offline launch, original light theme with dark system setting, app name Hexic 2048, complete save and score preserved through APK update.
 
+PASS: stop during animation saves complete move below 100, Auto remains stopped, reload restores board and score, native pause saves remaining move.\n
