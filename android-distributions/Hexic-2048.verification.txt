@@ -1,0 +1,2 @@
+PASS: Android 16 offline launch, forced dark theme with light system setting, app name Hexic 2048, complete save and score preserved through APK update.
+
