@@ -19,13 +19,18 @@ public class SmokeInstrumentation extends Instrumentation {
  }
  void pick(String button,int index) throws Exception {js("document.getElementById('"+button+"').click();document.querySelectorAll('#mm>div')["+index+"].click()");Thread.sleep(50);}
  void swipeUp() throws Exception {
-  int[] p=new int[2];int[] size=new int[2];
-  runOnMainSync(()->{a.web.getLocationOnScreen(p);size[0]=a.web.getWidth();size[1]=a.web.getHeight();});
-  float x=p[0]+size[0]*.5f,y=p[1]+size[1]*.6f;long t=SystemClock.uptimeMillis();
-  sendPointerSync(MotionEvent.obtain(t,t,MotionEvent.ACTION_DOWN,x,y,0));
-  sendPointerSync(MotionEvent.obtain(t,t+100,MotionEvent.ACTION_MOVE,x,y-100,0));
-  sendPointerSync(MotionEvent.obtain(t,t+200,MotionEvent.ACTION_UP,x,y-200,0));
-  Thread.sleep(900);
+  int[] p=new int[2];int[] width=new int[1];
+  runOnMainSync(()->{a.web.getLocationOnScreen(p);width[0]=a.web.getWidth();});
+  org.json.JSONArray rect=new org.json.JSONArray(js("(()=>{const r=document.getElementById('board').getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2,innerWidth]})()"));
+  float scale=width[0]/(float)rect.getDouble(2);
+  float x=p[0]+(float)rect.getDouble(0)*scale;
+  float cy=p[1]+(float)rect.getDouble(1)*scale;
+  long t=SystemClock.uptimeMillis();
+  MotionEvent down=MotionEvent.obtain(t,t,MotionEvent.ACTION_DOWN,x,cy+40*scale,0);down.setSource(android.view.InputDevice.SOURCE_TOUCHSCREEN);sendPointerSync(down);down.recycle();
+  for(int i=1;i<=10;i++){Thread.sleep(20);MotionEvent m=MotionEvent.obtain(t,SystemClock.uptimeMillis(),MotionEvent.ACTION_MOVE,x,cy+(40-i*8)*scale,0);m.setSource(android.view.InputDevice.SOURCE_TOUCHSCREEN);sendPointerSync(m);m.recycle();}
+  Thread.sleep(20);
+  MotionEvent up=MotionEvent.obtain(t,SystemClock.uptimeMillis(),MotionEvent.ACTION_UP,x,cy-40*scale,0);up.setSource(android.view.InputDevice.SOURCE_TOUCHSCREEN);sendPointerSync(up);up.recycle();
+  Thread.sleep(1000);
  }
  @Override public void onStart(){
   Bundle result=new Bundle();
@@ -42,8 +47,10 @@ public class SmokeInstrumentation extends Instrumentation {
    pick("bMode",2);
    require("true".equals(js("document.querySelectorAll('#board .tw').length>2")),"X tile mode");
    js("localStorage.clear();localStorage.setItem('hex2048_manual_save_data_A442803514634F8E',JSON.stringify({mi:0,gmode:'classic',score:'0n',undos:10,uid:2,started:true,tiles:[{id:1,v:'1n',q:0,r:0},{id:2,v:'1n',q:0,r:1}],hist:[],bestScores:{}}));location.reload()");
-   Thread.sleep(1000);waitReady();swipeUp();
-   require("\"2\"".equals(js("document.getElementById('score').textContent")),"Native swipe and merge");
+   Thread.sleep(1000);waitReady();
+   js("window.testEvents=[];['pointerdown','pointerup','pointercancel'].forEach(k=>window.addEventListener(k,e=>testEvents.push([k,e.clientX,e.clientY,e.target.id])))");
+   swipeUp();
+   require("\"2\"".equals(js("document.getElementById('score').textContent")),"Native swipe and merge; observed="+js("JSON.stringify({score:document.getElementById(\'score\').textContent,events:window.testEvents,saved:localStorage.getItem(\'hex2048_manual_save_data_A442803514634F8E\')})"));
    js("document.getElementById('bUndo').click()");
    require("\"0\"".equals(js("document.getElementById('score').textContent")),"Undo score");
    require("\"9\"".equals(js("document.getElementById('badge').textContent")),"Undo count");
