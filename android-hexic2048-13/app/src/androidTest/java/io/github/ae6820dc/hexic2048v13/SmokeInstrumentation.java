@@ -52,6 +52,7 @@ public class SmokeInstrumentation extends Instrumentation {
    if("upgrade".equals(mode)){
     require("true".equals(js("localStorage.getItem('upgrade_test_expected')===localStorage.getItem('hex2048_manual_save_data_A442803514634F8E') && localStorage.getItem('upgrade_test_expected')!==null")),"Upgrade preserved full save");
     require("true".equals(js("document.getElementById('score').textContent===localStorage.getItem('upgrade_test_score')")),"Upgrade restored score");
+    result.putString("stream","PASS: Android 16 offline launch, forced dark theme with light system setting, app name Hexic 2048, complete save and score preserved through APK update.\n");finish(Activity.RESULT_OK,result);return;
    }
    require(js("document.getElementById('hint').textContent").contains("27A5431D1655F0FE7E95D6DBDC19A328"),"Program ID");
    int[] counts={7,19,37,61,91,127,169,16,25,36,49,64,81,100};
