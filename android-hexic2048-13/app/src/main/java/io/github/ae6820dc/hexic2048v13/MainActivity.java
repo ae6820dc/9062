@@ -12,7 +12,7 @@ public class MainActivity extends Activity {
  @Override public void onCreate(Bundle saved) {
   super.onCreate(saved);
   FrameLayout root = new FrameLayout(this);
-  root.setBackgroundColor(Color.rgb(15,20,32));
+  root.setBackgroundColor(Color.rgb(250,248,239));
   root.setOnApplyWindowInsetsListener((v, wi) -> {
    if(android.os.Build.VERSION.SDK_INT>=30){
     Insets i=wi.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
@@ -21,7 +21,7 @@ public class MainActivity extends Activity {
    return wi;
   });
   web=new WebView(this);
-  web.setBackgroundColor(Color.rgb(15,20,32));
+  web.setBackgroundColor(Color.rgb(250,248,239));
   web.getSettings().setJavaScriptEnabled(true);
   web.getSettings().setDomStorageEnabled(true);
   web.getSettings().setAllowFileAccess(false);

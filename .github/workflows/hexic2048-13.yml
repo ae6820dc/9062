@@ -24,7 +24,7 @@ jobs:
         working-directory: android-hexic2048-13
         run: |
           bash build-sdk.sh
-          cmp app/src/main/assets/index.html <(sed 's/<html lang="hu">/<html lang="hu" data-theme="dark">/' ../hexic2048/13/sample1.html)
+          cmp app/src/main/assets/index.html <(sed 's/<html lang="hu">/<html lang="hu" data-theme="light">/' ../hexic2048/13/sample1.html)
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose app/build/outputs/apk/debug/app-debug.apk
       - name: Enable KVM
         run: |
@@ -44,7 +44,7 @@ jobs:
             adb shell am instrument -w -e mode seed io.github.ae6820dc.hexic2048v13.test/io.github.ae6820dc.hexic2048v13.SmokeInstrumentation | tee seed-hexic2048.txt
             grep -q 'SEEDED' seed-hexic2048.txt
             adb install -r android-hexic2048-13/app/build/outputs/apk/debug/app-debug.apk
-            adb shell cmd uimode night no
+            adb shell cmd uimode night yes
             adb shell svc wifi disable
             adb shell svc data disable
             adb shell am instrument -w -e mode upgrade io.github.ae6820dc.hexic2048v13.test/io.github.ae6820dc.hexic2048v13.SmokeInstrumentation | tee runtime-hexic2048.txt
@@ -57,7 +57,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add android-distributions/Hexic-2048*
-          git commit -m 'Add dark-theme Hexic 2048 APK without version in label'
+          git commit -m 'Restore original light theme in Hexic 2048 APK'
           git pull --rebase origin main
           git push origin HEAD:main
       - uses: actions/upload-artifact@v4

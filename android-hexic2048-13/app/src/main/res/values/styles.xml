@@ -1,5 +1,5 @@
 <resources><style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
 <item name="android:fontFamily">sans</item><item name="android:colorAccent">#3ec7c2</item>
-<item name="android:windowLightStatusBar">false</item><item name="android:windowLightNavigationBar">false</item>
-<item name="android:windowBackground">#0f1420</item><item name="android:statusBarColor">#0f1420</item><item name="android:navigationBarColor">#0f1420</item>
+<item name="android:windowLightStatusBar">true</item><item name="android:windowLightNavigationBar">true</item>
+<item name="android:windowBackground">#faf8ef</item><item name="android:statusBarColor">#faf8ef</item><item name="android:navigationBarColor">#faf8ef</item>
 </style></resources>

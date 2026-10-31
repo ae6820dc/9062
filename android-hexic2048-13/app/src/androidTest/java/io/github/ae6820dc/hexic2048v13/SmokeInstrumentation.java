@@ -48,11 +48,11 @@ public class SmokeInstrumentation extends Instrumentation {
     result.putString("stream","SEEDED saved progress for update test\n");finish(Activity.RESULT_OK,result);return;
    }
    require("Hexic 2048".contentEquals(getTargetContext().getApplicationInfo().loadLabel(getTargetContext().getPackageManager())),"App label");
-   require("true".equals(js("getComputedStyle(document.body).backgroundColor==='rgb(43, 38, 34)' && document.documentElement.dataset.theme==='dark'")),"Dark theme in light system mode");
+   require("true".equals(js("getComputedStyle(document.body).backgroundColor==='rgb(250, 248, 239)' && document.documentElement.dataset.theme==='light'")),"Original light theme in dark system mode");
    if("upgrade".equals(mode)){
     require("true".equals(js("localStorage.getItem('upgrade_test_expected')===localStorage.getItem('hex2048_manual_save_data_A442803514634F8E') && localStorage.getItem('upgrade_test_expected')!==null")),"Upgrade preserved full save");
     require("true".equals(js("document.getElementById('score').textContent===localStorage.getItem('upgrade_test_score')")),"Upgrade restored score");
-    result.putString("stream","PASS: Android 16 offline launch, forced dark theme with light system setting, app name Hexic 2048, complete save and score preserved through APK update.\n");finish(Activity.RESULT_OK,result);return;
+    result.putString("stream","PASS: Android 16 offline launch, original light theme with dark system setting, app name Hexic 2048, complete save and score preserved through APK update.\n");finish(Activity.RESULT_OK,result);return;
    }
    require(js("document.getElementById('hint').textContent").contains("27A5431D1655F0FE7E95D6DBDC19A328"),"Program ID");
    int[] counts={7,19,37,61,91,127,169,16,25,36,49,64,81,100};
@@ -78,7 +78,7 @@ public class SmokeInstrumentation extends Instrumentation {
    pick("bAuto",0);Thread.sleep(1600);
    js("if(document.getElementById('bAuto').classList.contains('on'))document.getElementById('bAuto').click()");
    require("true".equals(js("!document.getElementById('bUndo').disabled")),"Auto mode made moves");
-   result.putString("stream","PASS: Android 16 offline launch, dark theme, app name, saved progress through APK update, Program ID, all 14 grids, Survival, X-Tile, native swipe and merge, Undo, saved progress after reopen, Auto.\n");
+   result.putString("stream","PASS: Android 16 offline launch, original light theme, app name, saved progress through APK update, Program ID, all 14 grids, Survival, X-Tile, native swipe and merge, Undo, saved progress after reopen, Auto.\n");
    finish(Activity.RESULT_OK,result);
   }catch(Throwable e){result.putString("stream","FAIL: "+android.util.Log.getStackTraceString(e));finish(Activity.RESULT_CANCELED,result);}
  }
