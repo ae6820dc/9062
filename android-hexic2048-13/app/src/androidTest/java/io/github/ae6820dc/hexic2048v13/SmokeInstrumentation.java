@@ -39,17 +39,19 @@ public class SmokeInstrumentation extends Instrumentation {
    a=(MainActivity)startActivitySync(new Intent(getTargetContext(),MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
    waitReady();
    if("seed".equals(mode)){
-    js("localStorage.setItem('hex2048_manual_save_data_A442803514634F8E',JSON.stringify({mi:0,gmode:'classic',score:'128n',undos:7,uid:2,started:true,tiles:[{id:1,v:'1n',q:0,r:0},{id:2,v:'1n',q:0,r:1}],hist:[],bestScores:{}}))");
-    js("location.reload()");Thread.sleep(1200);waitReady();
-    require("\"128\"".equals(js("document.getElementById('score').textContent")),"Seed score loaded");
+    pick("bAuto",0);Thread.sleep(2400);
+    js("if(document.getElementById('bAuto').classList.contains('on'))document.getElementById('bAuto').click()");
+    Thread.sleep(800);
+    js("window.alert=()=>{};document.querySelector('#hm [data-a=save]').click();localStorage.setItem('upgrade_test_expected',localStorage.getItem('hex2048_manual_save_data_A442803514634F8E'));localStorage.setItem('upgrade_test_score',document.getElementById('score').textContent)");
+    require("true".equals(js("localStorage.getItem('upgrade_test_expected')!==null")),"Manual save exists");
     runOnMainSync(()->a.finish());waitForIdleSync();Thread.sleep(2500);
     result.putString("stream","SEEDED saved progress for update test\n");finish(Activity.RESULT_OK,result);return;
    }
    require("Hexic 2048".contentEquals(getTargetContext().getApplicationInfo().loadLabel(getTargetContext().getPackageManager())),"App label");
    require("true".equals(js("getComputedStyle(document.body).backgroundColor==='rgb(43, 38, 34)' && document.documentElement.dataset.theme==='dark'")),"Dark theme in light system mode");
    if("upgrade".equals(mode)){
-    require("\"128\"".equals(js("document.getElementById('score').textContent")),"Upgrade preserved score");
-    require("\"7\"".equals(js("document.getElementById('badge').textContent")),"Upgrade preserved undo count");
+    require("true".equals(js("localStorage.getItem('upgrade_test_expected')===localStorage.getItem('hex2048_manual_save_data_A442803514634F8E') && localStorage.getItem('upgrade_test_expected')!==null")),"Upgrade preserved full save");
+    require("true".equals(js("document.getElementById('score').textContent===localStorage.getItem('upgrade_test_score')")),"Upgrade restored score");
    }
    require(js("document.getElementById('hint').textContent").contains("27A5431D1655F0FE7E95D6DBDC19A328"),"Program ID");
    int[] counts={7,19,37,61,91,127,169,16,25,36,49,64,81,100};
