@@ -1,0 +1,64 @@
+name: Unicode 16 standalone APK
+on:
+  push:
+    branches: [main]
+    paths: ['android-unicode16-single/**', '.github/workflows/unicode16-single.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+          log-accepted-android-sdk-licenses: false
+      - run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Build and verify original source
+        working-directory: android-unicode16-single
+        run: |
+          bash build-sdk.sh
+          cmp app/src/main/assets/index.html ../unicode/16/sample1.html
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Android 16 offline checks
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          arch: x86_64
+          target: default
+          profile: pixel_2
+          script: |
+            adb install android-unicode16-single/app/build/outputs/apk/debug/app-debug.apk
+            adb install android-unicode16-single/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            adb shell svc wifi disable
+            adb shell svc data disable
+            adb shell am instrument -w io.github.ae6820dc.unicode16single.test/io.github.ae6820dc.unicode16single.SmokeInstrumentation | tee runtime-unicode16.txt
+            grep -q 'PASS: Android 16' runtime-unicode16.txt
+      - name: Publish verified APK
+        run: |
+          cp android-unicode16-single/app/build/outputs/apk/debug/app-debug.apk android-distributions/Unicode-16.apk
+          cp runtime-unicode16.txt android-distributions/Unicode-16.verification.txt
+          sha256sum android-distributions/Unicode-16.apk > android-distributions/Unicode-16.apk.sha256
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add android-distributions/Unicode-16*
+          git commit -m 'Add verified standalone Unicode 16 offline APK'
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Unicode-16
+          path: |
+            android-distributions/Unicode-16*
+            runtime-unicode16.txt

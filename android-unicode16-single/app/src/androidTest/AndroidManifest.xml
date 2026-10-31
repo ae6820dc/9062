@@ -1,0 +1,1 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="io.github.ae6820dc.unicode16single.test"><application android:label="Unicode 16 verification"/><instrumentation android:name="io.github.ae6820dc.unicode16single.SmokeInstrumentation" android:targetPackage="io.github.ae6820dc.unicode16single"/></manifest>
