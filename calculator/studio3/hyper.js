@@ -18,15 +18,15 @@ function installHyperKeyboard(doc){
   let a=start,b=end,t=token;
   if(token==='Clear'){a=0;b=active.value.length;t='';}
   if(token==='⌫'){a=start===end?Math.max(0,start-1):start;t='';}
-  if(token==='←'||token==='→'){const p=Math.max(0,Math.min(active.value.length,token==='←'?start-1:end+1));active.focus({preventScroll:true});active.setSelectionRange(p,p);return;}
+  if(token==='←'||token==='→'){const p=Math.max(0,Math.min(active.value.length,token==='←'?start-1:end+1));active.setSelectionRange(p,p);return;}
   if(token==='Next'){const f=allFields();f[(f.indexOf(active)+1)%f.length]?.focus();return;}
   if(token==='Space')t=' ';
   if(token==='New row')t=active.tagName==='TEXTAREA'?'\n':';';
-  if(token==='Calculate'){doc.getElementById('calculate')?.click();return;}
+  if(token==='Calculate'){if(doc===document&&active.closest('#percent-form'))doc.getElementById('percent-form').requestSubmit();else doc.getElementById('calculate')?.click();return;}
   if(active.value.length-(b-a)+t.length>50000)return;
-  active.setRangeText(t,a,b,'end');active.dispatchEvent(new doc.defaultView.Event('input',{bubbles:true}));active.dispatchEvent(new doc.defaultView.Event('change',{bubbles:true}));active.focus({preventScroll:true});
+  active.setRangeText(t,a,b,'end');active.dispatchEvent(new doc.defaultView.Event('input',{bubbles:true}));active.dispatchEvent(new doc.defaultView.Event('change',{bubbles:true}));
  }
- function grid(keys,parent){const g=doc.createElement('div');g.className='hyper-grid'+(keys.includes('Clear')?' hyper-controls':'');for(const k of keys){const b=doc.createElement('button');b.type='button';b.textContent=k;if(['Calculate','Space','New row'].includes(k))b.dataset.wide='true';b.onpointerdown=e=>e.preventDefault();b.onclick=()=>edit(k);g.append(b);}parent.append(g);}
+ function grid(keys,parent){const g=doc.createElement('div');g.className='hyper-grid'+(keys.includes('Clear')?' hyper-controls':'');for(const k of keys){const b=doc.createElement('button');b.type='button';b.textContent=k;if(['Next','Calculate','Space','New row'].includes(k))b.dataset.wide='true';b.onpointerdown=e=>{e.preventDefault();active?.blur();};b.onclick=()=>edit(k);g.append(b);}parent.append(g);}
  grid(['7','8','9','+','(',')','4','5','6','-','^','/','1','2','3','*','x','y','0','. ',',',';','pi','e'].map(x=>x.trim()),panel);
  grid(['Clear','⌫','←','→','Next','Calculate','Space','New row'],panel);
  const more=doc.createElement('details'),summary=doc.createElement('summary');summary.textContent='Functions & letters';more.append(summary);grid(['sin(','cos(','tan(','sqrt(','abs(','log(','log10(','exp(','asin(','acos(','atan(','cbrt(','sinh(','cosh(','tanh(','sign('],more);grid('abcdefghijklmnopqrstuvwxyz'.split(''),more);panel.append(more);doc.body.append(panel);
@@ -36,7 +36,7 @@ function installHyperKeyboard(doc){
   const download=doc.getElementById('download-result');
   if(download){if(download.textContent!=='Save HTML')download.textContent='Save HTML';download.onclick=()=>{const result=doc.getElementById('result');if(!result||result.hidden)return;const inputs=allFields().filter(e=>!e.closest('#hyper-keyboard')).map(e=>(e.name||e.id)+': '+e.value).join('\n');saveResultHTML(doc.title,inputs+'\n\n'+result.innerText,doc.getElementById('program')?.textContent||PROGRAM);};}
  }
- doc.addEventListener('focusin',e=>{if(!allFields().includes(e.target)||(doc===document&&e.target.id==='expression'))return;active=e.target;label.textContent='Hyper keyboard · '+(active.labels?.[0]?.childNodes[0]?.textContent?.trim()||active.name||active.id);panel.hidden=false;const anchor=active.closest('label')||active;anchor.after(panel);});
+ doc.addEventListener('focusin',e=>{if(!allFields().includes(e.target)||(doc===document&&e.target.id==='expression'))return;if(active===e.target&&panel.isConnected&&!panel.hidden)return;active=e.target;label.textContent='Hyper keyboard · '+(active.labels?.[0]?.childNodes[0]?.textContent?.trim()||active.name||active.id);panel.hidden=false;const anchor=active.closest('label')||active;anchor.after(panel);});
  const observer=new doc.defaultView.MutationObserver(prepare);observer.observe(doc.body,{childList:true,subtree:true});prepare();
 }
 document.getElementById('lab-frame').addEventListener('load',()=>{try{installHyperKeyboard(document.getElementById('lab-frame').contentDocument);}catch{}});
