@@ -32,16 +32,16 @@ for flavor in spec:
             sources += [p for p in (repo/'calculator'/folder).rglob('*') if p.is_file() and p.suffix in extensions and not p.name.endswith('.test.cjs')]
     elif flavor=='explorer':
         for version,depth in ((7,65536),):
-            for sample in range(1,13):
+            for sample in (1,):
                 p=repo/f'explorer/{version}/sample{sample}.html';html=p.read_text();sources.append(p)
                 program_id=re.search(r'Program ID: <code>([0-9a-f]{16})</code>',html).group(1)
                 key=re.search(r"STORAGE_KEY='([0-9a-f]{16})'",html).group(1)
                 database=re.search(r"DATABASE_NAME='([0-9a-f]{16})'",html).group(1)
                 assert f'MAX_DEPTH={depth}' in html
                 catalog.append(dict(id=f'explorer-{version}-{sample}',group=f'System drive · {depth} levels',name=f'Sample {sample}',path=str(p.relative_to(repo)),kind='explorer',programId=program_id,storageKey=key,databaseName=database,depth=depth,sample=sample))
-        assert len(catalog)==12
+        assert len(catalog)==1
         all_ids=[p[k] for p in catalog for k in ('programId','storageKey','databaseName')]
-        assert len(set(all_ids))==36
+        assert len(set(all_ids))==3
     elif flavor=='unicode':
         for version in range(1,12):
             for sample in range(1,4):

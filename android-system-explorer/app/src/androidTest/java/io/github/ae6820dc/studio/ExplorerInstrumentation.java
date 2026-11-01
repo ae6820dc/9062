@@ -50,11 +50,12 @@ public final class ExplorerInstrumentation extends Instrumentation {
         Field wf=MainActivity.class.getDeclaredField("web");wf.setAccessible(true);web=(WebView)wf.get(activity);
         Field cf=MainActivity.class.getDeclaredField("programs");cf.setAccessible(true);
         @SuppressWarnings("unchecked") List<JSONObject> programs=(List<JSONObject>)cf.get(activity);
-        require(programs.size()==12,"all 12 System Explorer samples included");
+        require(programs.size()==1 && programs.get(0).getString("id").equals("explorer-7-1"),"only System Explorer sample 1 included");
         Set<String> ids=new HashSet<>(),databaseNames=new HashSet<>();Map<Integer,Integer> depths=new HashMap<>();
         for(JSONObject p:programs){require(ids.add(p.getString("id")),"unique origin "+p.getString("id"));require(databaseNames.add(p.getString("databaseName")),"unique IndexedDB "+p.getString("id"));depths.merge(p.getInt("depth"),1,Integer::sum);}
-        for(int depth:new int[]{65536})require(depths.getOrDefault(depth,0)==12,"twelve samples at depth "+depth);
-        runOnMainSync(()->require(sampleButtons(activity.findViewById(android.R.id.content))==12,"home chooser lists 12 samples"));nativeLayout();
+        for(int depth:new int[]{65536})require(depths.getOrDefault(depth,0)==1,"single sample at depth "+depth);
+        runOnMainSync(()->require(sampleButtons(activity.findViewById(android.R.id.content))==0,"no sample chooser on launch"));nativeLayout();
+        ready(programs.get(0));require("true".equals(eval("location.pathname.endsWith('/explorer/7/sample1.html')")),"sample 1 opens automatically on launch");
         Method open=MainActivity.class.getDeclaredMethod("open",JSONObject.class);open.setAccessible(true);
         boolean verify="verify".equals(args.getString("phase"));
         for(JSONObject p:programs){
@@ -93,7 +94,7 @@ public final class ExplorerInstrumentation extends Instrumentation {
         Method back=MainActivity.class.getDeclaredMethod("back");back.setAccessible(true);
         eval("showAction('about')");runOnMainSync(()->{try{back.invoke(activity);}catch(Exception e){throw new RuntimeException(e);}});waitFor("!document.getElementById('actionDialog').open");require("true".equals(eval("ready")),"Android Back closes dialog first");
         runOnMainSync(()->{try{back.invoke(activity);}catch(Exception e){throw new RuntimeException(e);}});Thread.sleep(300);
-        runOnMainSync(()->require(sampleButtons(activity.findViewById(android.R.id.content))==12,"Android Back returns to chooser"));
+        runOnMainSync(()->require(sampleButtons(activity.findViewById(android.R.id.content))==0,"Android Back never opens a chooser"));
         result.putString("stream","PASS "+checks.size()+" Explorer Android checks\n"+String.join("\n",checks)+"\n");finish(Activity.RESULT_OK,result);
     }catch(Throwable error){result.putString("stream","FAIL after "+checks.size()+" checks: "+error+"\n"+String.join("\n",checks)+"\n");finish(Activity.RESULT_CANCELED,result);}}
 }

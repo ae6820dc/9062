@@ -126,14 +126,7 @@ public final class MainActivity extends Activity {
         systemBars();
     }
     private int dp(int n){return Math.round(n*getResources().getDisplayMetrics().density);}
-    private void home(){
-        current=null;web.loadUrl("about:blank");content.removeAllViews();
-        ScrollView scroll=new ScrollView(this);LinearLayout list=new LinearLayout(this);list.setOrientation(LinearLayout.VERTICAL);list.setPadding(dp(16),dp(8),dp(16),dp(24));
-        TextView heading=new TextView(this);heading.setText(getString(getApplicationInfo().labelRes)+"\nChoose a program · Fully offline");heading.setTextSize(24);heading.setTextColor(isExplorer()?0xff253448:Color.WHITE);list.addView(heading);
-        String group="";
-        for(JSONObject p:programs){if(!text(p,"group").equals(group)){group=text(p,"group");TextView title=new TextView(this);title.setText(group);title.setTextSize(19);title.setTextColor(isExplorer()?0xff285fe5:0xff73dbb6);title.setPadding(0,dp(22),0,dp(8));list.addView(title);}Button choose=new Button(this);choose.setAllCaps(false);choose.setText(text(p,"name"));choose.setOnClickListener(v->open(p));list.addView(choose,new LinearLayout.LayoutParams(-1,-2));}
-        scroll.addView(list);content.addView(scroll);
-    }
+    private void home(){open(programs.get(0));}
     private void open(JSONObject p){current=p;content.removeAllViews();if(web.getParent() instanceof android.view.ViewGroup)((android.view.ViewGroup)web.getParent()).removeView(web);content.addView(web,new FrameLayout.LayoutParams(-1,-1));web.loadUrl(url(p));}
     private void leave(Runnable next){if(downloading){message("Finish saving the file before switching programs.");return;}if(current==null){next.run();return;}web.evaluateJavascript("if(typeof save==='function')save();if(window.studioSaveForm)window.studioSaveForm();",ignored->next.run());}
     private void menu(){String[] names=new String[programs.size()];for(int i=0;i<names.length;i++)names[i]=text(programs.get(i),"group")+" · "+text(programs.get(i),"name");new AlertDialog.Builder(this).setTitle("Switch program").setItems(names,(d,i)->leave(()->open(programs.get(i)))).setNegativeButton("Cancel",null).show();}
@@ -151,7 +144,7 @@ public final class MainActivity extends Activity {
     private String mime(String p){String ext=p.substring(p.lastIndexOf('.')+1).toLowerCase(Locale.ROOT);switch(ext){case "html":return "text/html";case "js":return "application/javascript";case "css":return "text/css";case "wasm":return "application/wasm";case "json":return "application/json";case "webmanifest":return "application/manifest+json";case "svg":return "image/svg+xml";case "png":return "image/png";case "txt":return "text/plain";default:return "application/octet-stream";}}
     private void back(){if(current==null){moveTaskToBack(true);return;}
         if(isExplorer()){
-            web.evaluateJavascript("(function(){var d=document.querySelector('dialog[open]');if(d){d.close();return true;}var m=document.getElementById('appMenu');if(m&&!m.hidden&&typeof closeMenu==='function'){closeMenu(true);return true;}return false;})()",closed->{if(!"true".equals(closed))leave(this::home);});return;
+            web.evaluateJavascript("(function(){var d=document.querySelector('dialog[open]');if(d){d.close();return true;}var m=document.getElementById('appMenu');if(m&&!m.hidden&&typeof closeMenu==='function'){closeMenu(true);return true;}return false;})()",closed->{if(!"true".equals(closed))moveTaskToBack(true);});return;
         }
 web.evaluateJavascript("(function(){var o=document.getElementById('jumpOverlay');if(o&&o.classList.contains('open')){document.getElementById('jumpCancel').click();return true;}return false;})()",closed->{if(!"true".equals(closed)){if(web.canGoBack() && !web.copyBackForwardList().getItemAtIndex(web.copyBackForwardList().getCurrentIndex()-1).getUrl().equals("about:blank"))leave(()->web.goBack());else leave(this::home);}});}
     @android.annotation.SuppressLint("GestureBackNavigation")

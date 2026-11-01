@@ -64,7 +64,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add android-distributions/System-Explorer.apk android-distributions/System-Explorer.apk.sha256 android-distributions/System-Explorer.json
           if ! git diff --cached --quiet; then
-            git commit -m 'Publish tested System Explorer APK with 12 programs'
+            git commit -m 'Publish tested System Explorer APK with sample 1 and direct launch'
             git pull --rebase origin "$GITHUB_REF_NAME"
             git push origin HEAD:"$GITHUB_REF_NAME"
           fi
