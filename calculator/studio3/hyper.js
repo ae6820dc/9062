@@ -6,7 +6,7 @@ function saveResultHTML(title, text, program){
 }
 function installHyperKeyboard(doc){
  if(!doc?.body||doc.getElementById('hyper-keyboard'))return;
- const style=doc.createElement('style');style.textContent='#hyper-keyboard{background:#17283c;border:1px solid #609bad;border-radius:14px;padding:12px;margin:12px 0;position:relative}#hyper-keyboard .hyper-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}#hyper-keyboard button{padding:10px 2px;min-height:44px;min-width:0;font-size:15px;touch-action:manipulation}#hyper-keyboard p{font-size:13px;margin:4px 0 10px}#hyper-keyboard summary{cursor:pointer;padding:10px}input[readonly],textarea[readonly]{cursor:pointer}';
+ const style=doc.createElement('style');style.textContent='#hyper-keyboard{background:#17283c;border:1px solid #609bad;border-radius:14px;padding:12px;margin:12px 0;position:relative;box-sizing:border-box;width:100%;max-width:100%;min-width:0}#hyper-keyboard .hyper-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:6px}#hyper-keyboard .hyper-controls{grid-template-columns:repeat(4,minmax(0,1fr))}#hyper-keyboard .hyper-controls button[data-wide]{grid-column:span 2}#hyper-keyboard details .hyper-grid{grid-template-columns:repeat(4,minmax(0,1fr))}#hyper-keyboard button{padding:10px 2px;min-height:44px;min-width:0;font-size:15px;line-height:1.3;box-sizing:border-box;width:100%;max-width:100%;white-space:normal;overflow-wrap:anywhere;touch-action:manipulation}#hyper-keyboard p{font-size:13px;margin:4px 0 10px}#hyper-keyboard summary{cursor:pointer;padding:10px}input[readonly],textarea[readonly]{cursor:pointer}';
  doc.head.append(style);
  const panel=doc.createElement('section');panel.id='hyper-keyboard';panel.hidden=true;panel.setAttribute('aria-label','Hyper keyboard');
  const label=doc.createElement('p');panel.append(label);
@@ -26,7 +26,7 @@ function installHyperKeyboard(doc){
   if(active.value.length-(b-a)+t.length>50000)return;
   active.setRangeText(t,a,b,'end');active.dispatchEvent(new doc.defaultView.Event('input',{bubbles:true}));active.dispatchEvent(new doc.defaultView.Event('change',{bubbles:true}));active.focus({preventScroll:true});
  }
- function grid(keys,parent){const g=doc.createElement('div');g.className='hyper-grid';for(const k of keys){const b=doc.createElement('button');b.type='button';b.textContent=k;b.onpointerdown=e=>e.preventDefault();b.onclick=()=>edit(k);g.append(b);}parent.append(g);}
+ function grid(keys,parent){const g=doc.createElement('div');g.className='hyper-grid'+(keys.includes('Clear')?' hyper-controls':'');for(const k of keys){const b=doc.createElement('button');b.type='button';b.textContent=k;if(['Calculate','Space','New row'].includes(k))b.dataset.wide='true';b.onpointerdown=e=>e.preventDefault();b.onclick=()=>edit(k);g.append(b);}parent.append(g);}
  grid(['7','8','9','+','(',')','4','5','6','-','^','/','1','2','3','*','x','y','0','. ',',',';','pi','e'].map(x=>x.trim()),panel);
  grid(['Clear','⌫','←','→','Next','Calculate','Space','New row'],panel);
  const more=doc.createElement('details'),summary=doc.createElement('summary');summary.textContent='Functions & letters';more.append(summary);grid(['sin(','cos(','tan(','sqrt(','abs(','log(','log10(','exp(','asin(','acos(','atan(','cbrt(','sinh(','cosh(','tanh(','sign('],more);grid('abcdefghijklmnopqrstuvwxyz'.split(''),more);panel.append(more);doc.body.append(panel);
