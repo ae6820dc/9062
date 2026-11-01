@@ -58,15 +58,18 @@ public final class MainActivity extends Activity {
             }
             return insets;
         });
-        LinearLayout toolbar=new LinearLayout(this);toolbar.setMinimumHeight(dp(48));
-        String[] labels={"‹ Back","Home","Programs","Backup"};
-        for(int i=0;i<labels.length;i++) {
-            final int action=i;Button button=new Button(this);button.setText(labels[i]);button.setTextSize(12);button.setAllCaps(false);
-            button.setPadding(0,0,0,0);button.setContentDescription(labels[i]);
-            button.setOnClickListener(v->{if(action==0)back();else if(action==1)leave(this::home);else if(action==2)menu();else backups();});
-            toolbar.addView(button,new LinearLayout.LayoutParams(0,dp(48),1));
+        if (!getPackageName().equals("io.github.ae6820dc.mathematicsstudio")) {
+            LinearLayout toolbar=new LinearLayout(this);toolbar.setMinimumHeight(dp(48));
+            String[] labels={"‹ Back","Home","Programs","Backup"};
+            for(int i=0;i<labels.length;i++) {
+                final int action=i;Button button=new Button(this);button.setText(labels[i]);button.setTextSize(12);button.setAllCaps(false);
+                button.setPadding(0,0,0,0);button.setContentDescription(labels[i]);
+                button.setOnClickListener(v->{if(action==0)back();else if(action==1)leave(this::home);else if(action==2)menu();else backups();});
+                toolbar.addView(button,new LinearLayout.LayoutParams(0,dp(48),1));
+            }
+            root.addView(toolbar);
         }
-        root.addView(toolbar);content=new FrameLayout(this);root.addView(content,new LinearLayout.LayoutParams(-1,0,1));
+        content=new FrameLayout(this);root.addView(content,new LinearLayout.LayoutParams(-1,0,1));
         setContentView(root);
         WebView.setWebContentsDebuggingEnabled((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE)!=0);
         web=new WebView(this);web.setBackgroundColor(0xff101827);

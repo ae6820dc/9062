@@ -11,7 +11,7 @@ android {
     }
     flavorDimensions += 'studio'
     productFlavors {
-        mathematics { dimension 'studio'; applicationId 'io.github.ae6820dc.mathematicsstudio'; resValue 'string', 'app_name', 'Mathematics Studio' }
+        mathematics { versionCode 2; versionName '1.1'; dimension 'studio'; applicationId 'io.github.ae6820dc.mathematicsstudio'; resValue 'string', 'app_name', 'Mathematics Studio' }
         unicode { versionCode 2; versionName '1.1'; dimension 'studio'; applicationId 'io.github.ae6820dc.unicodestudio'; resValue 'string', 'app_name', 'Unicode Studio' }
     }
     sourceSets.main.res.srcDirs = [layout.buildDirectory.dir('generated/resources/main')]

@@ -34,6 +34,18 @@ public final class SmokeInstrumentation extends Instrumentation {
         if(view instanceof ViewGroup){ViewGroup group=(ViewGroup)view;for(int i=0;i<group.getChildCount();i++){android.widget.ListView list=dialogList(group.getChildAt(i));if(list!=null)return list;}}
         return null;
     }
+    private void checkMathematicsToolbar() {
+        if (!getTargetContext().getPackageName().endsWith("mathematicsstudio")) return;
+        runOnMainSync(()->{
+            ViewGroup root=(ViewGroup)activity.findViewById(android.R.id.content);
+            require(!hasHostButton(root),"Mathematics host toolbar absent");
+        });
+    }
+    private boolean hasHostButton(View v) {
+        if(v instanceof android.widget.Button && Arrays.asList("‹ Back","Home","Programs","Backup").contains(((android.widget.Button)v).getText().toString()))return true;
+        if(v instanceof ViewGroup){ViewGroup g=(ViewGroup)v;for(int i=0;i<g.getChildCount();i++)if(hasHostButton(g.getChildAt(i)))return true;}
+        return false;
+    }
     @Override public void onStart(){
         Bundle result=new Bundle();
         try {
@@ -46,6 +58,8 @@ public final class SmokeInstrumentation extends Instrumentation {
             @SuppressWarnings("unchecked") List<JSONObject> programs=(List<JSONObject>)catalog.get(activity);
             if(getTargetContext().getPackageName().endsWith("unicodestudio"))
                 require(programs.size()==("upgrade-seed".equals(arguments.getString("phase"))?27:33),"complete Unicode catalog");
+            checkMathematicsToolbar();
+            if(getTargetContext().getPackageName().endsWith("mathematicsstudio"))require(programs.size()==10,"ten Mathematics calculators retained");
             Method open=MainActivity.class.getDeclaredMethod("open",JSONObject.class);open.setAccessible(true);
             Method leave=MainActivity.class.getDeclaredMethod("leave",Runnable.class);leave.setAccessible(true);
             Method menu=MainActivity.class.getDeclaredMethod("menu");menu.setAccessible(true);
@@ -69,6 +83,7 @@ public final class SmokeInstrumentation extends Instrumentation {
                 runOnMainSync(()->{try{leave.invoke(activity,(Runnable)()->{try{open.invoke(activity,p);switched.countDown();}catch(Exception e){throw new RuntimeException(e);}});}catch(Exception e){throw new RuntimeException(e);}});
                 require(switched.await(30,TimeUnit.SECONDS),"native switch "+p.getString("id"));
                 waitFor("location.hostname==="+JSONObject.quote(p.getString("id")+".appassets.androidplatform.net")+" && document.readyState==='complete' && !!window.studioDownload");
+                checkMathematicsToolbar();
                 require("true".equals(eval("isSecureContext")),"secure offline origin "+p.getString("id"));
                 String probe="studio.instrumentation.probe",id=p.getString("id");
                 if("verify".equals(arguments.getString("phase")) || ("upgrade".equals(arguments.getString("phase")) && programs.indexOf(p)<27))require(JSONObject.quote(id).equals(eval("localStorage.getItem('"+probe+"')")),"restart persistence "+id);

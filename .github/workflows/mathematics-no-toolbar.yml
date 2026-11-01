@@ -1,0 +1,86 @@
+name: Mathematics Studio without toolbar
+on:
+  push:
+    paths:
+      - '.github/workflows/mathematics-no-toolbar.yml'
+      - 'android-studios/app/src/main/java/io/github/ae6820dc/studio/MainActivity.java'
+      - 'android-studios/app/src/androidTest/java/io/github/ae6820dc/studio/SmokeInstrumentation.java'
+      - 'android-studios/app/build.gradle'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  mathematics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Build Mathematics update
+        working-directory: android-studios
+        run: ./gradlew --no-daemon assembleMathematicsDebug assembleMathematicsDebugAndroidTest lintMathematicsDebug
+      - name: Verify catalog, source assets and update signature
+        run: |
+          python3 - <<'PY'
+          import zipfile,json,hashlib,subprocess,os,re
+          from pathlib import Path
+          old=Path('android-distributions/mathematics-studio.apk')
+          new=Path('android-studios/app/build/outputs/apk/mathematics/debug/app-mathematics-debug.apk')
+          tools=Path(os.environ['ANDROID_HOME'])/'build-tools/36.0.0'
+          def cert(p):
+            out=subprocess.check_output([str(tools/'apksigner'),'verify','--print-certs',str(p)],text=True)
+            return re.search(r'Signer #1 certificate SHA-256 digest: (\w+)',out).group(1)
+          assert cert(old)==cert(new),'Update signer must match'
+          with zipfile.ZipFile(old) as a,zipfile.ZipFile(new) as b:
+            assert json.loads(a.read('assets/catalog.json'))==json.loads(b.read('assets/catalog.json'))
+            assert len(json.loads(b.read('assets/catalog.json')))==10
+            for path,digest in json.loads(b.read('assets/source-checksums.json')).items():
+              data=b.read('assets/site/'+path)
+              assert data==Path(path).read_bytes() and hashlib.sha256(data).hexdigest()==digest,path
+          print('PASS: ten original catalog entries, unchanged source bytes, compatible signer')
+          PY
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          arch: x86_64
+          target: default
+          profile: pixel_2
+          script: |
+            adb install android-distributions/mathematics-studio.apk
+            adb install -r android-studios/app/build/outputs/apk/mathematics/debug/app-mathematics-debug.apk
+            adb install -r -t android-studios/app/build/outputs/apk/androidTest/mathematics/debug/app-mathematics-debug-androidTest.apk
+            adb shell cmd connectivity airplane-mode enable
+            adb shell am instrument -w -e phase seed io.github.ae6820dc.mathematicsstudio.test/io.github.ae6820dc.studio.SmokeInstrumentation > math-seed.log
+            cat math-seed.log
+            grep -q 'PASS ' math-seed.log && ! grep -q FAIL math-seed.log
+            adb shell am force-stop io.github.ae6820dc.mathematicsstudio
+            adb shell am instrument -w -e phase verify io.github.ae6820dc.mathematicsstudio.test/io.github.ae6820dc.studio.SmokeInstrumentation > math-verify.log
+            cat math-verify.log
+            grep -q 'PASS ' math-verify.log && ! grep -q FAIL math-verify.log
+      - name: Package tested update
+        run: |
+          cp android-studios/app/build/outputs/apk/mathematics/debug/app-mathematics-debug.apk android-distributions/Mathematics-Studio.apk
+          sha256sum android-distributions/Mathematics-Studio.apk > android-distributions/Mathematics-Studio.apk.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Mathematics-Studio
+          path: |
+            android-distributions/Mathematics-Studio.apk
+            math-*.log
+      - name: Publish tested APK
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add android-distributions/Mathematics-Studio.apk android-distributions/Mathematics-Studio.apk.sha256
+          git commit -m 'Publish Mathematics Studio without host toolbar'
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin HEAD:"$GITHUB_REF_NAME"
