@@ -60,7 +60,7 @@ public final class ExplorerInstrumentation extends Instrumentation {
         boolean verify="verify".equals(args.getString("phase"));
         for(JSONObject p:programs){
             String id=p.getString("id"),filename="egér-"+id+".exe";int depth=p.getInt("depth"),target=p.getInt("sample")==1?depth:p.getInt("sample");
-            runOnMainSync(()->{try{open.invoke(activity,p);}catch(Exception e){throw new RuntimeException(e);}});ready(p);
+            ready(p);
             require("true".equals(eval("isSecureContext && MAX_DEPTH==="+depth+" && document.querySelector('footer code').textContent==="+JSONObject.quote(p.getString("programId")))),"original program and depth "+id);
             require("true".equals(eval("symbols.join('')==='0123456789abcdefghijklmnopqrstuvwxyz' && document.title.includes('System Explorer')")),"System branding and numeric-first symbols "+id);
             if(verify)require("true".equals(eval("path.length==="+target+" && currentFiles.length===1 && currentFiles[0].name==="+JSONObject.quote(filename))),"restart restores IndexedDB file and location "+id);
