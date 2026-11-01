@@ -1,13 +1,13 @@
 {
   "file": "android-distributions/System-Explorer.apk",
   "package": "io.github.ae6820dc.systemexplorer",
-  "versionCode": 1,
-  "versionName": "1.0",
-  "bytes": 193425,
-  "sha256": "7654ccf892ad1f7e85e16269274c56daf3c063972f98ba23a5f027a7d746d54b",
+  "versionCode": 2,
+  "versionName": "1.1",
+  "bytes": 41211,
+  "sha256": "3b5a67c7dd48630451ad6a4cb6aa2f0ad1fce9bf619c78ecf46603224a46ec51",
   "signingCertificateSHA256": "01059a5e2a9f61d6b88aff4f2b47bc4e33195b352ba01872858f71fd358ffb1e",
-  "programs": 12,
-  "originalAssets": 12,
+  "programs": 1,
+  "originalAssets": 1,
   "depths": [
     65536
   ]
