@@ -37,8 +37,7 @@
   <canvas id="stage" aria-label="8x16 grid"></canvas>
   <div class="bar" id="buttonBar">
     <button id="n0">N0</button><button id="n1">N1</button><button id="n2">N2</button>
-    <button id="n3">N3</button><button id="n4">N4</button><button id="n5">N5</button>
-    <button id="n6">N6</button><button id="n7">N7</button>
+    <button id="n3">N3</button>
     <button id="autoToggle">R</button>
   </div>
 </div>
@@ -83,9 +82,9 @@
   const defaultBoardState = () => ({ matrix: emptyMatrix(), step: "0", score: "0" });
   
   const STORAGE_KEY = '45C128F0E7A90D32'; // unique 16-hex persistent storage key
-  const BOARD_COUNT = 256;
+  const BOARD_COUNT = 16;
   let boardsState = Array.from({length:BOARD_COUNT}, defaultBoardState);
-  let activeButtons = Array(8).fill(false);
+  let activeButtons = Array(4).fill(false);
   let viewIndex = 0;
   let autoToggleInterval = null;
   let isAutoToggleActive = false;
@@ -118,15 +117,15 @@
       const raw=localStorage.getItem(STORAGE_KEY);
       if(!raw) return false;
       const data=JSON.parse(raw);
-      if(!data || !Array.isArray(data.boardsState) || data.boardsState.length!==BOARD_COUNT) return false;
+      if(!data || !Array.isArray(data.boardsState) || data.boardsState.length < BOARD_COUNT) return false;
       const validBoard=b=>b && Array.isArray(b.matrix) && b.matrix.length===ROWS &&
         b.matrix.every(row=>Array.isArray(row) && row.length===COLS &&
           row.every(v=>typeof v==='boolean')) &&
-        typeof b.step==='string' && /^\\d+$/.test(b.step) &&
-        typeof b.score==='string' && /^-?\\d+$/.test(b.score);
-      if(!data.boardsState.every(validBoard)) return false;
-      boardsState=data.boardsState;
-      activeButtons=Array.from({length:8},(_,i)=>!!data.activeButtons?.[i]);
+        typeof b.step==='string' && /^\d+$/.test(b.step) &&
+        typeof b.score==='string' && /^-?\d+$/.test(b.score);
+      if(!data.boardsState.slice(0,BOARD_COUNT).every(validBoard)) return false;
+      boardsState=data.boardsState.slice(0,BOARD_COUNT);
+      activeButtons=Array.from({length:4},(_,i)=>!!data.activeButtons?.[i]);
       viewIndex=maskFromButtons();
       currentRow=Number.isInteger(data.currentRow)&&data.currentRow>=0&&data.currentRow<ROWS?data.currentRow:0;
       currentCol=Number.isInteger(data.currentCol)&&data.currentCol>=0&&data.currentCol<COLS?data.currentCol:0;
@@ -141,7 +140,7 @@
   const elM = document.getElementById('mValue');
   const elS = document.getElementById('sValue');
   const btns = [];
-  for(let i=0;i<8;i++) btns.push(document.getElementById(`n${i}`));
+  for(let i=0;i<4;i++) btns.push(document.getElementById(`n${i}`));
   btns.push(document.getElementById('autoToggle'));
   
   // ---- BIG INTEGER ARITMETIKA ----
@@ -217,7 +216,7 @@
   // ---- MASZK KEZELÉS ----
   function maskFromButtons(){
     let mask=0;
-    for(let i=0;i<8;i++) if(activeButtons[i]) mask |= (1<<i);
+    for(let i=0;i<4;i++) if(activeButtons[i]) mask |= (1<<i);
     return mask;
   }
   function updateViewIndexFromMask(){ viewIndex = maskFromButtons(); }
@@ -458,7 +457,7 @@
   canvas.addEventListener('touchend', e=>{ if(!touchMoved){ const p=pointerXY(e); handleCanvasClick(p.x,p.y); } }, {passive:true});
   
   function renderButtons(){
-    for(let i=0;i<8;i++){
+    for(let i=0;i<4;i++){
       const btn = btns[i];
       const on = !!activeButtons[i];
       if(btn){
@@ -467,7 +466,7 @@
         btn.style.color = on ? '#0a1320' : COLORS.DIGIT_INK;
       }
     }
-    const autoBtn = btns[8];
+    const autoBtn = btns[4];
     if(autoBtn){
       const onAuto = isAutoToggleActive;
       autoBtn.classList.toggle('btn-on', onAuto);
@@ -477,7 +476,7 @@
   }
   
   function pressButton(idx){
-    if(idx === 8){
+    if(idx === 4){
       toggleAutoMode();
       return;
     }
