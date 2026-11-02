@@ -446,6 +446,15 @@
   }
   
   // ablakméret változás
+  // Stop automatic processing on tab switch, like Factorial V37.
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      stopAutoToggle();
+      renderButtons();
+      saveState();
+    }
+  });
+
   window.addEventListener('resize', ()=>{
     fitCanvas();
     const b = boardsState[viewIndex];
