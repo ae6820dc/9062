@@ -91,18 +91,27 @@
   let isAutoToggleActive = false;
   
   // Persistent state; automatic processing is deliberately never resumed on reload.
-  let saveTimer = null;
-  function saveStateNow(){
-    if(saveTimer !== null){ clearTimeout(saveTimer); saveTimer=null; }
+  const SAVE_EVERY_STEPS = 100;
+  let unsavedSteps = 0;
+  let stateDirty = false;
+  function saveState(force = false){
+    if(!stateDirty || (!force && unsavedSteps < SAVE_EVERY_STEPS)) return;
     try{
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         boardsState, activeButtons, viewIndex, currentRow, currentCol
       }));
+      unsavedSteps = 0;
+      stateDirty = false;
     }catch(e){ console.warn('Storage unavailable:', e); }
   }
-  function scheduleSave(){
-    if(saveTimer !== null) return;
-    saveTimer = setTimeout(saveStateNow, 500);
+  function recordStep(){
+    unsavedSteps++;
+    stateDirty = true;
+    saveState();
+  }
+  function saveSelection(){
+    stateDirty = true;
+    saveState(true);
   }
   function loadState(){
     try{
@@ -297,7 +306,7 @@
     
     syncHUD();
     draw();
-    scheduleSave();
+    recordStep();
   }
   
   // ---- Toggle a cell and move to a random neighbor (for auto mode) ----
@@ -321,7 +330,7 @@
     
     syncHUD();
     draw();
-    scheduleSave();
+    recordStep();
   }
   
   // ---- Random toggle with neighbor constraint ----
@@ -343,7 +352,7 @@
     if(isAutoToggleActive) stopAutoToggle();
     else startAutoToggle();
     renderButtons();
-    saveStateNow();
+    saveSelection();
   }
   
   // ---- Canvas click handler - now uses neighbor constraint ----
@@ -480,7 +489,7 @@
     if(!boardsState[viewIndex]) boardsState[viewIndex] = defaultBoardState();
     syncHUD();
     draw();
-    saveStateNow();
+    saveSelection();
   }
   
   for(let i=0;i<btns.length;i++){
@@ -560,9 +569,10 @@
   // ablakméret változás
   // Pause automatically when the browser tab is hidden. Save state when hidden; never resume auto mode.
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { stopAutoToggle(); renderButtons(); saveStateNow(); }
+    if (document.hidden) { stopAutoToggle(); renderButtons(); saveState(true); }
   });
-  window.addEventListener('pagehide', () => { stopAutoToggle(); renderButtons(); saveStateNow(); });
+  window.addEventListener('pagehide', () => { stopAutoToggle(); renderButtons(); saveState(true); });
+  window.addEventListener('beforeunload', () => saveState(true));
 
   window.addEventListener('resize', ()=>{
     fitCanvas();
