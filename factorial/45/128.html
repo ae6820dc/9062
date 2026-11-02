@@ -454,7 +454,8 @@
   let touchMoved=false;
   canvas.addEventListener('touchstart', ()=>{ touchMoved=false; }, {passive:true});
   canvas.addEventListener('touchmove', ()=>{ touchMoved=true; }, {passive:true});
-  canvas.addEventListener('touchend', e=>{ if(!touchMoved){ const p=pointerXY(e); handleCanvasClick(p.x,p.y); } }, {passive:true});
+  // Canvas taps are handled by the synthetic click as well; avoid double moves.
+  // Touch listeners above only track scrolling.
   
   function renderButtons(){
     for(let i=0;i<4;i++){
@@ -495,8 +496,8 @@
     const btn = btns[i];
     if(!btn) continue;
     const idx = i;
+    // One pointer activation only: touchend + click could previously toggle a board twice.
     btn.addEventListener('click', (e)=>{ e.preventDefault(); pressButton(idx); });
-    btn.addEventListener('touchend', (e)=>{ e.preventDefault(); pressButton(idx); }, {passive:false});
   }
   
   function fitCanvas(){
