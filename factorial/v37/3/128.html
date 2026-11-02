@@ -206,7 +206,7 @@
   }
 
   function toggleCell(r,c){
-    if (document.hidden) return;
+    
     const b = boardsState[viewIndex];
     const wasOn = b.matrix[r][c];
     b.matrix[r][c] = !wasOn;
@@ -231,7 +231,7 @@
 
   // Automatikus random kapcsolgató funkció
   function toggleRandomCell() {
-    if (!isAutoToggleActive || document.hidden) return;
+    if (!isAutoToggleActive) return;
 
     const r = Math.floor(Math.random() * grid.rows);
     const c = Math.floor(Math.random() * grid.cols);
@@ -240,7 +240,7 @@
   }
 
   function scheduleAutoToggle() {
-    if (!isAutoToggleActive || document.hidden || autoToggleTimer !== null) return;
+    if (!isAutoToggleActive || autoToggleTimer !== null) return;
     const generation = autoToggleGeneration;
     autoToggleDeadline = performance.now() + autoToggleRemaining;
     autoToggleTimer = setTimeout(() => {
@@ -427,12 +427,7 @@
   window.addEventListener('pagehide', () => saveState(true));
   window.addEventListener('beforeunload', () => saveState(true));
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      pauseAutoToggle();
-      saveState(true);
-    } else {
-      scheduleAutoToggle();
-    }
+    if (document.visibilityState === 'hidden') saveState(true);
   });
 
   window.addEventListener('resize', ()=>fitCanvas());
