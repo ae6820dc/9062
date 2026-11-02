@@ -71,7 +71,11 @@
   let boardsState = Array.from({length:16}, defaultBoardState);
   let activeButtons = [false,false,false,false];
   let viewIndex = 0;
-  let autoToggleInterval = null;
+  const AUTO_TOGGLE_DELAY = 200;
+  let autoToggleTimer = null;
+  let autoToggleDeadline = 0;
+  let autoToggleRemaining = AUTO_TOGGLE_DELAY;
+  let autoToggleGeneration = 0;
   let isAutoToggleActive = false;
 
   const elM=document.getElementById('mValue');
@@ -202,6 +206,7 @@
   }
 
   function toggleCell(r,c){
+    if (document.hidden) return;
     const b = boardsState[viewIndex];
     const wasOn = b.matrix[r][c];
     b.matrix[r][c] = !wasOn;
@@ -226,25 +231,50 @@
 
   // Automatikus random kapcsolgató funkció
   function toggleRandomCell() {
-    if (!isAutoToggleActive) return;
-    
+    if (!isAutoToggleActive || document.hidden) return;
+
     const r = Math.floor(Math.random() * grid.rows);
     const c = Math.floor(Math.random() * grid.cols);
+    // One bounded, synchronous step: matrix, Step and Score commit together.
     toggleCell(r, c);
   }
 
+  function scheduleAutoToggle() {
+    if (!isAutoToggleActive || document.hidden || autoToggleTimer !== null) return;
+    const generation = autoToggleGeneration;
+    autoToggleDeadline = performance.now() + autoToggleRemaining;
+    autoToggleTimer = setTimeout(() => {
+      // Reject callbacks queued before a pause or manual stop.
+      if (generation !== autoToggleGeneration) return;
+      autoToggleTimer = null;
+      autoToggleRemaining = Math.max(0, autoToggleDeadline - performance.now());
+      if (!isAutoToggleActive || document.hidden) return;
+      toggleRandomCell();
+      autoToggleRemaining = AUTO_TOGGLE_DELAY;
+      scheduleAutoToggle();
+    }, autoToggleRemaining);
+  }
+
+  function pauseAutoToggle() {
+    if (autoToggleTimer !== null) {
+      autoToggleRemaining = Math.max(0, autoToggleDeadline - performance.now());
+      clearTimeout(autoToggleTimer);
+      autoToggleTimer = null;
+    }
+    autoToggleGeneration++;
+  }
+
   function startAutoToggle() {
-    if (autoToggleInterval) return;
+    if (isAutoToggleActive) return;
     isAutoToggleActive = true;
-    autoToggleInterval = setInterval(toggleRandomCell, 200); // 500ms = 0.5 másodperc
+    autoToggleRemaining = AUTO_TOGGLE_DELAY;
+    scheduleAutoToggle();
   }
 
   function stopAutoToggle() {
     isAutoToggleActive = false;
-    if (autoToggleInterval) {
-      clearInterval(autoToggleInterval);
-      autoToggleInterval = null;
-    }
+    pauseAutoToggle();
+    autoToggleRemaining = AUTO_TOGGLE_DELAY;
     saveState(true);
   }
 
@@ -397,7 +427,12 @@
   window.addEventListener('pagehide', () => saveState(true));
   window.addEventListener('beforeunload', () => saveState(true));
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') saveState(true);
+    if (document.hidden) {
+      pauseAutoToggle();
+      saveState(true);
+    } else {
+      scheduleAutoToggle();
+    }
   });
 
   window.addEventListener('resize', ()=>fitCanvas());
