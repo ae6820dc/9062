@@ -26,7 +26,7 @@ jobs:
         run: |
           cp -a android-factorial-96-v37 android-factorial-96-v45
           cp factorial/45/96.html android-factorial-96-v45/app/src/main/assets/index.html
-          find android-factorial-96-v45 -type f \( -name '*.xml' -o -name '*.java' -o -name '*.gradle' -o -name '*.sh' \) -print0 | xargs -0 sed -i 's/factorial96v37/factorial96v45/g; s/37\.3\.96/45.96/g; s/96! v37/Factorial 45 - 96/g'
+          find android-factorial-96-v45 -type f \( -name '*.xml' -o -name '*.java' -o -name '*.gradle' -o -name '*.sh' \) -print0 | xargs -0 sed -i 's/factorial96v37/factorial96v45/g; s/37\.3\.96/45.96/g; s/96! v37/96! v45/g'
           mv android-factorial-96-v45/app/src/main/java/io/github/ae6820dc/factorial96v37 android-factorial-96-v45/app/src/main/java/io/github/ae6820dc/factorial96v45
           mv android-factorial-96-v45/app/src/androidTest/java/io/github/ae6820dc/factorial96v37 android-factorial-96-v45/app/src/androidTest/java/io/github/ae6820dc/factorial96v45
           sed -i 's/--version-code 2/--version-code 1/' android-factorial-96-v45/build-sdk.sh
