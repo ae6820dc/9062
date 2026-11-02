@@ -412,6 +412,15 @@
     return false;
   }
 
+  // Stop automatic processing when the browser tab becomes hidden.
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      stopAutoToggle();
+      renderButtons();
+      saveState();
+    }
+  });
+
   window.addEventListener('resize', fitCanvas);
   window.addEventListener('orientationchange', fitCanvas);
 
