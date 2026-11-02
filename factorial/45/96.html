@@ -5,66 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <title>Factorial 45 — 96</title>
 <style>
-  :root{
-    --bg:#0a0e1a; --tile-on:#3ec7c2; --tile-off:#1a2640;
-    --ink:#e8eef8; --muted:#9fb3c8; --digit-ink:#e7f0ff; --gap:10px;
-    --glow:#3ec7c280;
-  }
-  *{box-sizing:border-box;}
+  :root{--bg:#0f1420;--tile-on:#3ec7c2;--tile-off:#2a3550;--ink:#e8eef8;--muted:#9fb3c8;--digit-ink:#e7f0ff;--gap:10px}
   html,body{height:100%}
-  body{
-    margin:0; background:var(--bg); color:var(--ink);
-    font-family: 'Inter', 'Segoe UI', system-ui, Roboto, Helvetica, Arial;
-    display:flex; flex-direction:column; align-items:center;
-    -webkit-tap-highlight-color: transparent;
-  }
-  h1{font-size:18px; font-weight:700; margin:10px 0 8px; letter-spacing:-0.2px; background:linear-gradient(135deg, #e0f0ff, #8fcbff); -webkit-background-clip:text; background-clip:text; color:transparent;}
-  #frame{display:flex; flex-direction:column; align-items:center; gap:6px;}
-  .hud{
-    width:100%; background:rgba(10,14,26,0.7); backdrop-filter:blur(2px);
-    padding:8px 16px; display:flex; flex-direction:column; gap:8px;
-    color:var(--muted); font-size:20px; font-weight:600; border:1px solid rgba(62,199,194,0.25);
-  }
-  .row{
-    display:flex; align-items:baseline; justify-content:space-between;
-    background:#0f1422; padding:4px 18px;
-    gap:12px;
-  }
-  .label{white-space:nowrap; font-weight:500; letter-spacing:0.5px; font-size:16px;}
-  .value{
-    display:block; font-family:'JetBrains Mono', monospace; font-weight:600; 
-    color:#b9f3f0; font-size:18px; line-height:1.3; text-align:right;
-    word-break:break-word; white-space:normal; max-width:260px;
-    transition:font-size 0.1s ease;
-  }
-  canvas{display:block; position:relative; filter:drop-shadow(0 6px 12px rgba(0,0,0,0.4));}
-  .bar{
-    width:100%; display:flex; justify-content:center; gap:var(--gap); flex-wrap:wrap;
-    background:rgba(10,14,26,0.5); padding:6px 12px; border-radius:60px; backdrop-filter:blur(4px);
-    margin-top:4px;
-  }
-  button{
-    margin:0; padding:0; border:none; border-radius:0px;
-    background:var(--tile-off); color:var(--digit-ink); font-weight:700;
-    touch-action:manipulation; user-select:none;
-    width:64px; height:64px; display:flex; align-items:center; justify-content:center;
-    transition: all 0.08s cubic-bezier(0.2,0.9,0.4,1.1);
-    font-family:'Inter', monospace; font-size:20px; letter-spacing:1px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.2);
-  }
-  button:active{ transform:scale(0.94); }
-  .btn-on{ background:var(--tile-on)!important; color:#0a1320!important; box-shadow:0 0 8px var(--glow); }
-  @media (max-width:550px){
-    .hud{padding:6px 12px; gap:6px;} .row{padding:2px 14px;}
-    .label{font-size:14px;}
-    .value{font-size:15px; max-width:180px;} h1{font-size:15px;}
-    .bar{padding:4px 10px;}
-  }
-  @media (max-width:420px){
-    .value{font-size:13px; max-width:150px;}
-    .label{font-size:12px;}
-    .bar{padding:3px 8px;}
-  }
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;display:flex;flex-direction:column;align-items:center;-webkit-tap-highlight-color:transparent}
+  h1{font-size:18px;font-weight:700;margin:10px 0 8px}
+  #frame{display:flex;flex-direction:column;align-items:center}
+  .hud{width:100%;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;color:var(--muted);font-size:20px;padding:0 4px}
+  .row{display:flex;align-items:baseline;gap:8px;min-width:0}
+  .row .label{white-space:nowrap}
+  .value{display:block;width:100%;overflow-x:auto;white-space:nowrap;padding-bottom:2px;border-bottom:1px dashed rgba(231,240,255,.2);color:var(--ink);font-weight:700}
+  canvas{display:block;position:relative}
+  .bar{width:100%;display:flex;justify-content:center;gap:var(--gap);flex-wrap:wrap}
+  button{margin:12px 0 14px;padding:0;border:none;border-radius:0;background:var(--tile-off);color:var(--digit-ink);font-weight:700;touch-action:manipulation;user-select:none;width:64px;height:64px;min-width:unset;display:flex;align-items:center;justify-content:center}
+  .btn-on{background:var(--tile-on)!important;color:#0a1320!important}
+  @media(max-width:420px){.hud{font-size:18px;gap:5px;padding:0 2px}h1{font-size:16px}}
 </style>
 </head>
 <body>
@@ -72,11 +26,11 @@
 <div id="frame">
   <div class="hud" id="hud">
     <div class="row">
-      <span class="label"> ✦ Step</span>
+      <span class="label">Step:</span>
       <div id="sValue" class="value">0</div>
     </div>
     <div class="row">
-      <span class="label"> ⚡ Score</span>
+      <span class="label">Score:</span>
       <div id="mValue" class="value">0</div>
     </div>
   </div>
@@ -85,7 +39,7 @@
     <button id="n0">N0</button><button id="n1">N1</button><button id="n2">N2</button>
     <button id="n3">N3</button><button id="n4">N4</button><button id="n5">N5</button>
     <button id="n6">N6</button><button id="n7">N7</button>
-    <button id="autoToggle">⦿ R ⦿</button>
+    <button id="autoToggle">R</button>
   </div>
 </div>
 <script>
@@ -423,29 +377,21 @@
   }
   
   function draw(){
-    const b = boardsState[viewIndex];
+    const b=boardsState[viewIndex];
     if(!b) return;
-    ctx.clearRect(0,0,canvas.width/DPR, canvas.height/DPR);
-    ctx.fillStyle = COLORS.BG;
-    ctx.fillRect(0,0,canvas.width/DPR, canvas.height/DPR);
-    
-    for(let r=0; r<grid.rows; r++){
-      for(let c=0; c<grid.cols; c++){
-        const x = c*(grid.size+grid.pad)+grid.pad;
-        const y = r*(grid.size+grid.pad)+grid.pad;
-        const isOn = b.matrix[r][c];
-        ctx.fillStyle = isOn ? COLORS.ON : COLORS.OFF;
-        roundedRect(x, y, grid.size, grid.size, grid.radius);
-        ctx.fill();
-        ctx.strokeStyle = isOn ? 'rgba(100,230,220,0.7)' : 'rgba(80,130,200,0.3)';
-        ctx.lineWidth = 1.2;
-        roundedRect(x+1.5, y+1.5, grid.size-3, grid.size-3, grid.radius-1);
-        ctx.stroke();
-        
-        const symbol = getCellSymbol(r,c);
-        const centerX = x + grid.size/2;
-        const centerY = y + grid.size/2;
-        drawHaloSymbol(centerX, centerY, symbol, isOn);
+    ctx.fillStyle=COLORS.BG;
+    ctx.fillRect(0,0,canvas.width/DPR,canvas.height/DPR);
+    for(let r=0;r<grid.rows;r++){
+      for(let c=0;c<grid.cols;c++){
+        const x=c*(grid.size+grid.pad)+grid.pad;
+        const y=r*(grid.size+grid.pad)+grid.pad;
+        const on=b.matrix[r][c];
+        ctx.fillStyle=on?COLORS.ON:COLORS.OFF;
+        ctx.fillRect(x,y,grid.size,grid.size);
+        ctx.font=`bold ${Math.max(14,Math.floor(grid.size*.5))}px Inter,system-ui,monospace`;
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillStyle=on?'#0a1320':COLORS.DIGIT_INK;
+        ctx.fillText(((r*grid.cols+c)%16).toString(16).toUpperCase(),x+grid.size/2,y+grid.size/2);
       }
     }
   }
@@ -513,15 +459,15 @@
     const barH = document.querySelector('.bar')?.getBoundingClientRect().height || 0;
     const safeY = 20;
     // Növelt maximális szélesség és magasság, hogy nagyobbak legyenek a csempék
-    const maxW = Math.max(380, window.innerWidth - outer*2);
+    const maxW = Math.max(240, window.innerWidth - outer*2);
     const maxH = Math.max(320, window.innerHeight - (h1h + hudH + barH + safeY + outer));
-    grid.pad = Math.round(Math.max(6, Math.min(14, Math.min(maxW, maxH) * 0.018)));
+    grid.pad = Math.round(Math.max(6, Math.min(14, Math.min(maxW,maxH)*0.018)));
     const sizeFromW = Math.floor((maxW - (grid.pad*(grid.cols+1))) / grid.cols);
     const sizeFromH = Math.floor((maxH - (grid.pad*(grid.rows+1))) / grid.rows);
     // Megnövelt maximális csempeméret
     const MAX_TILE = Math.min(80, Math.floor(window.innerWidth/5));
     grid.size = Math.min(MAX_TILE, Math.max(24, Math.min(sizeFromW, sizeFromH)));
-    grid.radius = Math.max(4, Math.floor(grid.size * 0.12));
+    grid.radius = 0;
     const cssW = grid.cols*(grid.size+grid.pad)+grid.pad;
     const cssH = grid.rows*(grid.size+grid.pad)+grid.pad;
     const frameDiv = document.getElementById('frame');
