@@ -248,7 +248,7 @@
       if (generation !== autoToggleGeneration) return;
       autoToggleTimer = null;
       autoToggleRemaining = Math.max(0, autoToggleDeadline - performance.now());
-      if (!isAutoToggleActive || document.hidden) return;
+      if (!isAutoToggleActive) return;
       toggleRandomCell();
       autoToggleRemaining = AUTO_TOGGLE_DELAY;
       scheduleAutoToggle();
@@ -427,7 +427,11 @@
   window.addEventListener('pagehide', () => saveState(true));
   window.addEventListener('beforeunload', () => saveState(true));
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') saveState(true);
+    if (document.hidden) {
+      stopAutoToggle();
+      renderButtons();
+      saveState(true);
+    }
   });
 
   window.addEventListener('resize', ()=>fitCanvas());
