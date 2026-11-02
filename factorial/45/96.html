@@ -82,7 +82,7 @@
   function emptyMatrix(){ return Array.from({length:grid.rows},()=>Array(grid.cols).fill(false)); }
   const defaultBoardState = () => ({ matrix: emptyMatrix(), step: "0", score: "0" });
   
-  const STORAGE_KEY = '45C096F0E7A90D33'; // reserved unique 16-hex key; no persistence
+  const STORAGE_KEY = '45C096F0E7A90D33'; // unique 16-hex persistent storage key
   const BOARD_COUNT = 256;
   let boardsState = Array.from({length:BOARD_COUNT}, defaultBoardState);
   let activeButtons = Array(8).fill(false);
@@ -90,6 +90,41 @@
   let autoToggleInterval = null;
   let isAutoToggleActive = false;
   
+  // Persistent state; automatic processing is deliberately never resumed on reload.
+  let saveTimer = null;
+  function saveStateNow(){
+    if(saveTimer !== null){ clearTimeout(saveTimer); saveTimer=null; }
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        boardsState, activeButtons, viewIndex, currentRow, currentCol
+      }));
+    }catch(e){ console.warn('Storage unavailable:', e); }
+  }
+  function scheduleSave(){
+    if(saveTimer !== null) return;
+    saveTimer = setTimeout(saveStateNow, 500);
+  }
+  function loadState(){
+    try{
+      const raw=localStorage.getItem(STORAGE_KEY);
+      if(!raw) return false;
+      const data=JSON.parse(raw);
+      if(!data || !Array.isArray(data.boardsState) || data.boardsState.length!==BOARD_COUNT) return false;
+      const validBoard=b=>b && Array.isArray(b.matrix) && b.matrix.length===ROWS &&
+        b.matrix.every(row=>Array.isArray(row) && row.length===COLS &&
+          row.every(v=>typeof v==='boolean')) &&
+        typeof b.step==='string' && /^\\d+$/.test(b.step) &&
+        typeof b.score==='string' && /^-?\\d+$/.test(b.score);
+      if(!data.boardsState.every(validBoard)) return false;
+      boardsState=data.boardsState;
+      activeButtons=Array.from({length:8},(_,i)=>!!data.activeButtons?.[i]);
+      viewIndex=maskFromButtons();
+      currentRow=Number.isInteger(data.currentRow)&&data.currentRow>=0&&data.currentRow<ROWS?data.currentRow:0;
+      currentCol=Number.isInteger(data.currentCol)&&data.currentCol>=0&&data.currentCol<COLS?data.currentCol:0;
+      return true;
+    }catch(e){ console.warn('Stored state could not be loaded:',e); return false; }
+  }
+
   // ---- Track current position for neighbor-based selection ----
   let currentRow = 0;
   let currentCol = 0;
@@ -262,6 +297,7 @@
     
     syncHUD();
     draw();
+    scheduleSave();
   }
   
   // ---- Toggle a cell and move to a random neighbor (for auto mode) ----
@@ -285,6 +321,7 @@
     
     syncHUD();
     draw();
+    scheduleSave();
   }
   
   // ---- Random toggle with neighbor constraint ----
@@ -306,6 +343,7 @@
     if(isAutoToggleActive) stopAutoToggle();
     else startAutoToggle();
     renderButtons();
+    saveStateNow();
   }
   
   // ---- Canvas click handler - now uses neighbor constraint ----
@@ -442,6 +480,7 @@
     if(!boardsState[viewIndex]) boardsState[viewIndex] = defaultBoardState();
     syncHUD();
     draw();
+    saveStateNow();
   }
   
   for(let i=0;i<btns.length;i++){
@@ -509,8 +548,8 @@
     activeButtons = Array(8).fill(false);
     viewIndex = 0;
     
-    // Véletlenszerű kezdőpozíció
-    setRandomStartPosition();
+    // Restore saved boards and cursor; otherwise choose a fresh start position.
+    if(!loadState()) setRandomStartPosition();
     
     renderButtons();
     syncHUD();
@@ -519,11 +558,11 @@
   }
   
   // ablakméret változás
-  // Pause automatically when the browser tab is hidden. No persistent storage, as in Language 19.
+  // Pause automatically when the browser tab is hidden. Save state when hidden; never resume auto mode.
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { stopAutoToggle(); renderButtons(); }
+    if (document.hidden) { stopAutoToggle(); renderButtons(); saveStateNow(); }
   });
-  window.addEventListener('pagehide', () => { stopAutoToggle(); renderButtons(); });
+  window.addEventListener('pagehide', () => { stopAutoToggle(); renderButtons(); saveStateNow(); });
 
   window.addEventListener('resize', ()=>{
     fitCanvas();
