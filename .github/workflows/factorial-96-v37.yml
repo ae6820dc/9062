@@ -2,7 +2,7 @@ name: Factorial 96 v37 APK
 on:
   push:
     branches: [main]
-    paths: ['android-factorial-96-v37/**', '.github/workflows/factorial-96-v37.yml']
+    paths: ['android-factorial-96-v37/**', 'factorial/v37/3/96.html', '.github/workflows/factorial-96-v37.yml']
   workflow_dispatch:
 permissions:
   contents: write
