@@ -1,0 +1,80 @@
+Chinese Explorer verification
+Environment: Chromium 154.0.8037.57, Debian Linux, Playwright, Node 24.19.0
+Static audit: PASS — 22 samples, 44 unique 16-hex identifiers, samples otherwise byte-identical.
+Scope: only explorer/31/ added; original explorer/7/ unchanged.
+Mobile: touch/viewport emulation for all 22 samples; no physical Android or Windows hardware.
+Standalone HTML: served locally with external requests blocked. Browser administrator policy prevents file:// testing.
+
+Full functionality and deep-path suite
+sample1: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample2: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample3: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample4: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample5: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample6: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample7: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample8: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample9: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample10: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample11: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample12: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample13: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample14: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample15: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample16: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample17: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample18: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample19: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample20: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample21: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+sample22: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+
+All-sample mobile suite
+sample1: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample2: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample3: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample4: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample5: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample6: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample7: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample8: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample9: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample10: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample11: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample12: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample13: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample14: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample15: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample16: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample17: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample18: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample19: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample20: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample21: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+sample22: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
+
+Original-feature regression suite
+sample1: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample2: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample3: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample4: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample5: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample6: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample7: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample8: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample9: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample10: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample11: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample12: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample13: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample14: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample15: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample16: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample17: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample18: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample19: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample20: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample21: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+sample22: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
+
+RESULT: PASS — all three suites completed successfully for every sample (66 sample-suite passes).
