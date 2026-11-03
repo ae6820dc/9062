@@ -81,34 +81,10 @@ if(crumbStart>0){const sep=document.createElement('span');sep.textContent='›';
 for(let i=crumbStart;i<path.length;i++){const symbol=path[i],sep=document.createElement('span');sep.textContent='›';sep.setAttribute('aria-hidden','true');const b=document.createElement('button');b.textContent=symbol;b.title='Level '+(i+1);b.setAttribute('aria-label',symbol+' folder, level '+(i+1));if(i===path.length-1)b.setAttribute('aria-current','location');b.onclick=()=>navigate(path.slice(0,i+1));crumbs.append(sep,b);}
 crumbs.scrollLeft=crumbs.scrollWidth;
 const folders=$('folders');folders.replaceChildren();folders.hidden=atEnd&&!currentFiles.length;$('terminal').hidden=!atEnd;
-renderVirtualFolders(atEnd,depth);
+if(!atEnd)symbols.forEach(symbol=>{const b=document.createElement('button');b.className='folder';b.dataset.symbol=symbol;b.setAttribute('aria-label','Open '+symbol+' folder, level '+(depth+1));b.innerHTML='<svg aria-hidden="true"><use href="#folder-icon"/></svg><span class="folder-name">'+symbol+'</span><span class="folder-info">'+(depth===MAX_DEPTH-1?'Level 65536 · final level':'20992 subfolders')+'</span>';b.onclick=()=>enter(symbol);folders.append(b);});
+currentFiles.forEach(file=>{const b=document.createElement('button');b.className='folder file';b.setAttribute('aria-label','File: '+file.name);b.title=file.name;b.innerHTML='<svg aria-hidden="true"><use href="#file-icon"/></svg><span class="folder-name"></span><span class="folder-info">File · name only</span>';b.querySelector('.folder-name').textContent=file.name;b.onclick=()=>toast(file.name+' — a virtual file, stored in this folder.');folders.append(b);});
 folders.classList.toggle('list',listMode);$('gridView').setAttribute('aria-pressed',String(!listMode));$('listView').setAttribute('aria-pressed',String(listMode));
 }
-// Window the same grid/list against page scrolling, retaining the full logical sequence.
-let virtualFrame=0;
-function renderVirtualFolders(atEnd,depth){
-const folders=$('folders');folders.classList.toggle('list',listMode);
-const count=(atEnd?0:symbols.length)+currentFiles.length;
-const grid=getComputedStyle(folders),columns=listMode?1:grid.gridTemplateColumns.split(' ').length;
-const gap=parseFloat(grid.rowGap)||0,rowHeight=(listMode?53:matchMedia('(max-width:800px)').matches?105:116)+gap;
-const top=folders.getBoundingClientRect().top+scrollY+20;
-const rows=Math.ceil(count/columns),first=Math.min(Math.max(0,rows-1),Math.max(0,Math.floor((scrollY-top)/rowHeight)-3)),last=Math.min(rows,Math.max(first+1,Math.ceil((scrollY+innerHeight-top)/rowHeight)+3));
-const focused=document.activeElement?.dataset.virtualIndex;
-folders.replaceChildren();
-function spacer(height){if(height<=0)return;const el=document.createElement('div');el.style.cssText='height:'+height+'px;grid-column:1/-1;flex:none;pointer-events:none';el.setAttribute('aria-hidden','true');folders.append(el);}
-spacer(Math.max(0,first*rowHeight-gap));
-for(let index=first*columns;index<Math.min(count,last*columns);index++){
-if(!atEnd&&index<symbols.length){const symbol=symbols[index];const b=document.createElement('button');b.className='folder';b.dataset.symbol=symbol;b.setAttribute('aria-label','Open '+symbol+' folder, level '+(depth+1));b.innerHTML='<svg aria-hidden="true"><use href="#folder-icon"/></svg><span class="folder-name">'+symbol+'</span><span class="folder-info">'+(depth===MAX_DEPTH-1?'Level 65536 · final level':'20992 subfolders')+'</span>';b.onclick=()=>enter(symbol);folders.append(b);}
-else{const file=currentFiles[index-(atEnd?0:symbols.length)];const b=document.createElement('button');b.className='folder file';b.setAttribute('aria-label','File: '+file.name);b.title=file.name;b.innerHTML='<svg aria-hidden="true"><use href="#file-icon"/></svg><span class="folder-name"></span><span class="folder-info">File · name only</span>';b.querySelector('.folder-name').textContent=file.name;b.onclick=()=>toast(file.name+' — a virtual file, stored in this folder.');folders.append(b);}
-const b=folders.lastElementChild;b.onkeydown=e=>{if(e.key!=='Tab')return;const next=index+(e.shiftKey?-1:1);if(next<0||next>=count)return;e.preventDefault();const targetTop=top+Math.floor(next/columns)*rowHeight;if(targetTop<scrollY||targetTop+rowHeight>scrollY+innerHeight)scrollTo(0,Math.max(0,targetTop-innerHeight/2));renderVirtualFolders(atEnd,depth);folders.querySelector('[data-virtual-index="'+next+'"]')?.focus({preventScroll:true});};b.dataset.virtualIndex=index;b.setAttribute('aria-posinset',index+1);b.setAttribute('aria-setsize',count);
-}
-spacer(Math.max(0,(rows-last)*rowHeight-gap));
-if(focused!==undefined)folders.querySelector('[data-virtual-index="'+focused+'"]')?.focus({preventScroll:true});
-}
-function scheduleVirtual(){cancelAnimationFrame(virtualFrame);virtualFrame=requestAnimationFrame(()=>{if(ready)renderVirtualFolders(path.length===MAX_DEPTH,path.length);});}
-addEventListener('scroll',scheduleVirtual,{passive:true});addEventListener('resize',scheduleVirtual);
-new ResizeObserver(scheduleVirtual).observe($('folders'));
-
 $('back').onclick=goBack;$('forward').onclick=goForward;$('up').onclick=up;$('terminalUp').onclick=up;$('home').onclick=$('root').onclick=()=>navigate([]);
 function changeView(mode){return runTask(async()=>{currentFiles=await locationTask(path,mode);listMode=mode;render();});}
 $('gridView').onclick=()=>changeView(false);$('listView').onclick=()=>changeView(true);
