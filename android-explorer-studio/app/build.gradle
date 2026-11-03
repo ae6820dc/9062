@@ -11,8 +11,11 @@ android {
     }
     flavorDimensions += 'studio'
     productFlavors {
+        unicodeCode { dimension 'studio'; applicationId 'io.github.ae6820dc.unicodecodeexplorer'; resValue 'string', 'app_name', 'Unicode Explorer' }
         explorer { dimension 'studio'; applicationId 'io.github.ae6820dc.explorerstudio'; resValue 'string', 'app_name', 'Explorer Studio'; testInstrumentationRunner 'io.github.ae6820dc.studio.ExplorerInstrumentation' }
     }
+    sourceSets.unicodeCode.res.srcDirs = [layout.buildDirectory.dir('generated/resources/explorer')]
+    sourceSets.unicodeCode.assets.srcDirs = [layout.buildDirectory.dir('generated/offline/unicodeCode')]
     sourceSets.explorer.res.srcDirs = [layout.buildDirectory.dir('generated/resources/explorer')]
     sourceSets.explorer.assets.srcDirs = [layout.buildDirectory.dir('generated/offline/explorer')]
     sourceSets.main.res.srcDirs = [layout.buildDirectory.dir('generated/resources/main')]

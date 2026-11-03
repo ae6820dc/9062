@@ -15,7 +15,7 @@ import java.util.*;
 
 /** Offline-only host. Original application files are served without transformation. */
 public final class MainActivity extends Activity {
-    private boolean isExplorer(){return getPackageName().equals("io.github.ae6820dc.explorerstudio");}
+    private boolean isExplorer(){return getPackageName().equals("io.github.ae6820dc.explorerstudio") || getPackageName().equals("io.github.ae6820dc.unicodecodeexplorer");}
     private static final String SUFFIX = ".appassets.androidplatform.net";
     private static final int CHOOSE_FILE=1, SAVE_FILE=2, IMPORT_STORAGE=3, LIMIT=32*1024*1024;
     private final List<JSONObject> programs = new ArrayList<>();
@@ -122,7 +122,7 @@ public final class MainActivity extends Activity {
         if(Build.VERSION.SDK_INT>=33)getOnBackInvokedDispatcher().registerOnBackInvokedCallback(0,this::back);
         JSONObject restored=null;
         if(state!=null)for(JSONObject p:programs)if(text(p,"id").equals(state.getString("program")))restored=p;
-        if(restored==null)home();else open(restored);
+        if(restored==null && programs.size()==1)open(programs.get(0));else if(restored==null)home();else open(restored);
         systemBars();
     }
     private int dp(int n){return Math.round(n*getResources().getDisplayMetrics().density);}

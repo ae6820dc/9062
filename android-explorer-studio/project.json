@@ -1,6 +1,1 @@
-{
-  "explorer": {
-    "name": "Explorer Studio",
-    "package": "io.github.ae6820dc.explorerstudio"
-  }
-}
+{"explorer":{"name":"Explorer Studio","package":"io.github.ae6820dc.explorerstudio"},"unicodeCode":{"name":"Unicode Explorer","package":"io.github.ae6820dc.unicodecodeexplorer"}}

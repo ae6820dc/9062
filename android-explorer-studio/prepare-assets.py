@@ -42,6 +42,11 @@ for flavor in spec:
         assert len(catalog)==48
         all_ids=[p[k] for p in catalog for k in ('programId','storageKey','databaseName')]
         assert len(set(all_ids))==144
+    elif flavor=='unicodeCode':
+        p=repo/'explorer/11/sample1.html'; html=p.read_text(); sources.append(p)
+        program_id=re.search(r'Program ID: <code>([0-9a-f]{16})</code>',html).group(1)
+        key=re.search(r"STORAGE_KEY='([0-9a-f]{16})'",html).group(1)
+        catalog.append(dict(id='unicode-code-explorer-11',group='Unicode Explorer',name='Unicode Explorer',path='explorer/11/sample1.html',kind='explorer',programId=program_id,storageKey=key,depth=65536,sample=1))
     elif flavor=='unicode':
         for version in range(1,12):
             for sample in range(1,4):

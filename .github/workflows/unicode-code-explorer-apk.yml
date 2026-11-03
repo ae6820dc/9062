@@ -1,0 +1,41 @@
+name: Unicode Explorer APK
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'explorer/11/sample1.html'
+      - 'android-explorer-studio/**'
+      - '.github/workflows/unicode-code-explorer-apk.yml'
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Build standalone Unicode Explorer
+        working-directory: android-explorer-studio
+        run: ./gradlew --no-daemon assembleUnicodeCodeDebug
+      - name: Publish APK
+        run: |
+          mkdir -p android-distributions
+          cp android-explorer-studio/app/build/outputs/apk/unicodeCode/debug/app-unicodeCode-debug.apk android-distributions/Unicode-Explorer.apk
+          sha256sum android-distributions/Unicode-Explorer.apk > android-distributions/Unicode-Explorer.apk.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Unicode-Explorer-APK
+          path: android-distributions/Unicode-Explorer.apk
+      - name: Commit APK
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add android-distributions/Unicode-Explorer.apk android-distributions/Unicode-Explorer.apk.sha256
+          git commit -m 'Publish standalone Unicode Explorer APK' || exit 0
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin HEAD:"$GITHUB_REF_NAME"
