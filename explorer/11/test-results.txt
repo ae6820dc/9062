@@ -1,80 +1,61 @@
-Chinese Explorer verification
-Environment: Chromium 154.0.8037.57, Debian Linux, Playwright, Node 24.19.0
-Static audit: PASS — 22 samples, 44 unique 16-hex identifiers, samples otherwise byte-identical.
-Scope: only explorer/31/ added; original explorer/7/ unchanged.
-Mobile: touch/viewport emulation for all 22 samples; no physical Android or Windows hardware.
-Standalone HTML: served locally with external requests blocked. Browser administrator policy prevents file:// testing.
+Verification date: 2026-11-03 (UTC)
+Command: node explorer/10/test.cjs
+Browser: Chromium, Playwright, desktop and Android-sized touch emulation
+Physical Android hardware was not available.
 
-Full functionality and deep-path suite
-sample1: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample2: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample3: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample4: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample5: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample6: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample7: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample8: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample9: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample10: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample11: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample12: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample13: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample14: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample15: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample16: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample17: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample18: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample19: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample20: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample21: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
-sample22: PASS desktop/mobile, Unicode, navigation, storage, deep paths, export, import, delete/reset
+10/sample1: PASS (PC, navigation, files, storage, 65536 depth, menus)
+10/sample2: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+10/sample3: PASS (PC, navigation, files, storage, 65536 depth, menus)
+10/sample4: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+10/sample5: PASS (PC, navigation, files, storage, 65536 depth, menus)
+10/sample6: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+10/sample7: PASS (PC, navigation, files, storage, 65536 depth, menus)
+10/sample8: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+10/sample9: PASS (PC, navigation, files, storage, 65536 depth, menus)
+10/sample10: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+10/sample11: PASS (PC, navigation, files, storage, 65536 depth, menus)
+10/sample12: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+10/sample13: PASS (PC, navigation, files, storage, 65536 depth, menus)
+10/sample14: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+10/sample15: PASS (PC, navigation, files, storage, 65536 depth, menus)
+10/sample16: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+10/sample17: PASS (PC, navigation, files, storage, 65536 depth, menus)
+10/sample18: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+10/sample19: PASS (PC, navigation, files, storage, 65536 depth, menus)
+10/sample20: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+10/sample21: PASS (PC, navigation, files, storage, 65536 depth, menus)
+10/sample22: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+11/sample1: PASS (PC, navigation, files, storage, 65536 depth, menus)
+11/sample2: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+11/sample3: PASS (PC, navigation, files, storage, 65536 depth, menus)
+11/sample4: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+11/sample5: PASS (PC, navigation, files, storage, 65536 depth, menus)
+11/sample6: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+11/sample7: PASS (PC, navigation, files, storage, 65536 depth, menus)
+11/sample8: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+11/sample9: PASS (PC, navigation, files, storage, 65536 depth, menus)
+11/sample10: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+11/sample11: PASS (PC, navigation, files, storage, 65536 depth, menus)
+11/sample12: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+11/sample13: PASS (PC, navigation, files, storage, 65536 depth, menus)
+11/sample14: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+11/sample15: PASS (PC, navigation, files, storage, 65536 depth, menus)
+11/sample16: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+11/sample17: PASS (PC, navigation, files, storage, 65536 depth, menus)
+11/sample18: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+11/sample19: PASS (PC, navigation, files, storage, 65536 depth, menus)
+11/sample20: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+11/sample21: PASS (PC, navigation, files, storage, 65536 depth, menus)
+11/sample22: PASS (Android-sized touch, navigation, files, storage, 65536 depth, menus)
+PASS: 44 samples; 88 unique identifiers; baseline UI element parity; no extra features.
 
-All-sample mobile suite
-sample1: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample2: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample3: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample4: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample5: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample6: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample7: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample8: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample9: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample10: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample11: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample12: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample13: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample14: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample15: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample16: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample17: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample18: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample19: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample20: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample21: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-sample22: PASS 360px touch viewport, last-folder scroll/open, list search, list start, landscape resize
-
-Original-feature regression suite
-sample1: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample2: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample3: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample4: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample5: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample6: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample7: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample8: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample9: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample10: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample11: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample12: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample13: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample14: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample15: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample16: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample17: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample18: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample19: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample20: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample21: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-sample22: PASS menu/keyboard, About, share/copy, earlier-level jump, folder-name conflict, terminal files, password guard/reset
-
-RESULT: PASS — all three suites completed successfully for every sample (66 sample-suite passes).
+Additional checks:
+edition 9, width 390: baseline layout PASS
+edition 10, width 390: baseline layout PASS
+edition 11, width 390: baseline layout PASS
+edition 9, width 1440: baseline layout PASS
+edition 10, width 1440: baseline layout PASS
+edition 11, width 1440: baseline layout PASS
+Legacy localStorage migration and file restoration: PASS in both editions.
+All 44 original Program ID/storage-key pairs preserved.
+Only explorer/10/ and explorer/11/ changed; explorer/9/, explorer/30/ and explorer/31/ unchanged.
