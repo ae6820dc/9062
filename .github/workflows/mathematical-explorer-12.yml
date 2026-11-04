@@ -1,0 +1,57 @@
+name: Mathematical Explorer 12 APK
+on:
+  push:
+    paths:
+      - 'explorer/12/sample1.html'
+      - '.github/workflows/mathematical-explorer-12.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Prepare standalone offline application
+        run: |
+          cp -a android-system-explorer android-mathematical-explorer-12
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('android-mathematical-explorer-12')
+          f=p/'prepare-assets.py'
+          s=f.read_text().replace('((7,65536),)','((12,65536),)')
+          f.write_text(s)
+          f=p/'app/build.gradle'
+          s=f.read_text().replace('io.github.ae6820dc.systemexplorer','io.github.ae6820dc.mathematicalexplorer12').replace("'System Explorer'","'Mathematical Explorer 12'")
+          f.write_text(s)
+          f=p/'app/src/main/java/io/github/ae6820dc/studio/MainActivity.java'
+          s=f.read_text().replace('io.github.ae6820dc.systemexplorer','io.github.ae6820dc.mathematicalexplorer12')
+          f.write_text(s)
+          PY
+      - name: Build signed offline APK
+        working-directory: android-mathematical-explorer-12
+        run: ./gradlew --no-daemon assembleExplorerDebug
+      - name: Verify APK content
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile,json,hashlib
+          apk=Path('android-mathematical-explorer-12/app/build/outputs/apk/explorer/debug/app-explorer-debug.apk')
+          with zipfile.ZipFile(apk) as z:
+            c=json.loads(z.read('assets/catalog.json'))
+            assert len(c)==1 and c[0]['path']=='explorer/12/sample1.html'
+            assert z.read('assets/site/explorer/12/sample1.html')==Path('explorer/12/sample1.html').read_bytes()
+            assert len({c[0][k] for k in ('programId','storageKey','databaseName')})==3
+          print('Verified original HTML and distinct identifiers')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Mathematical-Explorer-12-APK
+          path: android-mathematical-explorer-12/app/build/outputs/apk/explorer/debug/app-explorer-debug.apk
+          if-no-files-found: error
