@@ -41,7 +41,7 @@ jobs:
           s=f.read_text().replace('((7,65536),)','((12,65536),)')
           f.write_text(s)
           f=p/'app/build.gradle'
-          s=f.read_text().replace('io.github.ae6820dc.systemexplorer','io.github.ae6820dc.mathematicalexplorer12').replace("'System Explorer'","'Mathematical Explorer 12'")
+          s=f.read_text().replace('io.github.ae6820dc.systemexplorer','io.github.ae6820dc.mathematicalexplorer12').replace("'System Explorer'","'Mathematical Explorer'")
           f.write_text(s)
           f=p/'app/src/main/java/io/github/ae6820dc/studio/MainActivity.java'
           s=f.read_text().replace('io.github.ae6820dc.systemexplorer','io.github.ae6820dc.mathematicalexplorer12')
