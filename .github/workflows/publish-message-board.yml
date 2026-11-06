@@ -16,7 +16,7 @@ permissions:
   id-token: write
 concurrency:
   group: message-board-pages-publish
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -135,6 +135,13 @@ jobs:
                 deployment = response.data;
               } catch (error) {
                 if (error.status !== 400 || !String(error.message).includes('in progress deployment') || Date.now() >= createDeadline) throw error;
+                const match = String(error.message).match(/cancel ([a-f0-9]{40}) first/);
+                if (match) {
+                  const {data: relation} = await github.rest.repos.compareCommits({...context.repo,base:match[1],head:context.sha});
+                  if (['ahead','identical'].includes(relation.status)) {
+                    await github.request('POST /repos/{owner}/{repo}/pages/deployments/{deploymentId}/cancel', {...context.repo,deploymentId:match[1]});
+                  }
+                }
                 core.info('Waiting for overlapping Pages deployment to stop.');
                 await new Promise(resolve => setTimeout(resolve, 15000));
               }
@@ -142,11 +149,14 @@ jobs:
             const deploymentId = deployment.id;
             if (!deploymentId) throw new Error('No Pages deployment ID returned.');
             const deadline = Date.now() + 30*60*1000;
-            let previous = '';
+            let previous = '', emptyStates = 0;
             while (Date.now() < deadline) {
               const {data: state} = await github.request('GET /repos/{owner}/{repo}/pages/deployments/{deploymentId}', {
                 ...context.repo, deploymentId
               });
+              core.info('Deployment ID: ' + deploymentId + ' status: ' + state.status);
+              emptyStates = state.status ? 0 : emptyStates + 1;
+              if (emptyStates >= 4) throw new Error('Pages deployment disappeared: ' + JSON.stringify(state));
               if (state.status !== previous) {
                 core.info('Pages status: ' + state.status);
                 previous = state.status;
