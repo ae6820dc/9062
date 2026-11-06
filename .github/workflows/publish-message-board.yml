@@ -77,7 +77,7 @@ jobs:
           source = 'source-artifact/artifact.tar'
           target = source + '.updated'
           prefixes = ('message/board/work/', 'message/board/friends/')
-          with tarfile.open(source, 'r') as old, tarfile.open(target, 'w') as new:
+          with tarfile.open(source, 'r') as old, tarfile.open(target, 'w', format=tarfile.GNU_FORMAT) as new:
               for member in old:
                   name = member.name.removeprefix('./')
                   if name == 'index.html' or any(name.startswith(prefix) or name == prefix.rstrip('/') for prefix in prefixes):
@@ -121,6 +121,10 @@ jobs:
           PAGES_ARTIFACT_ID: ${{ steps.artifact.outputs.artifact-id }}
         with:
           script: |
+            const {data: previousState} = await github.request('GET /repos/{owner}/{repo}/pages/deployments/{deploymentId}', {
+              ...context.repo, deploymentId: '86572c4906d3b809bbc4a602594a75b3feadb81a'
+            });
+            core.info('Previous deployment diagnostic: ' + JSON.stringify(previousState));
             const oidc = await core.getIDToken();
             let deployment;
             const createDeadline = Date.now() + 5*60*1000;
@@ -156,7 +160,7 @@ jobs:
                 return;
               }
               if (['deployment_failed','deployment_cancelled','errored','failed','cancelled'].includes(state.status)) {
-                throw new Error('Pages publication stopped: ' + state.status);
+                throw new Error('Pages publication stopped: ' + JSON.stringify(state));
               }
               await new Promise(resolve => setTimeout(resolve, 15000));
             }
