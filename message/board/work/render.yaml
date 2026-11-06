@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: message-board-work-ae6820dc
+    runtime: python
+    region: frankfurt
+    plan: 0.5c-512mb
+    repo: https://github.com/ae6820dc/9062
+    branch: main
+    rootDir: message/board/work
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 30
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    numInstances: 1
+    disk:
+      name: work-board-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: DB_PATH
+        value: /var/data/board.sqlite3
+      - key: ALLOWED_ORIGIN
+        value: https://ae6820dc.github.io
+      - key: SETUP_TOKEN
+        generateValue: true
