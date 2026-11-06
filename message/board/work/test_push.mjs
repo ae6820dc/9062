@@ -15,6 +15,6 @@ for(const invalid of ['http://fcm.googleapis.com/x','https://fcm.googleapis.com.
 const calls=[],deletions=[];
 env.DB={prepare:sql=>({bind(...args){return {all:async()=>({results:[{endpoint},{endpoint:'https://updates.push.services.mozilla.com/wpush/v2/expired'}]}),run:async()=>{deletions.push({sql,args});return {meta:{changes:1}};}};}})};
 await notifySubscribers(env,'sender',async(url,options)=>{calls.push({url,options});return new Response(null,{status:url.includes('expired')?410:201});});
-assert.equal(calls.length,2);assert.equal(calls[0].options.body,null);assert.equal(calls[0].options.headers.TTL,'60');assert.equal(calls[0].options.redirect,'error');
+assert.equal(calls.length,2);assert.equal(calls[0].options.body,null);assert.equal(calls[0].options.headers.TTL,'60');assert.equal(calls[0].options.redirect,'manual');
 assert.equal(deletions.length,1);assert.ok(deletions[0].args[0].includes('expired'));
 console.log('Passed: VAPID signature and audience, provider allowlist, bodyless push, expired subscription cleanup.');

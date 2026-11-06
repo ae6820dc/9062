@@ -24,7 +24,7 @@ export async function notifySubscribers(env,sender,send=fetch) {
       if(!validPushEndpoint(endpoint))return;
       const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),8000);
       try {
-        const response=await send(endpoint,{method:'POST',headers:{Authorization:await vapidAuthorization(endpoint,env),TTL:'60',Urgency:'normal',Topic:'new-board-message'},body:null,signal:controller.signal,redirect:'error'});
+        const response=await send(endpoint,{method:'POST',headers:{Authorization:await vapidAuthorization(endpoint,env),TTL:'60',Urgency:'normal',Topic:'new-board-message'},body:null,signal:controller.signal,redirect:'manual'});
         console.info(JSON.stringify({event:'push_result',status:response.status}));
         if(response.status===404||response.status===410)await env.DB.prepare('DELETE FROM push_subscriptions WHERE endpoint=?').bind(endpoint).run();
         else if(!response.ok)console.warn(JSON.stringify({event:'push_delivery_failed',status:response.status}));
