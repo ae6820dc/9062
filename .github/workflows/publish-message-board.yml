@@ -2,7 +2,7 @@ name: Publish message board update
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/publish-message-board.yml', 'message/board/**']
+    paths: ['.github/workflows/publish-message-board.yml']
   workflow_dispatch:
     inputs:
       source_run:
@@ -39,7 +39,7 @@ jobs:
               ...context.repo, base: source.head_sha, head: context.sha
             });
             const allowed = '.github/workflows/publish-message-board.yml';
-            if (!comparison.files || comparison.files.length >= 300 || comparison.files.some(file => file.filename !== allowed && file.filename !== 'index.html' && !file.filename.startsWith('message/board/'))) {
+            if (!comparison.files || comparison.files.length >= 300 || comparison.files.some(file => file.filename !== allowed && file.filename !== '.github/workflows/diagnose-board-pages.yml' && file.filename !== 'index.html' && !file.filename.startsWith('message/board/'))) {
               throw new Error('Site contents changed since the source artifact. Select a newer Pages build.');
             }
             // Cancel only the automatic publisher for this update or its ancestor.
@@ -114,17 +114,13 @@ jobs:
           name: github-pages
           path: source-artifact/artifact.tar
           compression-level: 0
-          retention-days: 1
+          retention-days: 90
       - name: Publish and wait for actual completion
         uses: actions/github-script@v7
         env:
           PAGES_ARTIFACT_ID: ${{ steps.artifact.outputs.artifact-id }}
         with:
           script: |
-            const {data: previousState} = await github.request('GET /repos/{owner}/{repo}/pages/deployments/{deploymentId}', {
-              ...context.repo, deploymentId: '86572c4906d3b809bbc4a602594a75b3feadb81a'
-            });
-            core.info('Previous deployment diagnostic: ' + JSON.stringify(previousState));
             const oidc = await core.getIDToken();
             let deployment;
             const createDeadline = Date.now() + 5*60*1000;
