@@ -39,20 +39,24 @@ jobs:
               ...context.repo, base: source.head_sha, head: context.sha
             });
             const allowed = '.github/workflows/publish-message-board.yml';
-            if (!comparison.files || comparison.files.length >= 300 || comparison.files.some(file => file.filename !== allowed && !file.filename.startsWith('message/board/'))) {
+            if (!comparison.files || comparison.files.length >= 300 || comparison.files.some(file => file.filename !== allowed && file.filename !== 'index.html' && !file.filename.startsWith('message/board/'))) {
               throw new Error('Site contents changed since the source artifact. Select a newer Pages build.');
             }
-            // Cancel only the automatic publisher for this exact board update commit.
+            // Cancel only the automatic publisher for this update or its ancestor.
             // It would publish the same snapshot and cancel it after ten minutes.
             for (let attempt=0; attempt<6; attempt++) {
               const {data} = await github.rest.actions.listWorkflowRunsForRepo({
-                ...context.repo, head_sha: context.sha, per_page: 30
+                ...context.repo, branch: 'main', per_page: 30
               });
               for (const run of data.workflow_runs) {
                 if (run.id !== context.runId && run.name === 'pages build and deployment' &&
                     ['queued','in_progress','waiting','pending','requested'].includes(run.status)) {
+                  const {data: relation} = await github.rest.repos.compareCommits({
+                    ...context.repo, base: run.head_sha, head: context.sha
+                  });
+                  if (!['ahead','identical'].includes(relation.status)) continue;
                   await github.rest.actions.cancelWorkflowRun({...context.repo,run_id:run.id});
-                  core.info('Stopped duplicate automatic publisher for this commit.');
+                  core.info('Stopped overlapping automatic publisher included in this update.');
                 }
               }
               await new Promise(resolve => setTimeout(resolve, 5000));
@@ -76,11 +80,11 @@ jobs:
           with tarfile.open(source, 'r') as old, tarfile.open(target, 'w') as new:
               for member in old:
                   name = member.name.removeprefix('./')
-                  if any(name.startswith(prefix) or name == prefix.rstrip('/') for prefix in prefixes):
+                  if name == 'index.html' or any(name.startswith(prefix) or name == prefix.rstrip('/') for prefix in prefixes):
                       continue
                   data = old.extractfile(member) if member.isfile() else None
                   new.addfile(member, data)
-              paths = subprocess.check_output(['git', 'ls-files', '-z', '--', *prefixes]).decode().split('\0')
+              paths = subprocess.check_output(['git', 'ls-files', '-z', '--', 'index.html', *prefixes]).decode().split('\0')
               for path in paths:
                   if path:
                       new.add(path, arcname='./' + path, recursive=False)
@@ -118,12 +122,23 @@ jobs:
         with:
           script: |
             const oidc = await core.getIDToken();
-            const {data: deployment} = await github.request('POST /repos/{owner}/{repo}/pages/deployments', {
+            let deployment;
+            const createDeadline = Date.now() + 5*60*1000;
+            while (!deployment) {
+              try {
+                const response = await github.request('POST /repos/{owner}/{repo}/pages/deployments', {
               ...context.repo,
               artifact_id: Number(process.env.PAGES_ARTIFACT_ID),
               pages_build_version: context.sha,
               oidc_token: oidc
-            });
+                });
+                deployment = response.data;
+              } catch (error) {
+                if (error.status !== 400 || !String(error.message).includes('in progress deployment') || Date.now() >= createDeadline) throw error;
+                core.info('Waiting for overlapping Pages deployment to stop.');
+                await new Promise(resolve => setTimeout(resolve, 15000));
+              }
+            }
             const deploymentId = deployment.id;
             if (!deploymentId) throw new Error('No Pages deployment ID returned.');
             const deadline = Date.now() + 30*60*1000;
