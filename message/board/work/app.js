@@ -8,11 +8,11 @@ let setupToken = new URLSearchParams(location.hash.slice(1)).get('setup') || '';
 if (setupToken) history.replaceState(null, '', location.pathname + location.search);
 try { token = sessionStorage.getItem('A13D806FB92E4C75') || ''; } catch (_) {}
 const formatter = new Intl.DateTimeFormat('hu-HU', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-function notify(message) { $('notice').textContent = message; $('notice').hidden = false; }
-function clearNotice() { $('notice').hidden = true; }
+function notify(message) { const target = $('loginDialog')?.open ? $('loginNotice') : $('notice'); target.textContent = message; target.hidden = false; }
+function clearNotice() { $('notice').hidden = true; if($('loginNotice')) $('loginNotice').hidden = true; }
 function connection(ok, label) { $('liveText').textContent = label; $('liveDot').parentElement.classList.toggle('connected', ok); }
 function storeToken(value) { token = value; try { if(value) sessionStorage.setItem('A13D806FB92E4C75', value); else sessionStorage.removeItem('A13D806FB92E4C75'); } catch (_) {} }
-function showLogin() { storeToken(''); $('login').hidden = false; $('wall').hidden = true; $('setup').hidden = true; }
+function showLogin() { storeToken(''); currentName = ''; $('login').hidden = false; $('wall').hidden = true; $('setup').hidden = true; window.boardMenu?.reset(); }
 async function api(path, body) {
   if (!apiRoot) throw new Error('A háttérszolgáltatás még nincs bekapcsolva. Az üzenőfal előkészítése folyamatban van.');
   const controller = new AbortController();
@@ -58,10 +58,11 @@ async function openWall() {
   render(result.messages); $('older').hidden = !result.hasOlder;
   $('login').hidden = true; $('setup').hidden = true; $('wall').hidden = false;
   connection(true,'Minden üzenet naprakész'); clearNotice(); scrollBottom();
+  window.boardMenu?.reset();
   if(typeof restoreBoardNotifications === 'function') await restoreBoardNotifications();
 }
 $('loginForm').addEventListener('submit', async event => {
-  event.preventDefault(); $('loginButton').disabled = true; clearNotice();
+  event.preventDefault(); if(!window.boardMenu?.allowLogin()) return; $('loginButton').disabled = true; clearNotice();
   try { const result = await api('/api/login', {name:$('name').value.trim(),password:$('password').value}); storeToken(result.token); $('password').value = ''; await openWall(); }
   catch(error) { notify(error.message); }
   finally { $('loginButton').disabled = false; }
@@ -74,7 +75,7 @@ $('setupForm').addEventListener('submit', async event => {
   catch(error) { notify(error.message); }
   finally { button.disabled = false; }
 });
-$('logout').addEventListener('click', async () => { try { await api('/api/logout', {}); } catch (_) {} showLogin(); $('message').value = ''; $('counter').textContent = '0'; });
+$('logout').addEventListener('click', async () => { if(!window.boardMenu?.consume('logout')) return; try { await api('/api/logout', {}); showLogin(); $('message').value = ''; $('counter').textContent = '0'; } catch(error) { notify(error.message); } });
 $('message').addEventListener('input', () => { $('counter').textContent = $('message').value.length; });
 $('message').addEventListener('keydown', event => { if((event.ctrlKey || event.metaKey) && event.key === 'Enter') { event.preventDefault(); $('messageForm').requestSubmit(); } });
 $('messageForm').addEventListener('submit', async event => {

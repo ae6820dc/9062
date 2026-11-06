@@ -2,7 +2,7 @@ name: Publish message board update
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/publish-message-board.yml']
+    paths: ['.github/workflows/publish-message-board.yml', 'message/board/**']
   workflow_dispatch:
     inputs:
       source_run:
@@ -39,10 +39,10 @@ jobs:
               ...context.repo, base: source.head_sha, head: context.sha
             });
             const allowed = '.github/workflows/publish-message-board.yml';
-            if (comparison.files?.some(file => file.filename !== allowed)) {
+            if (!comparison.files || comparison.files.length >= 300 || comparison.files.some(file => file.filename !== allowed && !file.filename.startsWith('message/board/'))) {
               throw new Error('Site contents changed since the source artifact. Select a newer Pages build.');
             }
-            // Cancel only the automatic publisher for this exact CI-only commit.
+            // Cancel only the automatic publisher for this exact board update commit.
             // It would publish the same snapshot and cancel it after ten minutes.
             for (let attempt=0; attempt<6; attempt++) {
               const {data} = await github.rest.actions.listWorkflowRunsForRepo({
@@ -58,6 +58,7 @@ jobs:
               await new Promise(resolve => setTimeout(resolve, 5000));
             }
             core.setOutput('run', String(sourceRun));
+      - uses: actions/checkout@v4
       - name: Download previously built complete site
         uses: actions/download-artifact@v4
         with:
@@ -65,6 +66,27 @@ jobs:
           path: source-artifact
           run-id: ${{ steps.source.outputs.run }}
           github-token: ${{ github.token }}
+      - name: Overlay current message boards onto complete site
+        run: |
+          python - <<'PY'
+          import os, subprocess, tarfile
+          source = 'source-artifact/artifact.tar'
+          target = source + '.updated'
+          prefixes = ('message/board/work/', 'message/board/friends/')
+          with tarfile.open(source, 'r') as old, tarfile.open(target, 'w') as new:
+              for member in old:
+                  name = member.name.removeprefix('./')
+                  if any(name.startswith(prefix) or name == prefix.rstrip('/') for prefix in prefixes):
+                      continue
+                  data = old.extractfile(member) if member.isfile() else None
+                  new.addfile(member, data)
+              paths = subprocess.check_output(['git', 'ls-files', '-z', '--', *prefixes]).decode().split('\0')
+              for path in paths:
+                  if path:
+                      new.add(path, arcname='./' + path, recursive=False)
+          os.replace(target, source)
+          print('Updated both board directories; all other site assets preserved.')
+          PY
       - name: Verify message board assets in archive
         run: |
           python - <<'PY'
@@ -73,13 +95,13 @@ jobs:
               members = {m.name.removeprefix('./'): m for m in archive.getmembers()}
               for board in ['work', 'friends']:
                   base = 'message/board/' + board + '/'
-                  for name in ['index.html', 'app.js', 'notifications.js', 'sw.js']:
+                  for name in ['index.html', 'app.js', 'notifications.js', 'sw.js', 'menu.js']:
                       if base + name not in members:
                           raise SystemExit('Missing board asset: ' + base + name)
                   page = archive.extractfile(members[base + 'index.html']).read().decode()
-                  if 'id="notifications"' not in page or 'notifications.js?v=20261106push' not in page:
-                      raise SystemExit('Notification controls missing from ' + board)
-          print('Both notification-enabled boards verified; complete archive preserved.')
+                  if 'id="boardMenuOpen"' not in page or 'menu.js?v=20261106menu' not in page:
+                      raise SystemExit('Protected menu missing from ' + board)
+          print('Both protected board menus verified; complete archive preserved.')
           PY
       - name: Upload complete Pages artifact to this run
         id: artifact

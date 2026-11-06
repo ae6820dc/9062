@@ -2,3 +2,15 @@
 
 
 .user{flex-wrap:wrap}#notifications{max-width:260px;font-size:11px}#notifications[aria-pressed="true"]{background:#e7eddf}
+
+/* Locked action menu */
+.top-actions{display:flex;align-items:center;gap:12px}.menu-trigger{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink);padding:9px 13px;font-size:12px;min-height:44px}.menu-trigger>span:first-child{font-size:25px;line-height:1}
+.entry-guide h2{margin-top:0;font-size:23px}.entry-guide p{line-height:1.7;font-size:14px;color:var(--muted)}
+.menu-dialog{color:var(--ink);background:white;border:1px solid var(--line);border-radius:17px;padding:24px;width:calc(100vw - 32px);max-width:440px;max-height:calc(100svh - 40px);overflow:auto;box-shadow:0 20px 70px #122a2833}
+.menu-dialog::backdrop{background:#101b2866;backdrop-filter:blur(3px)}
+.dialog-top{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px}.dialog-top h2{margin:0;font-size:24px}.dialog-close{border:1px solid var(--line);border-radius:50%;background:var(--paper);color:var(--ink);width:36px;height:36px;font-size:23px;flex:0 0 36px}
+.menu-dialog .card{border:0;padding:0;box-shadow:none}.menu-dialog .primary{width:100%;margin-top:20px}.menu-dialog .hint{line-height:1.6}.menu-session{font-size:12px;color:var(--muted);overflow-wrap:anywhere;line-height:1.6}
+.menu-list{display:grid;gap:9px;margin:18px 0}.menu-list button,.menu-lock{border:1px solid var(--line);border-radius:9px;padding:14px;text-align:left;background:var(--paper);color:var(--ink);font-size:14px;min-height:50px}.menu-list button:hover{background:var(--green)}.menu-list #notifications{max-width:none;font-size:14px}.menu-lock{width:100%;text-align:center;background:white;margin-top:8px}
+#menuPin{letter-spacing:.5em;text-align:center;font-size:24px}.dialog-error{color:#a03232;font-size:13px;line-height:1.5;margin:12px 0}
+#shareAddress{font-size:14px}
+@media(max-width:480px){.top-actions .private{display:none}.menu-dialog{padding:22px}.menu-trigger{padding:8px 11px}.entry-guide{padding:24px}}

@@ -39,3 +39,7 @@ Belépés után az Értesítések bekapcsolása gomb kér engedélyt. Azonos bö
 Csak mások aktív, 12 órás belépései kapnak értesítést. Kilépéskor a szerver törli az adott munkamenet feliratkozását. A gombbal eszközönként ki is kapcsolható. A böngésző és az Android értesítési/energiatakarékossági beállításai befolyásolhatják a kézbesítést. Újra belépéskor a korábban engedélyezett feliratkozás helyreáll.
 
 A push aláírás és az érvénytelen végpontok kezelése külön ellenőrizhető: `node test_push.mjs`. A telefonos megjelenítés ellenőrzéséhez a felhasználónak engedélyeznie kell a böngésző értesítéseit.
+
+## Zárolt műveleti menü
+
+A hárompontos menü kódja 1111. A kód a véletlen műveletek ellen védő helyi kezelőfelületi zár; a közös fal jelszavának szerveroldali ellenőrzése továbbra is külön működik. A menü tartalmazza a bejelentkezést, kilépést, értesítések kapcsolását, oldal küldését, cím másolását és üzenetek frissítését. A belépési mezők csak a feloldott menüből nyithatók meg. A menü minden bezáráskor, műveletindításkor, a lap háttérbe kerülésekor és 60 másodperc után ismét zárol. A feloldás nem tárolódik el. A megosztás kizárólag a fal normál címét továbbítja, beállítási tokent vagy jelszót nem.

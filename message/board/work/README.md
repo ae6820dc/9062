@@ -38,3 +38,7 @@ A retention.mjs üzenetküldés előtt a D1 meta.size_after élő tárhelyméret
 Belépés után az Értesítések bekapcsolása gomb kér engedélyt. Azonos böngészőben falanként külön PushSubscription és service worker scope működik. Külön VAPID kulcspár tartozik minden falhoz; a privát JWK titkos VAPID_PRIVATE_KEY binding, a nyilvános kulcs VAPID_PUBLIC_KEY, a kapcsolat VAPID_SUBJECT. Nincs üzenettartalom vagy név a push szolgáltatónak küldött, törzs nélküli Web Push kérésben. Az értesítés általános szöveget jelenít meg; koppintással a megfelelő fal nyílik meg.
 
 Csak mások aktív, 12 órás belépései kapnak értesítést. Kilépéskor a szerver törli az adott munkamenet feliratkozását. A gombbal eszközönként ki is kapcsolható. A böngésző és az Android értesítési/energiatakarékossági beállításai befolyásolhatják a kézbesítést. Újra belépéskor a korábban engedélyezett feliratkozás helyreáll.
+
+## Zárolt műveleti menü
+
+A hárompontos menü kódja 1111. A kód a véletlen műveletek ellen védő helyi kezelőfelületi zár; a közös fal jelszavának szerveroldali ellenőrzése továbbra is külön működik. A menü tartalmazza a bejelentkezést, kilépést, értesítések kapcsolását, oldal küldését, cím másolását és üzenetek frissítését. A belépési mezők csak a feloldott menüből nyithatók meg. A menü minden bezáráskor, műveletindításkor, a lap háttérbe kerülésekor és 60 másodperc után ismét zárol. A feloldás nem tárolódik el. A megosztás kizárólag a fal normál címét továbbítja, beállítási tokent vagy jelszót nem.

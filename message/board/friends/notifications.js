@@ -12,6 +12,7 @@ async function restoreBoardNotifications(){
   try {const registration=await pushRegistration();const subscription=await registration.pushManager.getSubscription();if(subscription){await api('/api/notifications/subscribe',{endpoint:subscription.endpoint});pushButton(true);}else pushButton(false);}catch{pushButton(false);}
 }
 document.getElementById('notifications').addEventListener('click',async event=>{
+  if(!window.boardMenu?.consume('notifications')) return;
   const button=event.currentTarget;
   if(!supportsBoardPush()){notify('Ez a böngésző nem támogatja az értesítéseket. Nyisd meg az oldalt Chrome-ban.');return;}
   button.disabled=true;

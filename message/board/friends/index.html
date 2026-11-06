@@ -4,21 +4,46 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#122a28"><meta name="referrer" content="no-referrer">
 <meta name="description" content="Jelszóval védett közös baráti üzenőfal.">
-<title>Baráti üzenőfal</title><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css">
-<script src="config.js?v=20261106friends" defer></script><script src="app.js?v=20261106push" defer></script><script src="notifications.js?v=20261106push" defer></script>
+<title>Baráti üzenőfal</title><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=20261106menu">
+<script src="config.js?v=20261106friends" defer></script><script src="app.js?v=20261106menu" defer></script><script src="menu.js?v=20261106menu" defer></script><script src="notifications.js?v=20261106menu" defer></script>
 </head>
 <body>
-<header class="top"><a class="brand" href="./"><span class="mark" aria-hidden="true">m.</span><span>ÜZENŐFAL<small>Haverok</small></span></a><span class="private"><span aria-hidden="true">▣</span> Zárt közösség</span></header>
+<header class="top"><a class="brand" href="./"><span class="mark" aria-hidden="true">m.</span><span>ÜZENŐFAL<small>Haverok</small></span></a><div class="top-actions"><span class="private"><span aria-hidden="true">▣</span> Zárt közösség</span><button id="boardMenuOpen" class="menu-trigger" type="button" aria-label="Menü megnyitása" aria-haspopup="dialog"><span aria-hidden="true">⋮</span><span>Menü</span></button></div></header>
 <main>
 <section id="login" class="entry">
 <div class="intro"><p class="eyebrow">EGY HELYEN, EGYMÁSNAK</p><h1>A közös sztorik<br>itt folytatódnak<span>.</span></h1><p>Programok, közös sztorik, üzenetek a haveroknak. Egy közös fal, csak nektek.</p><div class="note"><span aria-hidden="true">↗</span><p>A belépéshez add meg a neved és a közös baráti jelszót.</p></div></div>
-<form id="loginForm" class="card"><span class="card-label">BARÁTI ÜZENŐFAL</span><h2>Jó, hogy itt vagy.</h2><p class="muted">Lépj be a beszélgetésbe.</p><label for="name">Neved</label><input id="name" name="name" autocomplete="nickname" maxlength="40" placeholder="Ahogy a haverok ismernek" required><label for="password">Közös jelszó</label><input id="password" name="password" type="password" autocomplete="current-password" maxlength="128" required><button class="primary" id="loginButton">Belépés <span aria-hidden="true">→</span></button><p class="hint">A neved látható lesz az üzeneteid mellett.</p></form>
+<div class="card entry-guide"><p class="card-label">BELÉPÉS A MENÜBŐL</p><h2>Egy helyen minden művelet.</h2><p>A jobb felső <strong>⋮ Menü</strong> alatt találod a bejelentkezést, az értesítéseket és az oldal megosztását.</p><p>A menü megnyitásához add meg a menükódot.</p></div>
 </section>
 <section id="setup" class="setup card" hidden><p class="eyebrow">ELSŐ LÉPÉS</p><h1>A közös jelszó.</h1><p>Állítsd be a baráti fal jelszavát, majd oszd meg a haverokkal.</p><form id="setupForm"><label for="newPassword">Jelszó, legalább 8 karakter</label><input id="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required><label for="confirmPassword">Jelszó ismét</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required><button class="primary">Jelszó beállítása →</button></form></section>
 <section id="wall" hidden>
-<div class="wall-heading"><div><p class="eyebrow">KÖZÖS TÉR</p><h1>Baráti üzenőfal<span>.</span></h1><p class="muted">Minden fontos üzenet egy helyen.</p></div><div class="user"><span id="userName"></span><button id="notifications" class="quiet" type="button" aria-pressed="false">🔔 Értesítések bekapcsolása</button><button id="logout" class="quiet">Kilépés ↗</button></div></div>
+<div class="wall-heading"><div><p class="eyebrow">KÖZÖS TÉR</p><h1>Baráti üzenőfal<span>.</span></h1><p class="muted">Minden fontos üzenet egy helyen.</p></div><div class="user"><span id="userName"></span></div></div>
 <div class="wall-layout"><aside><div class="aside-label">BESZÉLGETÉS</div><div class="room"><span aria-hidden="true">#</span> Közös üzenőfal <span class="room-dot"></span></div><p>Ide írhatsz a haveroknak. A korábbi üzeneteket később is visszaolvashatjátok.</p><div class="live"><span id="liveDot"></span><span id="liveText">Kapcsolódás…</span></div></aside><div class="conversation"><div class="conversation-top"><strong># Közös üzenőfal</strong><span>Csak a jelszóval belépőknek</span></div><button id="older" class="older" hidden>Korábbi üzenetek betöltése ↑</button><div id="messages" role="log" aria-label="Üzenetek" aria-live="polite" aria-relevant="additions"><div id="empty" class="empty"><span aria-hidden="true">✳</span><h2>Itt kezdődik a beszélgetés.</h2><p>Írd meg az első üzenetet a haveroknak.</p></div></div><button id="newMessages" class="new-messages" hidden>Új üzenetek ↓</button><form id="messageForm" class="composer"><label for="message">Üzenet a haveroknak</label><textarea id="message" maxlength="4000" rows="3" placeholder="Írj valamit a közös falra…" required></textarea><div class="composer-bottom"><span><span id="counter">0</span> / 4000 · Ctrl + Enter: küldés</span><button class="primary" id="sendButton">Küldés <span aria-hidden="true">↗</span></button></div></form></div></div>
 </section>
 <p id="notice" role="status" aria-live="polite" hidden></p>
+
+<dialog id="menuUnlock" class="menu-dialog" aria-labelledby="menuUnlockTitle">
+<form id="menuUnlockForm"><div class="dialog-top"><h2 id="menuUnlockTitle">Menü feloldása</h2><button class="dialog-close" type="button" data-close-dialog="menuUnlock" aria-label="Bezárás">×</button></div>
+<p class="muted">A műveletekhez add meg a menükódot.</p><label for="menuPin">Menükód</label><input id="menuPin" type="password" inputmode="numeric" autocomplete="off" maxlength="4" pattern="[0-9]{4}" required>
+<p id="menuPinError" class="dialog-error" role="alert" hidden>Hibás menükód.</p><button type="submit" class="primary">Menü megnyitása →</button></form>
+</dialog>
+<dialog id="boardMenu" class="menu-dialog" aria-labelledby="boardMenuTitle">
+<div class="dialog-top"><h2 id="boardMenuTitle" tabindex="-1">Menü</h2><button class="dialog-close" type="button" data-close-dialog="boardMenu" aria-label="Menü bezárása">×</button></div>
+<p id="menuSession" class="menu-session"></p><nav class="menu-list" aria-label="Üzenőfal műveletei">
+<button id="menuLogin" type="button">↪ Bejelentkezés</button>
+<button id="notifications" class="quiet" type="button" aria-pressed="false">🔔 Értesítések bekapcsolása</button>
+<button id="logout" class="quiet">Kilépés ↗</button>
+<button id="sharePage" type="button">↗ Oldal küldése</button>
+<button id="copyPage" type="button">⧉ Oldalcím másolása</button>
+<button id="refreshWall" type="button">↻ Üzenetek frissítése</button>
+</nav><button class="menu-lock" type="button" data-close-dialog="boardMenu">Menü bezárása és zárolása</button>
+</dialog>
+<dialog id="loginDialog" class="menu-dialog" aria-label="Bejelentkezés">
+<div class="dialog-top"><h2>Bejelentkezés</h2><button class="dialog-close" type="button" data-close-dialog="loginDialog" aria-label="Bejelentkezés bezárása">×</button></div>
+<form id="loginForm" class="card"><span class="card-label">BARÁTI ÜZENŐFAL</span><h2>Jó, hogy itt vagy.</h2><p class="muted">Lépj be a beszélgetésbe.</p><label for="name">Neved</label><input id="name" name="name" autocomplete="nickname" maxlength="40" placeholder="Ahogy a haverok ismernek" required><label for="password">Közös jelszó</label><input id="password" name="password" type="password" autocomplete="current-password" maxlength="128" required><button class="primary" id="loginButton">Belépés <span aria-hidden="true">→</span></button><p class="hint">A neved látható lesz az üzeneteid mellett.</p><p id="loginNotice" class="dialog-error" role="alert" hidden></p></form>
+</dialog>
+<dialog id="shareDialog" class="menu-dialog" aria-labelledby="shareTitle">
+<div class="dialog-top"><h2 id="shareTitle">Oldal címe</h2><button class="dialog-close" type="button" data-close-dialog="shareDialog" aria-label="Bezárás">×</button></div>
+<label for="shareAddress">Másolható oldalcím</label><input id="shareAddress" type="url" readonly><p class="muted">Jelöld ki és másold a címet, majd küldd el.</p>
+</dialog>
 </main><footer><span>Haverok · Üzenőfal</span><span>Program ID: D85A9316F24C07BE</span></footer>
 </body></html>
