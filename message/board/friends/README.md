@@ -37,3 +37,5 @@ A retention.mjs üzenetküldés előtt a D1 meta.size_after élő tárhelyméret
 Belépés után az Értesítések bekapcsolása gomb kér engedélyt. Azonos böngészőben falanként külön PushSubscription és service worker scope működik. Külön VAPID kulcspár tartozik minden falhoz; a privát JWK titkos VAPID_PRIVATE_KEY binding, a nyilvános kulcs VAPID_PUBLIC_KEY, a kapcsolat VAPID_SUBJECT. Nincs üzenettartalom vagy név a push szolgáltatónak küldött, törzs nélküli Web Push kérésben. Az értesítés általános szöveget jelenít meg; koppintással a megfelelő fal nyílik meg.
 
 Csak mások aktív, 12 órás belépései kapnak értesítést. Kilépéskor a szerver törli az adott munkamenet feliratkozását. A gombbal eszközönként ki is kapcsolható. A böngésző és az Android értesítési/energiatakarékossági beállításai befolyásolhatják a kézbesítést. Újra belépéskor a korábban engedélyezett feliratkozás helyreáll.
+
+A push aláírás és az érvénytelen végpontok kezelése külön ellenőrizhető: `node test_push.mjs`. A telefonos megjelenítés ellenőrzéséhez a felhasználónak engedélyeznie kell a böngésző értesítéseit.
