@@ -110,9 +110,10 @@ $('older').addEventListener('click', async () => {
 $('newMessages').addEventListener('click', scrollBottom);
 $('messages').addEventListener('scroll', () => { if(nearBottom()) $('newMessages').hidden = true; });
 document.addEventListener('visibilitychange', () => { if(!document.hidden) poll(); });
-setInterval(poll, 4000);
+setInterval(poll, 10000);
 (async () => {
   if(setupToken) { $('login').hidden = true; $('setup').hidden = false; return; }
   if(token) { try { await openWall(); } catch(error) { showLogin(); notify(error.message); } }
   else if(!apiRoot) notify('Az üzenőfal elkészült. A háttérszolgáltatás bekapcsolására vár.');
 })();
+
