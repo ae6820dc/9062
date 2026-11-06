@@ -31,3 +31,9 @@ Ellenőrzés Node 24+ alatt: `node test_worker.mjs`. Memóriabeli SQLite adapter
 ## Automatikus helyfelszabadítás
 
 A retention.mjs üzenetküldés előtt a D1 meta.size_after élő tárhelyméretét ellenőrzi. 450 000 000 bájt felett, a Free 500 MB határa előtt a legkisebb azonosítójú, legrégebbi üzeneteket törli százas csoportokban. Kisebb tárhelyhasználatnál sem életkor, sem darabszám alapján nem töröl. A D1 automatikus helyvisszanyerését éles, elkülönített próbatáblával ellenőriztük. Kérésenként legfeljebb 1000 üzenetet töröl; ha további takarítás szükséges, a küldés újrapróbálható. Nem töröl másik falról, és nem fizet elő nagyobb tárhelyre. A napi olvasási/írási kvóta kimerülését a törlés nem oldja meg. Teszt: node test_retention.mjs.
+
+## Böngészős értesítések
+
+Belépés után az Értesítések bekapcsolása gomb kér engedélyt. Azonos böngészőben falanként külön PushSubscription és service worker scope működik. Külön VAPID kulcspár tartozik minden falhoz; a privát JWK titkos VAPID_PRIVATE_KEY binding, a nyilvános kulcs VAPID_PUBLIC_KEY, a kapcsolat VAPID_SUBJECT. Nincs üzenettartalom vagy név a push szolgáltatónak küldött, törzs nélküli Web Push kérésben. Az értesítés általános szöveget jelenít meg; koppintással a megfelelő fal nyílik meg.
+
+Csak mások aktív, 12 órás belépései kapnak értesítést. Kilépéskor a szerver törli az adott munkamenet feliratkozását. A gombbal eszközönként ki is kapcsolható. A böngésző és az Android értesítési/energiatakarékossági beállításai befolyásolhatják a kézbesítést. Újra belépéskor a korábban engedélyezett feliratkozás helyreáll.

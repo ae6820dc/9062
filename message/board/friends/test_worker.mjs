@@ -25,6 +25,15 @@ assert.equal((await call('/api/setup',{setupToken:env.SETUP_TOKEN,password:'diff
 assert.equal((await call('/api/login',{name:'A',password:'wrong'})).status,401);
 const a=await call('/api/login',{name:'Árvíztűrő',password:'abcdefgh'});assert.equal(a.status,200);
 const b=await call('/api/login',{name:'Kolléga',password:'abcdefgh'});assert.equal(b.status,200);
+assert.equal((await call('/api/notifications/key')).status,401);
+assert.equal((await call('/api/notifications/subscribe',{endpoint:'https://evil.test/x'},b.data.token)).status,400);
+const endpoint='https://fcm.googleapis.com/fcm/send/test-subscription';
+assert.equal((await call('/api/notifications/subscribe',{endpoint},b.data.token)).status,200);
+assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM push_subscriptions').get().n,1);
+assert.equal((await call('/api/notifications/unsubscribe',{endpoint},a.data.token)).status,200);
+assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM push_subscriptions').get().n,1);
+assert.equal((await call('/api/notifications/unsubscribe',{endpoint},b.data.token)).status,200);
+assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM push_subscriptions').get().n,0);
 const text='<script>alert(1)</script> 😀';
 const sent=await call('/api/messages',{body:text,nonce:'nonce-0001'},a.data.token);assert.equal(sent.status,201);
 const retry=await call('/api/messages',{body:text,nonce:'nonce-0001'},a.data.token);assert.equal(retry.data.message.id,sent.data.message.id);

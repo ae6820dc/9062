@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#122a28"><meta name="referrer" content="no-referrer">
 <meta name="description" content="Jelszóval védett közös munkahelyi üzenőfal.">
 <title>Munkahelyi üzenőfal</title><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css">
-<script src="config.js?v=20261106cf" defer></script><script src="app.js?v=20261106year" defer></script>
+<script src="config.js?v=20261106cf" defer></script><script src="app.js?v=20261106push" defer></script><script src="notifications.js?v=20261106push" defer></script>
 </head>
 <body>
 <header class="top"><a class="brand" href="./"><span class="mark" aria-hidden="true">m.</span><span>ÜZENŐFAL<small>Munkahely</small></span></a><span class="private"><span aria-hidden="true">▣</span> Zárt közösség</span></header>
@@ -16,7 +16,7 @@
 </section>
 <section id="setup" class="setup card" hidden><p class="eyebrow">ELSŐ LÉPÉS</p><h1>A közös jelszó.</h1><p>Állítsd be a munkahelyi fal jelszavát, majd oszd meg a kollégákkal.</p><form id="setupForm"><label for="newPassword">Jelszó, legalább 8 karakter</label><input id="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required><label for="confirmPassword">Jelszó ismét</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required><button class="primary">Jelszó beállítása →</button></form></section>
 <section id="wall" hidden>
-<div class="wall-heading"><div><p class="eyebrow">KÖZÖS TÉR</p><h1>Munkahelyi üzenőfal<span>.</span></h1><p class="muted">Minden fontos üzenet egy helyen.</p></div><div class="user"><span id="userName"></span><button id="logout" class="quiet">Kilépés ↗</button></div></div>
+<div class="wall-heading"><div><p class="eyebrow">KÖZÖS TÉR</p><h1>Munkahelyi üzenőfal<span>.</span></h1><p class="muted">Minden fontos üzenet egy helyen.</p></div><div class="user"><span id="userName"></span><button id="notifications" class="quiet" type="button" aria-pressed="false">🔔 Értesítések bekapcsolása</button><button id="logout" class="quiet">Kilépés ↗</button></div></div>
 <div class="wall-layout"><aside><div class="aside-label">BESZÉLGETÉS</div><div class="room"><span aria-hidden="true">#</span> Közös üzenőfal <span class="room-dot"></span></div><p>Ide írhatsz a kollégáknak. A korábbi üzeneteket később is visszaolvashatjátok.</p><div class="live"><span id="liveDot"></span><span id="liveText">Kapcsolódás…</span></div></aside><div class="conversation"><div class="conversation-top"><strong># Közös üzenőfal</strong><span>Csak a jelszóval belépőknek</span></div><button id="older" class="older" hidden>Korábbi üzenetek betöltése ↑</button><div id="messages" role="log" aria-label="Üzenetek" aria-live="polite" aria-relevant="additions"><div id="empty" class="empty"><span aria-hidden="true">✳</span><h2>Itt kezdődik a beszélgetés.</h2><p>Írd meg az első üzenetet a kollégáknak.</p></div></div><button id="newMessages" class="new-messages" hidden>Új üzenetek ↓</button><form id="messageForm" class="composer"><label for="message">Üzenet a kollégáknak</label><textarea id="message" maxlength="4000" rows="3" placeholder="Írj valamit a közös falra…" required></textarea><div class="composer-bottom"><span><span id="counter">0</span> / 4000 · Ctrl + Enter: küldés</span><button class="primary" id="sendButton">Küldés <span aria-hidden="true">↗</span></button></div></form></div></div>
 </section>
 <p id="notice" role="status" aria-live="polite" hidden></p>

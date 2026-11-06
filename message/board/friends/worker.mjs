@@ -1,3 +1,4 @@
+import {notifySubscribers,validPushEndpoint} from './push.mjs';
 import {pruneOldestIfNeeded} from './retention.mjs';
 // Cloudflare Worker. Secrets are supplied as bindings, never in this source.
 const enc = new TextEncoder();
@@ -57,14 +58,28 @@ async function route(request,env,ctx) {
     if(!await equal(await passwordHash(data.password,saved.salt,env.PASSWORD_PEPPER),saved.hash)) fail('Hibás jelszó.',401);
     const token=crypto.randomUUID()+crypto.randomUUID();
     await db.prepare('INSERT INTO sessions VALUES (?,?,?)').bind(await digest(token),data.name.trim(),now+43200).run();
-    ctx.waitUntil(db.batch([db.prepare('DELETE FROM sessions WHERE expires<=?').bind(now),db.prepare('DELETE FROM limits WHERE start<?').bind(now-86400)]));
+    ctx.waitUntil(db.batch([db.prepare('DELETE FROM push_subscriptions WHERE session IN (SELECT token FROM sessions WHERE expires<=?)').bind(now),db.prepare('DELETE FROM sessions WHERE expires<=?').bind(now),db.prepare('DELETE FROM limits WHERE start<?').bind(now-86400)]));
     return Response.json({token,name:data.name.trim()});
   }
-  if(!['/api/messages','/api/logout'].includes(path)) fail('Nincs ilyen oldal.',404);
+  if(!['/api/messages','/api/logout','/api/notifications/key','/api/notifications/subscribe','/api/notifications/unsubscribe'].includes(path)) fail('Nincs ilyen oldal.',404);
   const bearer=request.headers.get('Authorization')||'';
   const session= bearer.startsWith('Bearer ')&&bearer.length<160 ? await db.prepare('SELECT token,name FROM sessions WHERE token=? AND expires>?').bind(await digest(bearer.slice(7)),now).first():null;
   if(!session) fail('Jelentkezz be az üzenőfalhoz.',401);
-  if(path==='/api/logout'&&method==='POST') {await db.prepare('DELETE FROM sessions WHERE token=?').bind(session.token).run();return Response.json({ok:true});}
+  if(path==='/api/notifications/key'&&method==='GET') return Response.json({publicKey:env.VAPID_PUBLIC_KEY});
+  if(path==='/api/notifications/subscribe'&&method==='POST') {
+    const data=await bodyOf(request);
+    if(!validPushEndpoint(data.endpoint))fail('Érvénytelen értesítési cím.');
+    const count=await db.prepare('SELECT COUNT(*) AS n FROM push_subscriptions WHERE session=?').bind(session.token).first();
+    const existing=await db.prepare('SELECT 1 FROM push_subscriptions WHERE endpoint=? AND session=?').bind(data.endpoint,session.token).first();
+    if(!existing&&count.n>=5)fail('Egy belépéshez legfeljebb öt értesítési eszköz használható.',429);
+    await db.prepare('INSERT INTO push_subscriptions(endpoint,session,created) VALUES (?,?,?) ON CONFLICT(endpoint) DO UPDATE SET session=excluded.session,created=excluded.created').bind(data.endpoint,session.token,now).run();
+    return Response.json({ok:true});
+  }
+  if(path==='/api/notifications/unsubscribe'&&method==='POST') {
+    const data=await bodyOf(request);if(typeof data.endpoint!=='string'||data.endpoint.length>2048)fail('Érvénytelen értesítési cím.');
+    await db.prepare('DELETE FROM push_subscriptions WHERE endpoint=? AND session=?').bind(data.endpoint,session.token).run();return Response.json({ok:true});
+  }
+  if(path==='/api/logout'&&method==='POST') {await db.batch([db.prepare('DELETE FROM push_subscriptions WHERE session=?').bind(session.token),db.prepare('DELETE FROM sessions WHERE token=?').bind(session.token)]);return Response.json({ok:true});}
   if(path==='/api/messages'&&method==='GET') {
     const read=n=>{const value=url.searchParams.get(n)||'0';if(!/^\d+$/.test(value)||!Number.isSafeInteger(Number(value))) fail('Hibás lapozás.');return Number(value);};
     const after=read('after'),before=read('before'); let rows;
@@ -84,6 +99,7 @@ async function route(request,env,ctx) {
       db.prepare('INSERT OR IGNORE INTO messages(name,body,created,nonce,session) VALUES (?,?,?,?,?)').bind(session.name,data.body.trim(),now,data.nonce,session.token),
       db.prepare('SELECT id,name,body,created FROM messages WHERE session=? AND nonce=?').bind(session.token,data.nonce)
     ]);
+    if(results[0].meta.changes===1)ctx.waitUntil(notifySubscribers(env,session.token).catch(()=>console.warn(JSON.stringify({event:'push_failed'}))));
     return Response.json({message:results[1].results[0]},{status:201});
   }
   fail('Nem támogatott művelet.',405);

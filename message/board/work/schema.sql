@@ -4,3 +4,6 @@ CREATE INDEX IF NOT EXISTS sessions_expiry ON sessions(expires);
 CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, body TEXT NOT NULL, created INTEGER NOT NULL, nonce TEXT NOT NULL, session TEXT NOT NULL, UNIQUE(session,nonce));
 CREATE TABLE IF NOT EXISTS limits (key TEXT PRIMARY KEY, start INTEGER NOT NULL, count INTEGER NOT NULL);
 CREATE INDEX IF NOT EXISTS limits_start ON limits(start);
+
+CREATE TABLE IF NOT EXISTS push_subscriptions (endpoint TEXT PRIMARY KEY, session TEXT NOT NULL, created INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS push_session ON push_subscriptions(session);

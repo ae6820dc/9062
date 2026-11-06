@@ -58,6 +58,7 @@ async function openWall() {
   render(result.messages); $('older').hidden = !result.hasOlder;
   $('login').hidden = true; $('setup').hidden = true; $('wall').hidden = false;
   connection(true,'Minden üzenet naprakész'); clearNotice(); scrollBottom();
+  if(typeof restoreBoardNotifications === 'function') await restoreBoardNotifications();
 }
 $('loginForm').addEventListener('submit', async event => {
   event.preventDefault(); $('loginButton').disabled = true; clearNotice();
