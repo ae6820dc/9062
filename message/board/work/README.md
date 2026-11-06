@@ -8,7 +8,7 @@ API: https://message-board-work.ae6820dc-message.workers.dev
 
 ## Éles háttér
 
-Cloudflare Worker: `message-board-work`. Tartós D1 adatbázis: `message-board-work`, EU joghatóság. Az ingyenes Workers és D1 keretét használja; fizetős előfizetést nem állítottunk be. Kerettúllépéskor hibát jelezhet, az adatok megmaradnak. A régi Python/Render fájlok archív alternatívaként megmaradtak, jelenleg nem szolgálják ki az üzenőfalat.
+Cloudflare Worker: `message-board-work`. Tartós D1 adatbázis: `message-board-work`, EU joghatóság. Az ingyenes Workers és D1 keretét használja; fizetős előfizetést nem állítottunk be. A napi kéréskvóták túllépésekor hibát jelezhet. A régi Python/Render fájlok archív alternatívaként megmaradtak, jelenleg nem szolgálják ki az üzenőfalat.
 
 ## Működés
 
@@ -28,3 +28,7 @@ A CORS csak a GitHub Pages eredetet engedi. A jelszóellenőrzés szerveroldali.
 
 Ellenőrzés Node 24+ alatt: `node test_worker.mjs`. Memóriabeli SQLite adapterrel ellenőrzi az API logikáját; nem helyettesíti a Cloudflare futtatókörnyezeti ellenőrzést. Mentés a D1 export funkciójával készíthető. Családi és baráti falhoz külön adatbázis és külön titkok szükségesek.
 
+
+## Automatikus helyfelszabadítás
+
+A retention.mjs üzenetküldés előtt a D1 meta.size_after élő tárhelyméretét ellenőrzi. 450 000 000 bájt felett, a Free 500 MB határa előtt a legkisebb azonosítójú, legrégebbi üzeneteket törli százas csoportokban. Kisebb tárhelyhasználatnál sem életkor, sem darabszám alapján nem töröl. A D1 automatikus helyvisszanyerését éles, elkülönített próbatáblával ellenőriztük. Kérésenként legfeljebb 1000 üzenetet töröl; ha további takarítás szükséges, a küldés újrapróbálható. Nem töröl másik falról, és nem fizet elő nagyobb tárhelyre. A napi olvasási/írási kvóta kimerülését a törlés nem oldja meg. Teszt: node test_retention.mjs.

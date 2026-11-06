@@ -1,0 +1,22 @@
+import {DatabaseSync} from 'node:sqlite';
+import assert from 'node:assert/strict';
+import {pruneOldestIfNeeded} from './retention.mjs';
+const sql=new DatabaseSync(':memory:');
+sql.exec('PRAGMA auto_vacuum=FULL; CREATE TABLE messages(id INTEGER PRIMARY KEY,body TEXT);');
+function size(){return Number(sql.prepare('PRAGMA page_count').get().page_count)*Number(sql.prepare('PRAGMA page_size').get().page_size);}
+const db={prepare:query=>({async run(){const result=sql.prepare(query).run();return {meta:{size_after:size(),changes:Number(result.changes)}};}})};
+sql.prepare('INSERT INTO messages VALUES (?,?)').run(1,'old');
+assert.equal(await pruneOldestIfNeeded(db,200000),0);
+assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM messages').get().n,1);
+for(let i=2;i<=301;i++)sql.prepare('INSERT INTO messages VALUES (?,?)').run(i,'😀'.repeat(1000));
+const before=size();
+const deleted=await pruneOldestIfNeeded(db,600000);
+assert.ok(deleted>0);assert.ok(size()<600000);assert.ok(size()<before);
+const remaining=sql.prepare('SELECT id FROM messages ORDER BY id').all().map(r=>r.id);
+assert.equal(remaining.at(-1),301);assert.equal(remaining[0],deleted+1);
+assert.equal(await pruneOldestIfNeeded(db,600000),0);
+const noMeta={prepare:()=>({run:async()=>({meta:{}})})};
+await assert.rejects(()=>pruneOldestIfNeeded(noMeta),/metadata/);
+const stuck={prepare:()=>({run:async()=>({meta:{size_after:999,changes:0}})})};
+await assert.rejects(()=>pruneOldestIfNeeded(stuck,500),e=>e.status===503);
+console.log('Passed: no deletion below storage threshold; oldest-first reclamation; newest preserved; no repeated over-deletion; missing metadata and non-message storage handled.');

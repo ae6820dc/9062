@@ -8,7 +8,7 @@ class Statement {
   bind(...params){return new Statement(this.query,params);}
   async first(){return sql.prepare(this.query).get(...this.params)||null;}
   async all(){return {results:sql.prepare(this.query).all(...this.params)};}
-  async run(){const r=sql.prepare(this.query).run(...this.params);return {meta:{changes:Number(r.changes)}};}
+  async run(){const r=sql.prepare(this.query).run(...this.params);return {meta:{changes:Number(r.changes),size_after:57344}};}
 }
 const env={DB:{prepare:q=>new Statement(q),batch:async statements=>{sql.exec('BEGIN');try{const results=[];for(const s of statements)results.push(/^SELECT/.test(s.query)?await s.all():await s.run());sql.exec('COMMIT');return results;}catch(e){sql.exec('ROLLBACK');throw e;}}},SETUP_TOKEN:'test-setup-secret',PASSWORD_PEPPER:'test-pepper-secret',ALLOWED_ORIGIN:'https://ae6820dc.github.io'};
 const ctx={waitUntil:p=>p.catch(e=>{throw e;})};

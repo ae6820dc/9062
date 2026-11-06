@@ -1,3 +1,4 @@
+import {pruneOldestIfNeeded} from './retention.mjs';
 // Cloudflare Worker. Secrets are supplied as bindings, never in this source.
 const enc = new TextEncoder();
 const hex = buffer => Array.from(new Uint8Array(buffer), b => b.toString(16).padStart(2,'0')).join('');
@@ -78,6 +79,7 @@ async function route(request,env,ctx) {
     if(typeof data.body!=='string'||data.body.trim().length<1||data.body.trim().length>4000) fail('Az üzenet 1–4000 karakter legyen.');
     if(typeof data.nonce!=='string'||data.nonce.length<8||data.nonce.length>80) fail('Hibás üzenetazonosító.');
     await limited(db,'send:'+session.token,15,30,now);
+    await pruneOldestIfNeeded(db);
     const results=await db.batch([
       db.prepare('INSERT OR IGNORE INTO messages(name,body,created,nonce,session) VALUES (?,?,?,?,?)').bind(session.name,data.body.trim(),now,data.nonce,session.token),
       db.prepare('SELECT id,name,body,created FROM messages WHERE session=? AND nonce=?').bind(session.token,data.nonce)
