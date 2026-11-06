@@ -7,7 +7,7 @@ const seen = new Set();
 let setupToken = new URLSearchParams(location.hash.slice(1)).get('setup') || '';
 if (setupToken) history.replaceState(null, '', location.pathname + location.search);
 try { token = sessionStorage.getItem('A13D806FB92E4C75') || ''; } catch (_) {}
-const formatter = new Intl.DateTimeFormat('hu-HU', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+const formatter = new Intl.DateTimeFormat('hu-HU', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
 function notify(message) { $('notice').textContent = message; $('notice').hidden = false; }
 function clearNotice() { $('notice').hidden = true; }
 function connection(ok, label) { $('liveText').textContent = label; $('liveDot').parentElement.classList.toggle('connected', ok); }
