@@ -70,55 +70,35 @@ jobs:
           path: source-artifact
           run-id: ${{ steps.source.outputs.run }}
           github-token: ${{ github.token }}
-      - name: Overlay current message boards onto complete site
+      - name: Prepare the complete site with current boards
         run: |
+          mkdir -p deploy-site
+          tar -xf source-artifact/artifact.tar -C deploy-site
+          rm -rf deploy-site/message/board/work deploy-site/message/board/friends
+          git ls-files -z -- index.html message/board/work/ message/board/friends/ | tar --null -T - -cf - | tar -xf - -C deploy-site
           python - <<'PY'
-          import os, subprocess, tarfile
-          source = 'source-artifact/artifact.tar'
-          target = source + '.updated'
-          prefixes = ('message/board/work/', 'message/board/friends/')
-          with tarfile.open(source, 'r') as old, tarfile.open(target, 'w', format=tarfile.GNU_FORMAT) as new:
-              for member in old:
-                  name = member.name.removeprefix('./')
-                  if name == 'index.html' or any(name.startswith(prefix) or name == prefix.rstrip('/') for prefix in prefixes):
-                      continue
-                  data = old.extractfile(member) if member.isfile() else None
-                  new.addfile(member, data)
-              paths = subprocess.check_output(['git', 'ls-files', '-z', '--', 'index.html', *prefixes]).decode().split('\0')
-              for path in paths:
-                  if path:
-                      new.add(path, arcname='./' + path, recursive=False)
-          os.replace(target, source)
-          print('Updated both board directories; all other site assets preserved.')
-          PY
-      - name: Verify message board assets in archive
-        run: |
-          python - <<'PY'
-          import tarfile
-          with tarfile.open('source-artifact/artifact.tar') as archive:
-              members = {m.name.removeprefix('./'): m for m in archive.getmembers()}
-              for board in ['work', 'friends']:
-                  base = 'message/board/' + board + '/'
-                  for name in ['index.html', 'app.js', 'notifications.js', 'sw.js', 'menu.js']:
-                      if base + name not in members:
-                          raise SystemExit('Missing board asset: ' + base + name)
-                  page = archive.extractfile(members[base + 'index.html']).read().decode()
-                  if 'id="boardMenuOpen"' not in page or 'menu.js?v=20261106menu' not in page:
-                      raise SystemExit('Protected menu missing from ' + board)
-          print('Both protected board menus verified; complete archive preserved.')
+          from pathlib import Path
+          for board in ['work','friends']:
+              base = Path('deploy-site/message/board') / board
+              for name in ['index.html','app.js','menu.js','notifications.js','sw.js']:
+                  if not (base / name).is_file():
+                      raise SystemExit('Missing board asset: ' + str(base / name))
+              page = (base / 'index.html').read_text()
+              if 'id="boardMenuOpen"' not in page or 'menu.js?v=20261106menu' not in page:
+                  raise SystemExit('Protected menu missing from ' + board)
+          print('Both protected board menus verified in the complete site.')
           PY
       - name: Upload complete Pages artifact to this run
         id: artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages
-          path: source-artifact/artifact.tar
-          compression-level: 0
+          path: deploy-site
           retention-days: 90
       - name: Publish and wait for actual completion
         uses: actions/github-script@v7
         env:
-          PAGES_ARTIFACT_ID: ${{ steps.artifact.outputs.artifact-id }}
+          PAGES_ARTIFACT_ID: ${{ steps.artifact.outputs.artifact_id }}
         with:
           script: |
             const oidc = await core.getIDToken();
