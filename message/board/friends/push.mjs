@@ -15,8 +15,9 @@ export async function vapidAuthorization(endpoint,env) {
   return 'vapid t='+input+'.'+base64url(signature)+', k='+env.VAPID_PUBLIC_KEY;
 }
 export async function notifySubscribers(env,sender,send=fetch) {
-  if(!env.VAPID_PRIVATE_KEY||!env.VAPID_PUBLIC_KEY)return;
+  if(!env.VAPID_PRIVATE_KEY||!env.VAPID_PUBLIC_KEY){console.error(JSON.stringify({event:'push_missing_keys'}));return;}
   const rows=await env.DB.prepare('SELECT p.endpoint FROM push_subscriptions p JOIN sessions s ON p.session=s.token WHERE s.expires>? AND s.token<>? LIMIT 500').bind(Math.floor(Date.now()/1000),sender).all();
+  console.info(JSON.stringify({event:'push_targets',count:rows.results.length}));
   // A bodyless Web Push wakes the worker; no names or messages leave the board.
   for(let start=0;start<rows.results.length;start+=10) {
     await Promise.allSettled(rows.results.slice(start,start+10).map(async ({endpoint})=>{
@@ -24,9 +25,10 @@ export async function notifySubscribers(env,sender,send=fetch) {
       const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),8000);
       try {
         const response=await send(endpoint,{method:'POST',headers:{Authorization:await vapidAuthorization(endpoint,env),TTL:'60',Urgency:'normal',Topic:'new-board-message'},body:null,signal:controller.signal,redirect:'error'});
+        console.info(JSON.stringify({event:'push_result',status:response.status}));
         if(response.status===404||response.status===410)await env.DB.prepare('DELETE FROM push_subscriptions WHERE endpoint=?').bind(endpoint).run();
         else if(!response.ok)console.warn(JSON.stringify({event:'push_delivery_failed',status:response.status}));
-      } finally {clearTimeout(timeout);}
+      } catch(error) {console.error(JSON.stringify({event:'push_exception',kind:error?.name||'Error',detail:String(error?.message||'unknown').replace(/https?:\/\/\S+/g,'[endpoint]').slice(0,180)}));} finally {clearTimeout(timeout);}
     }));
   }
 }
