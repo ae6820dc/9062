@@ -1,0 +1,35 @@
+name: Hide duplicate Explorer breadcrumbs
+on:
+  push:
+    paths:
+      - '.github/workflows/explorer-hide-crumbs-once.yml'
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Hide redundant breadcrumb strip in every sample
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          files=sorted(Path('explorer').glob('*/sample*.html'))
+          assert len(files)>150,len(files)
+          for p in files:
+            s=p.read_text(encoding='utf-8')
+            assert 'id="crumbs"' in s and 'id="address"' in s,p
+            # Keep breadcrumb element for existing JS; hide it from layout and assistive navigation.
+            s=s.replace('<nav class="crumbs" id="crumbs" aria-label="Folder path"></nav>','<nav class="crumbs" id="crumbs" aria-label="Folder path" hidden></nav>')
+            s=s.replace('</style>','.crumbs#crumbs{display:none!important}\n</style>',1)
+            p.write_text(s,encoding='utf-8')
+          print('Updated',len(files),'Explorer samples')
+          PY
+      - name: Commit and clean up
+        run: |
+          rm .github/workflows/explorer-hide-crumbs-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add explorer .github/workflows/explorer-hide-crumbs-once.yml
+          git commit -m "Hide duplicate breadcrumb path in all Explorer samples"
+          git push
