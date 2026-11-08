@@ -1,0 +1,70 @@
+name: Apply Game prefix to all Explorer versions
+on:
+  push:
+    paths:
+      - '.github/workflows/explorer-game-all-once.yml'
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update all Explorer HTML samples
+        run: |
+          cat > /tmp/upgrade.py <<'PY'
+          from pathlib import Path
+          import re
+          root=Path('explorer')
+          files=sorted(p for p in root.glob('*/sample*.html') if p.parent.name!='13')
+          assert len(files)>100,len(files)
+          for p in files:
+            s=p.read_text(encoding='utf-8')
+            original=s
+            match=re.search(r'const MAX_DEPTH=(\d+), STORAGE_KEY=',s)
+            assert match,p
+            maximum=int(match.group(1))
+            s=s[:match.start(1)]+str(maximum+19)+s[match.end(1):]
+            s=s.replace("'use strict';","'use strict';\nconst GAME_DIGITS='0123456789'.split('');\nconst GAME_MAX_DEPTH="+str(maximum)+";\n",1)
+            valid=re.search(r"function validPath\(p\)\{return Array\.isArray\(p\)&&p\.length<=MAX_DEPTH&&p\.every\(x=>typeof x==='string'&&(.+?)\);\}",s)
+            assert valid,p
+            predicate=valid.group(1)
+            s=s[:valid.start()]+"function validPath(p){return Array.isArray(p)&&p.length<=MAX_DEPTH&&p.every((x,i)=>typeof x==='string'&&(i===0?x==='Game':i<=18?/^[0-9]$/.test(x):"+predicate+"));}"+s[valid.end():]
+            render=re.search(r"function render\(\)\{const depth=path\.length,atEnd=depth===MAX_DEPTH,folderCount=atEnd\?0:(\d+|[A-Za-z]+\.length);",s)
+            assert render,p
+            old_count=render.group(1)
+            s=s[:render.start()]+"function render(){const depth=path.length,atEnd=depth===MAX_DEPTH,folderCount=atEnd?0:(depth===0?1:depth<=18?10:"+old_count+");"+s[render.end():]
+            folder=re.search(r'if\(!atEnd\)([A-Za-z]+)\.forEach\(',s)
+            assert folder,p
+            source=folder.group(1)
+            s=s[:folder.start()]+"if(!atEnd)(depth===0?['Game']:depth<=18?GAME_DIGITS:"+source+").forEach("+s[folder.end():]
+            s=s.replace("$('depth').textContent=depth;","$('depth').textContent=Math.min(depth,19);$('gameDepth').textContent=Math.max(0,depth-19);",1)
+            s=s.replace("(depth/MAX_DEPTH*100)","(Math.max(0,depth-19)/GAME_MAX_DEPTH*100)")
+            s=s.replace("setAttribute('aria-valuenow',depth)","setAttribute('aria-valuenow',Math.max(0,depth-19))")
+            counter=re.search(r'<strong id="depth">\d+</strong> / '+str(maximum)+r'<br><span>depth</span>',s)
+            assert counter,p
+            s=s[:counter.start()]+'<strong id="depth">0</strong> / <strong id="gameDepth">0</strong> / '+str(maximum)+'<br><span>depth</span>'+s[counter.end():]
+            s=s.replace('aria-valuemax="'+str(maximum)+'"','aria-valuemax="'+str(maximum)+'"',1)
+            # Keep original character keyboard shortcuts but intercept Game/ID prefix.
+            keyboard="document.addEventListener('keydown',e=>{"
+            assert keyboard in s,p
+            interceptor="""document.addEventListener('keydown',e=>{if(!ready||busy||$('fileDialog').open||$('actionDialog').open||!$('appMenu').hidden||e.target.closest('input,textarea,select,[contenteditable=true]')||e.ctrlKey||e.metaKey||e.altKey)return;if(path.length===0&&e.key.toLowerCase()==='g'){e.preventDefault();e.stopImmediatePropagation();enter('Game');}else if(path.length>=1&&path.length<=18&&/^[0-9]$/.test(e.key)){e.preventDefault();e.stopImmediatePropagation();enter(e.key);}else if(path.length<19&&e.key!=='Backspace'){e.stopImmediatePropagation();}},true);\n"""
+            s=s.replace(keyboard,interceptor+keyboard,1)
+            # Original keyboard handlers remain valid for their own symbols only after ID.
+            # Add game/digit address path help without changing underlying file/storage IDs.
+            s=s.replace("if(!validPath(next)){toast(","if(next.length&&next[0].toLowerCase()==='game')next[0]='Game';if(!validPath(next)){toast(",1)
+            s=s.replace("if(!validPath(next)){toast('Use up to ","if(!validPath(next)){toast('Start with /Game, then 18 digits (0–9), followed by up to ",1)
+            assert s!=original
+            assert 'gameDepth' in s and "['Game']" in s
+            p.write_text(s,encoding='utf-8')
+          print('Updated',len(files),'samples; original maximum depth preserved as game depth')
+          PY
+          python3 /tmp/upgrade.py
+      - name: Commit and remove one-time workflow
+        run: |
+          rm .github/workflows/explorer-game-all-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add explorer .github/workflows/explorer-game-all-once.yml
+          git commit -m "Add Game and 18-digit ID to all Explorers preserving original depth"
+          git push
