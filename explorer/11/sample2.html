@@ -14,6 +14,13 @@ dialog{border:1px solid #d9e1ee;border-radius:16px;padding:28px;width:min(420px,
 
 .storage-notice{position:fixed;inset:0;z-index:100;background:#e8ecf1ed;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center;font-size:14px;line-height:1.8}.storage-notice button{border:0;background:#285fe5;color:white;padding:10px 22px;border-radius:8px}.window[inert]{opacity:1}
 .folders:not(.list) .folder{min-width:0;padding-left:2px;padding-right:2px}.folders:not(.list) .folder svg{max-width:100%}.folders:not(.list) .folder-name{text-align:center}.folders:not(.list) .file .folder-name{font-size:clamp(10px,1.6vw,15px)}@media(max-width:500px){.folders:not(.list){gap:2px}.folders:not(.list) .folder{min-height:75px;gap:4px}.folders:not(.list) .folder svg{width:min(100%,42px);height:34px}.folders:not(.list) .file .folder-name{font-size:11px}}.folders:not(.list){grid-template-columns:repeat(auto-fill,minmax(min(100%,105px),1fr))!important;gap:8px}@media(max-width:800px){.folders:not(.list){grid-template-columns:repeat(auto-fill,minmax(min(100%,88px),1fr))!important;gap:5px}}.crumbs#crumbs{display:none!important}
+.folder[draggable="true"]{cursor:grab;user-select:none}
+.folder.is-dragging{opacity:.45;cursor:grabbing}
+.folder[data-drop-side]{background:#edf3ff;transform:none}
+.folder[data-drop-side]::after{content:"";position:absolute;inset:4px auto 4px -2px;width:3px;border-radius:3px;background:var(--blue);pointer-events:none}
+.folder[data-drop-side="after"]::after{left:auto;right:-2px}
+.folders.list .folder[data-drop-side]::after{inset:-2px 4px auto;width:auto;height:3px}
+.folders.list .folder[data-drop-side="after"]::after{top:auto;bottom:-2px}
 </style>
 </head>
 <body>
@@ -35,7 +42,7 @@ const MAX_DEPTH=65555, STORAGE_KEY='e67a62ceb61975ea';
 const symbols='0123456789ABCDEFU+'.split('');
 const symbolSet=new Set(symbols);
 let historyNode=null;
-let path=[],history=[null],cursor=0,listMode=false,currentFiles=[],database=null,ready=false,busy=false;
+let path=[],history=[null],cursor=0,listMode=false,currentFiles=[],folderOrder=[],database=null,ready=false,busy=false;
 const $=id=>document.getElementById(id);
 function normalizeSymbol(s){return s.toUpperCase();}
 // Share path prefixes across history entries rather than copying every ancestor path.
@@ -50,6 +57,7 @@ function validPath(p){return Array.isArray(p)&&p.length<=MAX_DEPTH&&p.every((x,i
 function savedPath(p){if((Array.isArray(p)||p instanceof Uint16Array)&&p.length<=MAX_DEPTH&&p.every(x=>Number.isInteger(x)&&x>=0&&x<symbols.length))return Array.from(p,i=>symbols[i]);return p;}
 function pathKey(p=path){return '/'+p.join('/');}
 function displayPath(){return path.length>24?'/…/'+path.slice(-24).join('/')+' (level '+path.length+')':pathKey();}
+function folderOrderKey(p=path){return 'folderOrder:'+pathKey(p);}
 function validName(name){return typeof name==='string'&&name.trim().length>0&&Array.from(name).length<=255&&!name.includes('/')&&!name.includes(String.fromCharCode(92))&&!Array.from(name).some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127)&&name!=='.'&&name!=='..';}
 
 const DATABASE_NAME=STORAGE_KEY;
@@ -57,7 +65,21 @@ function databaseTask(stores,mode,operation){return new Promise((resolve,reject)
 function storedFile(folder,file){return {folder,name:file.name,nameFold:file.name.toLocaleLowerCase('en-US'),created:file.created||Date.now()};}
 function readFolder(folder){return databaseTask(['files'],'readonly',(tx,result)=>{const r=tx.objectStore('files').index('folder').getAll(folder);r.onsuccess=()=>result(r.result);});}
 function readSetting(key){return databaseTask(['settings'],'readonly',(tx,result)=>{const r=tx.objectStore('settings').get(key);r.onsuccess=()=>result(r.result);});}
-function locationTask(next,mode){return databaseTask(['files','settings'],'readwrite',(tx,result)=>{tx.objectStore('settings').put({key:'state',path:[...next],listMode:mode});const r=tx.objectStore('files').index('folder').getAll(pathKey(next));r.onsuccess=()=>result(r.result);});}
+function locationTask(next,mode){
+  return databaseTask(['files','settings'],'readwrite',(tx,result)=>{
+    const settings=tx.objectStore('settings'),location={};
+    settings.put({key:'state',path:[...next],listMode:mode});
+    const order=settings.get(folderOrderKey(next));
+    const files=tx.objectStore('files').index('folder').getAll(pathKey(next));
+    order.onsuccess=()=>{location.order=order.result?.names;};
+    files.onsuccess=()=>{location.files=files.result;};
+    result(location);
+  });
+}
+function setLocationEntries(files,order){
+  currentFiles=files;
+  folderOrder=Array.isArray(order)?order:[];
+}
 function setBusy(value){busy=value;document.querySelector('.window').inert=!ready||value;for(const form of [$('fileForm'),$('actionForm')])for(const button of form.querySelectorAll('button'))button.disabled=value;}
 function storageProblem(error){if(error&&error.name==='ConstraintError')return 'A file with this name already exists here.';if(error&&error.name==='QuotaExceededError')return 'Device storage is full. No changes were saved.';return 'Could not access saved data. No changes were saved. Please try again.';}
 async function runTask(operation,errorElement){if(!ready||busy)return;setBusy(true);try{await operation();}catch(error){const message=storageProblem(error);if(errorElement)errorElement.textContent=message;else toast(message);}finally{setBusy(false);}}
@@ -68,16 +90,91 @@ await databaseTask(['files','settings'],'readwrite',(tx)=>{const settings=tx.obj
 // The old save is removed only after the complete migration transaction commits.
 if(raw!==null)try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
 }
-async function initialize(){notice('Opening saved game…');try{database=await openDatabase();await migrateLegacy();const state=await readSetting('state');if(state)state.path=savedPath(state.path);path=state&&validPath(state.path)?[...state.path]:[];listMode=!!(state&&state.listMode);historyNode=null;for(let i=0;i<path.length;i++)historyNode={parent:historyNode,symbol:path[i],depth:i+1};history=[historyNode];cursor=0;currentFiles=await readFolder(pathKey());ready=true;setBusy(false);$('storageNotice').hidden=true;render();}catch(error){ready=false;if(database)database.close();notice('Could not open or migrate your saved game. Your previous save has been kept. Close other Explorer tabs and reload to try again.',true);}}
+async function initialize(){notice('Opening saved game…');try{database=await openDatabase();await migrateLegacy();const state=await readSetting('state');if(state)state.path=savedPath(state.path);path=state&&validPath(state.path)?[...state.path]:[];listMode=!!(state&&state.listMode);historyNode=null;for(let i=0;i<path.length;i++)historyNode={parent:historyNode,symbol:path[i],depth:i+1};history=[historyNode];cursor=0;const [files,order]=await Promise.all([readFolder(pathKey()),readSetting(folderOrderKey())]);setLocationEntries(files,order?.names);ready=true;setBusy(false);$('storageNotice').hidden=true;render();}catch(error){ready=false;if(database)database.close();notice('Could not open or migrate your saved game. Your previous save has been kept. Close other Explorer tabs and reload to try again.',true);}}
 let toastTimer;
 function toast(s){$('toast').textContent=s;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').textContent='',3500);}
 
-function navigate(next){if(!validPath(next)||!ready||busy)return;if(next.join('/')===path.join('/')){$('address').value=pathKey();return;}return runTask(async()=>{const entries=await locationTask(next,listMode);historyNode=historyLocation(next);path=[...next];currentFiles=entries;history.length=cursor+1;history.push(historyNode);cursor=history.length-1;render();});}
+function navigate(next){if(!validPath(next)||!ready||busy)return;if(next.join('/')===path.join('/')){$('address').value=pathKey();return;}return runTask(async()=>{const {files,order}=await locationTask(next,listMode);historyNode=historyLocation(next);path=[...next];setLocationEntries(files,order);history.length=cursor+1;history.push(historyNode);cursor=history.length-1;render();});}
 function enter(symbol){if(path.length===MAX_DEPTH){toast('You reached the 65536-level limit.');return;}return navigate([...path,symbol]);}
-function goBack(){if(cursor>0)return runTask(async()=>{const next=historyPath(history[cursor-1]),entries=await locationTask(next,listMode);cursor--;historyNode=history[cursor];path=next;currentFiles=entries;render();});}
-function goForward(){if(cursor<history.length-1)return runTask(async()=>{const next=historyPath(history[cursor+1]),entries=await locationTask(next,listMode);cursor++;historyNode=history[cursor];path=next;currentFiles=entries;render();});}
+function goBack(){if(cursor>0)return runTask(async()=>{const next=historyPath(history[cursor-1]),{files,order}=await locationTask(next,listMode);cursor--;historyNode=history[cursor];path=next;setLocationEntries(files,order);render();});}
+function goForward(){if(cursor<history.length-1)return runTask(async()=>{const next=historyPath(history[cursor+1]),{files,order}=await locationTask(next,listMode);cursor++;historyNode=history[cursor];path=next;setLocationEntries(files,order);render();});}
 function up(){if(path.length)return navigate(path.slice(0,-1));}
-function render(){const depth=path.length,atEnd=depth===MAX_DEPTH,folderNames=atEnd?[]:depth===0?['Game']:depth<=18?GAME_DIGITS:explorerFolders,folderCount=folderNames.length;
+const folderGrid=$('folders');
+let draggedFolder=null,dropTarget=null;
+
+function markDropTarget(target,side){
+  if(dropTarget!==target)dropTarget?.removeAttribute('data-drop-side');
+  dropTarget=target;
+  if(target)target.dataset.dropSide=side;
+}
+
+function clearFolderDrag(){
+  draggedFolder?.classList.remove('is-dragging');
+  draggedFolder=null;
+  markDropTarget(null);
+}
+
+function dropSide(event,target){
+  const bounds=target.getBoundingClientRect();
+  const after=listMode
+    ? event.clientY>=bounds.top+bounds.height/2
+    : event.clientX>=bounds.left+bounds.width/2;
+  return after?'after':'before';
+}
+
+function folderDropTarget(event){
+  const target=event.target.closest('.folder[draggable="true"]');
+  return !busy&&draggedFolder&&folderGrid.contains(draggedFolder)&&target!==draggedFolder
+    ? target
+    : null;
+}
+
+folderGrid.addEventListener('dragstart',event=>{
+  const folder=event.target.closest('.folder[draggable="true"]');
+  if(!folder||busy)return;
+  draggedFolder=folder;
+  event.dataTransfer.effectAllowed='move';
+  event.dataTransfer.setData('text/plain',folder.dataset.symbol);
+  folder.classList.add('is-dragging');
+});
+folderGrid.addEventListener('dragover',event=>{
+  const target=folderDropTarget(event);
+  if(!target){markDropTarget(null);return;}
+  event.preventDefault();
+  event.dataTransfer.dropEffect='move';
+  markDropTarget(target,dropSide(event,target));
+});
+folderGrid.addEventListener('dragleave',event=>{
+  if(dropTarget&&!dropTarget.contains(event.relatedTarget))markDropTarget(null);
+});
+folderGrid.addEventListener('dragend',clearFolderDrag);
+folderGrid.addEventListener('drop',event=>{
+  const target=folderDropTarget(event);
+  if(!target)return;
+  event.preventDefault();
+  const source=draggedFolder;
+  const after=dropSide(event,target)==='after';
+  clearFolderDrag();
+
+  const folders=Array.from(folderGrid.querySelectorAll('.folder[draggable="true"]'));
+  const reordered=folders.filter(folder=>folder!==source);
+  reordered.splice(reordered.indexOf(target)+Number(after),0,source);
+  if(reordered.every((folder,index)=>folder===folders[index]))return;
+
+  const names=reordered.map(folder=>folder.dataset.symbol),key=folderOrderKey();
+  return runTask(async()=>{
+    await databaseTask(['settings'],'readwrite',tx=>{
+      tx.objectStore('settings').put({key,names});
+    });
+    folderOrder=names;
+    render();
+    $('announcement').textContent=source.dataset.symbol+' folder moved.';
+  });
+});
+
+function render(){
+clearFolderDrag();
+const depth=path.length,atEnd=depth===MAX_DEPTH,folderNames=atEnd?[]:depth===0?['Game']:depth<=18?GAME_DIGITS:explorerFolders,folderCount=folderNames.length;
 $('depth').textContent=Math.min(depth,1);$('idDepth').textContent=Math.min(18,Math.max(0,depth-1));$('gameDepth').textContent=Math.max(0,depth-19);$('heading').textContent=depth?'Folder: '+path.at(-1):'Unicode drive';
 $('subtitle').textContent=atEnd?'65536 symbols, 65536 choices. Create a file or explore another branch.':'';
 $('subtitle').hidden=!atEnd;
@@ -91,13 +188,15 @@ if(crumbStart>0){const sep=document.createElement('span');sep.textContent='›';
 for(let i=crumbStart;i<path.length;i++){const symbol=path[i],sep=document.createElement('span');sep.textContent='›';sep.setAttribute('aria-hidden','true');const b=document.createElement('button');b.textContent=symbol;b.title='Level '+(i+1);b.setAttribute('aria-label',symbol+' folder, level '+(i+1));if(i===path.length-1)b.setAttribute('aria-current','location');b.onclick=()=>navigate(path.slice(0,i+1));crumbs.append(sep,b);}
 crumbs.scrollLeft=crumbs.scrollWidth;
 const folders=$('folders');folders.replaceChildren();folders.hidden=atEnd&&!currentFiles.length;$('terminal').hidden=!atEnd;
-folderNames.forEach(symbol=>{const b=document.createElement('button');b.className='folder';b.dataset.symbol=symbol;b.setAttribute('aria-label','Open '+symbol+' folder, level '+(depth+1));b.innerHTML='<svg aria-hidden="true"><use href="#folder-icon"/></svg><span class="folder-name">'+symbol+'</span><span class="folder-info">'+(depth===MAX_DEPTH-1?'Level 65536 · final level':(depth<18?GAME_DIGITS.length:explorerFolders.length)+' subfolders')+'</span>';b.onclick=()=>enter(symbol);folders.append(b);});
+const savedNames=[...new Set(folderOrder)].filter(name=>folderNames.includes(name));
+const orderedNames=[...savedNames,...folderNames.filter(name=>!savedNames.includes(name))];
+orderedNames.forEach(symbol=>{const b=document.createElement('button');b.className='folder';b.dataset.symbol=symbol;if(folderCount>1)b.draggable=true;b.setAttribute('aria-label','Open '+symbol+' folder, level '+(depth+1));b.innerHTML='<svg aria-hidden="true"><use href="#folder-icon"/></svg><span class="folder-name">'+symbol+'</span><span class="folder-info">'+(depth===MAX_DEPTH-1?'Level 65536 · final level':(depth<18?GAME_DIGITS.length:explorerFolders.length)+' subfolders')+'</span>';b.onclick=()=>enter(symbol);folders.append(b);});
 currentFiles.forEach(file=>{const b=document.createElement('button');b.className='folder file';b.setAttribute('aria-label','File: '+file.name);b.title=file.name;b.innerHTML='<svg aria-hidden="true"><use href="#file-icon"/></svg><span class="folder-name"></span><span class="folder-info">File · name only</span>';b.querySelector('.folder-name').textContent=file.name;b.onclick=()=>toast(file.name+' — a virtual file, stored in this folder.');folders.append(b);});
 
 folders.classList.toggle('list',listMode);$('gridView').setAttribute('aria-pressed',String(!listMode));$('listView').setAttribute('aria-pressed',String(listMode));
 }
 $('back').onclick=goBack;$('forward').onclick=goForward;$('up').onclick=up;$('terminalUp').onclick=up;$('home').onclick=$('root').onclick=()=>navigate([]);
-function changeView(mode){return runTask(async()=>{currentFiles=await locationTask(path,mode);listMode=mode;render();});}
+function changeView(mode){return runTask(async()=>{const {files,order}=await locationTask(path,mode);setLocationEntries(files,order);listMode=mode;render();});}
 $('gridView').onclick=()=>changeView(false);$('listView').onclick=()=>changeView(true);
 $('addressForm').onsubmit=e=>{e.preventDefault();const s=$('address').value.trim().normalize('NFC');const next=s==='/'||s===''?[]:s.replace(/^\/+|\/+$/g,'').split('/').map(normalizeSymbol);if(next.length&&next[0].toLowerCase()==='game')next[0]='Game';for(let i=19;i<next.length;i++)next[i]=normalizePlayerFolder(next[i]);if(!validPath(next)){toast('Start with /Game, then 18 digits (0–9), followed by up to 65536 folders, each named with one character from 0123456789ABCDEFU+, or a folder named Player1 or Player2.');return;}navigate(next);$('address').blur();};
 $('copy').onclick=async()=>{const text=pathKey();try{await navigator.clipboard.writeText(text);toast('Path copied.');}catch(e){$('address').focus();$('address').select();try{if(!document.execCommand('copy'))throw Error();toast('Path copied.');}catch(e){toast('Path selected. You can copy it manually.');}}};
@@ -146,7 +245,7 @@ if(actionMode==='level'){const level=Number($('jumpLevel').value);if($('jumpLeve
 if(!['new','delete'].includes(actionMode))return;
 if($('actionPassword').value!=='1111'){$('actionError').textContent='Incorrect password. Please try again.';$('actionPassword').value='';$('actionPassword').focus();return;}
 
-if(actionMode==='new'){return runTask(async()=>{await databaseTask(['files','settings'],'readwrite',tx=>{tx.objectStore('files').clear();tx.objectStore('settings').put({key:'state',path:[],listMode:false});});path=[];historyNode=null;history=[null];cursor=0;listMode=false;currentFiles=[];$('actionDialog').close();render();toast('New game started.');},$('actionError'));}
+if(actionMode==='new'){return runTask(async()=>{await databaseTask(['files','settings'],'readwrite',tx=>{tx.objectStore('files').clear();tx.objectStore('settings').put({key:'state',path:[],listMode:false});});path=[];historyNode=null;history=[null];cursor=0;listMode=false;setLocationEntries([]);$('actionDialog').close();render();toast('New game started.');},$('actionError'));}
 else{const selected=Array.from($('actionContent').querySelectorAll('.delete-check:checked'),box=>actionFiles[Number(box.value)]?.name);if(!selected.length){$('actionError').textContent='Select at least one file.';return;}return runTask(async()=>{const entries=await databaseTask(['files'],'readwrite',(tx,result)=>{const store=tx.objectStore('files');for(const name of selected)store.delete([actionKey,name]);const r=store.index('folder').getAll(actionKey);r.onsuccess=()=>result(r.result);});currentFiles=entries;$('actionDialog').close();render();toast(selected.length===1?'File deleted.':selected.length+' files deleted.');},$('actionError'));}
 
 };
