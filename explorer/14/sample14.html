@@ -75,6 +75,7 @@ function enter(symbol){if(path.length===MAX_DEPTH){toast('You reached the 65536-
 function goBack(){if(cursor>0)return runTask(async()=>{const next=history[cursor-1],entries=await locationTask(next,listMode);cursor--;path=[...next];currentFiles=entries;render();});}
 function goForward(){if(cursor<history.length-1)return runTask(async()=>{const next=history[cursor+1],entries=await locationTask(next,listMode);cursor++;path=[...next];currentFiles=entries;render();});}
 function up(){if(path.length)return navigate(path.slice(0,-1));}
+const folderGrid=$('folders');
 function folderOrderKey(){return 'folderOrder:'+pathKey();}
 function applyFolderOrder(names){const elements=Array.from(folderGrid.querySelectorAll('.folder[draggable="true"]'));const byName=new Map(elements.map(el=>[el.dataset.symbol,el]));const ordered=[...(Array.isArray(names)?names:[]).map(n=>byName.get(n)).filter(Boolean),...elements.filter(el=>!names?.includes(el.dataset.symbol))];for(const el of ordered)folderGrid.append(el);}
 async function restoreFolderOrder(){const key=folderOrderKey();try{const saved=await readSetting(key);if(key===folderOrderKey())applyFolderOrder(saved?.names||[]);}catch(error){console.warn('Folder order could not be loaded',error);}}
