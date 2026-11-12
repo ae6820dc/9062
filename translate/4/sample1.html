@@ -55,7 +55,7 @@
     <button id="n1" aria-label="N1" aria-pressed="false">N1</button>
     <button id="n2" aria-label="N2" aria-pressed="false">N2</button>
     <button id="n3" aria-label="N3" aria-pressed="false">N3</button>
-    <button id="autoToggle" aria-label="Toggle all four random sequences" aria-pressed="false">R</button>
+    <button id="autoToggle" aria-label="Toggle automatic random switching" aria-pressed="false">R</button>
   </div>
 </div>
 <script>
@@ -65,11 +65,6 @@
   const ROWS = 8;    // 8 sor
   const SECTION_COLS = COLS / 2;
   const SECTION_ROWS = ROWS / 2;
-  const SECTION_SIZE = SECTION_COLS * SECTION_ROWS;
-  const sectionOrigins = [
-    [0, 0], [0, SECTION_COLS],
-    [SECTION_ROWS, 0], [SECTION_ROWS, SECTION_COLS],
-  ];
   const DPR = Math.max(1, Math.min(window.devicePixelRatio||1, 2));
   const canvas = document.getElementById('stage');
   const ctx = canvas.getContext('2d');
@@ -84,11 +79,8 @@
   let boardsState = Array.from({ length: 16 }, defaultBoardState);
   let activeButtons = [false, false, false, false];
   let viewIndex = 0;
-  const MIN_AUTO_DELAY = 100;
-  const MAX_AUTO_DELAY = 300;
-  const MIN_SWITCH_GAP = 20;
-  const autoToggleTimers = sectionOrigins.map(() => null);
-  let nextSwitchTime = 0;
+  const AUTO_TOGGLE_DELAY = 200;
+  let autoToggleTimer = null;
   let isAutoToggleActive = false;
 
   const elM = document.getElementById('mValue');
@@ -224,50 +216,27 @@
     draw();
   }
 
-  function toggleRandomSection(section) {
-    const [startRow, startCol] = sectionOrigins[section];
-    const index = Math.floor(Math.random() * SECTION_SIZE);
-    const row = startRow + Math.floor(index / SECTION_COLS);
-    const col = startCol + index % SECTION_COLS;
-    toggleCell(row, col);
-    completeStep();
-  }
-
-  function scheduleAutoToggle(section, delay) {
-    autoToggleTimers[section] = setTimeout(() => {
-      autoToggleTimers[section] = null;
-      if (!isAutoToggleActive) return;
-
-      // Keep independently scheduled flips apart when their timers overlap.
-      const now = performance.now();
-      if (now < nextSwitchTime) {
-        scheduleAutoToggle(section, Math.ceil(nextSwitchTime - now));
-        return;
-      }
-
-      nextSwitchTime = now + MIN_SWITCH_GAP;
-      toggleRandomSection(section);
-      scheduleAutoToggle(section, randomAutoDelay());
-    }, delay);
-  }
-
-  function randomAutoDelay() {
-    return MIN_AUTO_DELAY + Math.random() * (MAX_AUTO_DELAY - MIN_AUTO_DELAY);
+  function scheduleAutoToggle() {
+    autoToggleTimer = setTimeout(() => {
+      const index = Math.floor(Math.random() * ROWS * COLS);
+      const row = Math.floor(index / COLS);
+      const col = index % COLS;
+      toggleCell(row, col);
+      completeStep();
+      scheduleAutoToggle();
+    }, AUTO_TOGGLE_DELAY);
   }
 
   function startAutoToggle() {
     if (isAutoToggleActive) return;
     isAutoToggleActive = true;
-    nextSwitchTime = 0;
-    sectionOrigins.forEach((_, section) => scheduleAutoToggle(section, randomAutoDelay()));
+    scheduleAutoToggle();
   }
 
   function stopAutoToggle() {
     isAutoToggleActive = false;
-    autoToggleTimers.forEach((timer, section) => {
-      clearTimeout(timer);
-      autoToggleTimers[section] = null;
-    });
+    clearTimeout(autoToggleTimer);
+    autoToggleTimer = null;
     saveState(true);
   }
 
