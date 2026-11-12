@@ -84,11 +84,11 @@
   let boardsState = Array.from({ length: 16 }, defaultBoardState);
   let activeButtons = [false, false, false, false];
   let viewIndex = 0;
-  const AUTO_TOGGLE_DELAY = 200;
-  let autoToggleTimer = null;
-  let autoToggleDeadline = 0;
-  let autoToggleRemaining = AUTO_TOGGLE_DELAY;
-  let autoToggleGeneration = 0;
+  const MIN_AUTO_DELAY = 100;
+  const MAX_AUTO_DELAY = 300;
+  const MIN_SWITCH_GAP = 20;
+  const autoToggleTimers = sectionOrigins.map(() => null);
+  let nextSwitchTime = 0;
   let isAutoToggleActive = false;
 
   const elM = document.getElementById('mValue');
@@ -224,51 +224,50 @@
     draw();
   }
 
-  function toggleRandomSections() {
-    for (const [startRow, startCol] of sectionOrigins) {
-      const index = Math.floor(Math.random() * SECTION_SIZE);
-      const row = startRow + Math.floor(index / SECTION_COLS);
-      const col = startCol + index % SECTION_COLS;
-      toggleCell(row, col);
-    }
+  function toggleRandomSection(section) {
+    const [startRow, startCol] = sectionOrigins[section];
+    const index = Math.floor(Math.random() * SECTION_SIZE);
+    const row = startRow + Math.floor(index / SECTION_COLS);
+    const col = startCol + index % SECTION_COLS;
+    toggleCell(row, col);
     completeStep();
   }
 
-  function scheduleAutoToggle() {
-    if (!isAutoToggleActive || autoToggleTimer !== null) return;
-    const generation = autoToggleGeneration;
-    autoToggleDeadline = performance.now() + autoToggleRemaining;
-    autoToggleTimer = setTimeout(() => {
-      if (generation !== autoToggleGeneration) return;
-      autoToggleTimer = null;
-      autoToggleRemaining = Math.max(0, autoToggleDeadline - performance.now());
+  function scheduleAutoToggle(section, delay) {
+    autoToggleTimers[section] = setTimeout(() => {
+      autoToggleTimers[section] = null;
       if (!isAutoToggleActive) return;
-      toggleRandomSections();
-      autoToggleRemaining = AUTO_TOGGLE_DELAY;
-      scheduleAutoToggle();
-    }, autoToggleRemaining);
+
+      // Keep independently scheduled flips apart when their timers overlap.
+      const now = performance.now();
+      if (now < nextSwitchTime) {
+        scheduleAutoToggle(section, Math.ceil(nextSwitchTime - now));
+        return;
+      }
+
+      nextSwitchTime = now + MIN_SWITCH_GAP;
+      toggleRandomSection(section);
+      scheduleAutoToggle(section, randomAutoDelay());
+    }, delay);
   }
 
-  function pauseAutoToggle() {
-    if (autoToggleTimer !== null) {
-      autoToggleRemaining = Math.max(0, autoToggleDeadline - performance.now());
-      clearTimeout(autoToggleTimer);
-      autoToggleTimer = null;
-    }
-    autoToggleGeneration++;
+  function randomAutoDelay() {
+    return MIN_AUTO_DELAY + Math.random() * (MAX_AUTO_DELAY - MIN_AUTO_DELAY);
   }
 
   function startAutoToggle() {
     if (isAutoToggleActive) return;
     isAutoToggleActive = true;
-    autoToggleRemaining = AUTO_TOGGLE_DELAY;
-    scheduleAutoToggle();
+    nextSwitchTime = 0;
+    sectionOrigins.forEach((_, section) => scheduleAutoToggle(section, randomAutoDelay()));
   }
 
   function stopAutoToggle() {
     isAutoToggleActive = false;
-    pauseAutoToggle();
-    autoToggleRemaining = AUTO_TOGGLE_DELAY;
+    autoToggleTimers.forEach((timer, section) => {
+      clearTimeout(timer);
+      autoToggleTimers[section] = null;
+    });
     saveState(true);
   }
 
