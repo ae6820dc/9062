@@ -80,7 +80,7 @@
   function emptyMatrix() {
     return Array.from({ length: grid.rows }, () => Array(grid.cols).fill(false));
   }
-  const defaultBoardState = () => ({ matrix: emptyMatrix(), step: "0", score: "0" });
+  const defaultBoardState = () => ({ matrix: emptyMatrix(), step: "0", flips: "0", score: "0" });
   let boardsState = Array.from({ length: 16 }, defaultBoardState);
   let activeButtons = [false, false, false, false];
   let viewIndex = 0;
@@ -203,20 +203,22 @@
     const wasOn = b.matrix[r][c];
     b.matrix[r][c] = !wasOn;
 
-    b.step = incUnsigned(b.step);
+    b.flips = incUnsigned(b.flips);
 
     // Score: on -> -1, off -> +2  (the original scoring rule is preserved)
     b.score = wasOn ? addSigned(b.score, "2") : addSigned(b.score, "-1");
 
-    if (isBoardEmpty(b.matrix) && b.step !== "0") {
-      b.score = halfUnsigned(b.step);
+    if (isBoardEmpty(b.matrix)) {
+      b.score = halfUnsigned(b.flips);
     }
 
     unsavedSteps++;
     stateDirty = true;
   }
 
-  function refreshBoard() {
+  function completeStep() {
+    const board = boardsState[viewIndex];
+    board.step = incUnsigned(board.step);
     saveState();
     syncHUD();
     draw();
@@ -229,7 +231,7 @@
       const col = startCol + index % SECTION_COLS;
       toggleCell(row, col);
     }
-    refreshBoard();
+    completeStep();
   }
 
   function scheduleAutoToggle() {
@@ -337,7 +339,7 @@
         const cy = cellOffset(r, SECTION_ROWS);
         if (x >= cx && x <= cx + grid.size && y >= cy && y <= cy + grid.size) {
           toggleCell(r, c);
-          refreshBoard();
+          completeStep();
           return;
         }
       }
@@ -451,6 +453,8 @@
               return defaultBoardState();
             }
             if (typeof b.step !== 'string') b.step = '0';
+            // Earlier saves used Step to count every individual flip.
+            if (typeof b.flips !== 'string') b.flips = b.step;
             if (typeof b.score !== 'string') b.score = '0';
             return b;
           });
