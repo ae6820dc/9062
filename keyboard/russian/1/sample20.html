@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Русская клавиатура</title>
+<link rel="icon" href="russian-flag.svg" type="image/svg+xml">
+<meta name="description" content="Русская экранная клавиатура для набора и копирования текста.">
+<style>
+:root{color-scheme:dark;font-family:"Geist",system-ui,sans-serif;background:#11141a;color:#f4f5fa;--surface:#1b2029;--edge:#353c49;--accent:#c6f789}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#232e33 0%,#11141a 70%)}
+main{width:min(100% - 32px,850px);margin:auto;padding:clamp(30px,8vh,76px) 0 32px}
+.program-id{margin:0 0 12px;padding-inline:2px;color:#a4aebd;font:600 13px/1.4 ui-monospace,monospace;letter-spacing:.08em}
+.editor,.keyboard{border:1px solid var(--edge);background:var(--surface);border-radius:18px;padding:14px}
+.text-field{position:relative}
+textarea,.caret-measure{padding:13px;font:inherit;font-size:20px}
+textarea{display:block;width:100%;min-height:142px;resize:vertical;background:#12161e;color:inherit;border:1px solid var(--edge);border-radius:10px;caret-color:var(--accent)}
+.caret-layer{position:absolute;top:1px;left:1px;overflow:hidden;pointer-events:none}
+.caret-measure{visibility:hidden;white-space:pre-wrap;overflow-wrap:break-word}
+.editor-caret{position:absolute;width:3px;background:var(--accent);animation:caret-blink 1s step-end infinite}
+@keyframes caret-blink{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.editor-caret{animation:none}}
+@media(forced-colors:none){
+  .text-field.has-caret textarea{caret-color:transparent}
+}
+@media(forced-colors:active){.caret-layer{display:none}}
+textarea::placeholder{color:#a4aebd;font-size:16px}
+.actions{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;grid-template-areas:"copy clear status export";gap:8px;align-items:center;margin-top:10px}
+button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--edge);border-radius:8px;background:#292f3b;touch-action:manipulation}
+button:hover{background:#373f4d}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+textarea:focus{outline:none}
+@media(forced-colors:active){textarea:focus-visible{outline:2px solid Highlight;outline-offset:2px}}
+.actions button{min-height:38px;padding:0 13px;font-size:14px;font-weight:650}
+#copy{background:var(--accent);color:#18220e;border-color:transparent}
+#copy:hover{background:#d8ffac}
+#copy{grid-area:copy}
+#clear{grid-area:clear}
+#export{grid-area:export;justify-self:end;background:#c4b8f8;color:#211940;border-color:transparent}
+#export:hover{background:#dbd2ff}
+#status{grid-area:status;justify-self:end;color:#c4ced9;font-size:13px}
+#status:empty{display:none}
+@media(max-width:570px){
+  .actions{grid-template-columns:auto auto minmax(0,1fr);grid-template-areas:"copy clear export" "status status status";row-gap:0}
+  .actions button{padding-inline:8px;font-size:13px}
+  #status{margin-top:6px}
+}
+.keyboard{margin-top:14px;display:grid;gap:7px}
+.keyboard-rows{display:contents}
+.row{display:flex;justify-content:center;gap:5px}
+.key{padding:0;flex:1 1 0;min-width:0;height:clamp(44px,8vw,57px);font-size:clamp(14px,3.7vw,22px);font-weight:600;box-shadow:0 2px 0 #0c1015;user-select:none}
+.key:active{transform:translateY(2px);box-shadow:none}
+.key.special{flex:1.65;background:#222733;font-size:clamp(12px,3vw,16px)}
+.key[aria-pressed=true]{background:var(--accent);color:#18220e}
+.key.space{flex:5}
+.emoji-panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(42px,1fr));gap:5px;margin-top:7px}
+.emoji-panel[hidden]{display:none}
+.emoji-panel button{min-height:42px;padding:0;font-size:22px}
+.key.special.emoji{font-size:20px}
+@media(max-width:570px){main{width:calc(100% - 16px)}.editor,.keyboard{padding:7px;border-radius:12px}.row{gap:2px}.key{border-radius:5px}.keyboard{gap:5px}}
+</style>
+</head>
+<body>
+<main>
+<h1 class="program-id" aria-label="Идентификатор программы 732770B4F75DD8C4">Program ID: 732770B4F75DD8C4</h1>
+<section class="editor" aria-label="Редактор текста">
+<div class="text-field">
+<textarea id="output" aria-label="Текст" placeholder="Начните печатать…" spellcheck="false" inputmode="none"></textarea>
+<div class="caret-layer" aria-hidden="true"><div class="caret-measure"></div><div class="editor-caret" hidden></div></div>
+</div>
+<div class="actions"><button id="copy" type="button">Копировать</button><button id="clear" type="button">Очистить</button><button id="export" type="button">Экспорт</button><span id="status" role="status"></span></div>
+</section>
+<section class="keyboard" aria-label="Русская экранная клавиатура">
+<div id="keyboard" class="keyboard-rows"></div>
+<div id="emoji-panel" class="emoji-panel" role="group" aria-label="Эмодзи" hidden></div>
+</section>
+</main>
+<script>
+const output = document.getElementById('output');
+const textField = output.parentElement;
+const caretLayer = textField.querySelector('.caret-layer');
+const caretMeasure = textField.querySelector('.caret-measure');
+const editorCaret = textField.querySelector('.editor-caret');
+const caretRange = document.createRange();
+let caretFrame = 0;
+let revealCaret = false;
+
+function refreshCaret() {
+  caretFrame = 0;
+  const shouldReveal = revealCaret;
+  revealCaret = false;
+  const { selectionStart, selectionEnd, value } = output;
+  const showCaret = document.activeElement === output && selectionStart === selectionEnd;
+  if (!showCaret) {
+    editorCaret.hidden = true;
+    textField.classList.remove('has-caret');
+    return;
+  }
+
+  caretLayer.style.width = `${output.clientWidth}px`;
+  caretLayer.style.height = `${output.clientHeight}px`;
+  // Give an empty final line a measurable caret position.
+  const measureText = value === '' || value.endsWith('\n') ? value + '\u200b' : value;
+  if (caretMeasure.textContent !== measureText) caretMeasure.textContent = measureText;
+  caretRange.setStart(caretMeasure.firstChild, selectionStart);
+  caretRange.collapse(true);
+  const rect = caretRange.getBoundingClientRect();
+  const origin = caretMeasure.getBoundingClientRect();
+  editorCaret.hidden = rect.height === 0;
+  textField.classList.toggle('has-caret', !editorCaret.hidden);
+  editorCaret.style.left = `${rect.left - origin.left - output.scrollLeft}px`;
+  const caretTop = rect.top - origin.top;
+  if (shouldReveal && !editorCaret.hidden) {
+    const visibleTop = output.scrollTop;
+    const visibleBottom = visibleTop + output.clientHeight;
+    if (caretTop < visibleTop) {
+      output.scrollTop = Math.floor(caretTop);
+    } else if (caretTop + rect.height > visibleBottom) {
+      output.scrollTop = Math.ceil(caretTop + rect.height - output.clientHeight);
+    }
+  }
+  editorCaret.style.top = `${caretTop - output.scrollTop}px`;
+  editorCaret.style.height = `${rect.height}px`;
+}
+
+function scheduleCaret() {
+  if (!caretFrame) caretFrame = requestAnimationFrame(refreshCaret);
+}
+
+for (const event of ['focus', 'blur', 'input', 'click', 'keyup', 'select', 'scroll']) {
+  output.addEventListener(event, scheduleCaret);
+}
+document.addEventListener('selectionchange', scheduleCaret);
+new ResizeObserver(scheduleCaret).observe(output);
+const keyboard = document.getElementById('keyboard');
+const status = document.getElementById('status');
+const draftKey = '732770B4F75DD8C4';
+let draftDatabase;
+let draftChanged = false;
+
+function showDraftError() {
+  status.textContent = 'Автосохранение недоступно.';
+}
+
+function writeDraft() {
+  const transaction = draftDatabase.transaction('drafts', 'readwrite');
+  const drafts = transaction.objectStore('drafts');
+  transaction.addEventListener('abort', showDraftError);
+  if (output.value) {
+    drafts.put(output.value, draftKey);
+  } else {
+    drafts.delete(draftKey);
+  }
+}
+
+function saveDraft() {
+  draftChanged = true;
+  if (draftDatabase) writeDraft();
+}
+
+function restoreDraft() {
+  if (!window.indexedDB) {
+    showDraftError();
+    return;
+  }
+  let opening;
+  try {
+    opening = window.indexedDB.open('9062-keyboard', 1);
+  } catch {
+    showDraftError();
+    return;
+  }
+  opening.addEventListener('upgradeneeded', () => {
+    opening.result.createObjectStore('drafts');
+  });
+  opening.addEventListener('error', showDraftError);
+  opening.addEventListener('blocked', showDraftError);
+  opening.addEventListener('success', () => {
+    draftDatabase = opening.result;
+    draftDatabase.addEventListener('versionchange', () => {
+      draftDatabase.close();
+      draftDatabase = undefined;
+      showDraftError();
+    });
+    if (draftChanged) {
+      writeDraft();
+      return;
+    }
+    const reading = draftDatabase.transaction('drafts').objectStore('drafts').get(draftKey);
+    reading.addEventListener('error', showDraftError);
+    reading.addEventListener('success', () => {
+      if (draftChanged || typeof reading.result !== 'string') return;
+      output.value = reading.result;
+      output.setSelectionRange(output.value.length, output.value.length);
+      revealCaret = true;
+      scheduleCaret();
+    });
+  });
+}
+const emojiPanel = document.getElementById('emoji-panel');
+const emojis = ['😁', '😀', '😄', '😂', '🤣', '😉', '😊', '😍', '🥰', '😎', '🤔', '😮', '😢', '😭', '😡', '👍', '👎', '✌️', '👏', '🙏', '❤️', '🔥', '✨', '🎉'];
+const graphemes = new Intl.Segmenter('ru', { granularity: 'grapheme' });
+const rows = [
+  [...'ё1234567890-=', 'backspace'],
+  [...'йцукенгшщзхъ', '\\'],
+  [...'фывапролджэ', 'enter'],
+  ['shift', ...'ячсмитьбю.', 'shift'],
+  ['symbols', 'space', 'emoji']
+];
+const shifted = new Map(Array.from('1234567890-=\\.', (key, index) => [key, Array.from('!"№;%:?*()_+/,')[index]]));
+const writingMarks = [...'«»„“—–….,!?;:'];
+const symbolRows = [
+  [...'1234567890-=', 'backspace'],
+  [...'!?"№%:;()[]{}'],
+  [...'+*/\\_@#$&<>', 'enter'],
+  [...'€₽', "'", '’'],
+  ['symbols', 'space', 'emoji']
+];
+const special = {
+  backspace: ['⌫', 'Удалить символ'],
+  enter: ['↵', 'Новая строка'],
+  shift: ['⇧', 'Верхний регистр'],
+  space: ['Пробел', 'Пробел'],
+  emoji: ['😁', 'Эмодзи']
+};
+let shift = false;
+let symbols = false;
+
+function keepEditorFocus(event) {
+  event.preventDefault();
+  output.focus({ preventScroll: true });
+}
+
+function setText(text, start = output.selectionStart, end = output.selectionEnd) {
+  output.setRangeText(text, start, end, 'end');
+  revealCaret = true;
+  scheduleCaret();
+  status.textContent = '';
+  saveDraft();
+}
+
+function pressKey(key, label) {
+  const wasShifted = shift;
+  if (key === 'emoji') {
+    emojiPanel.hidden = !emojiPanel.hidden;
+    keyboard.querySelector('.emoji').setAttribute('aria-expanded', String(!emojiPanel.hidden));
+  } else if (key === 'shift') {
+    shift = !shift;
+  } else if (key === 'symbols') {
+    symbols = !symbols;
+    shift = false;
+  } else if (key === 'backspace') {
+    const { selectionStart, selectionEnd, value } = output;
+    const start = selectionStart === selectionEnd && selectionStart > 0
+      ? graphemes.segment(value.slice(0, selectionStart)).containing(selectionStart - 1).index
+      : selectionStart;
+    setText('', start, selectionEnd);
+  } else if (key === 'enter') {
+    setText('\n');
+  } else if (key === 'space') {
+    setText(' ');
+  } else {
+    setText(label);
+    if (shift) shift = false;
+  }
+  if (key === 'shift' || key === 'symbols' || shift !== wasShifted) render(key);
+}
+
+function render(previousKey) {
+  const active = document.activeElement;
+  const focusedIndex = Array.from(keyboard.querySelectorAll('button')).indexOf(active);
+  const layout = symbols ? symbolRows : rows;
+  const renderedRows = [...layout.slice(0, -1), writingMarks, layout.at(-1)].map((keys) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const isWritingRow = keys === writingMarks;
+    if (isWritingRow) {
+      row.setAttribute('role', 'group');
+      row.setAttribute('aria-label', 'Знаки препинания');
+    }
+    keys.forEach((key) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'key';
+      const label = shift && !symbols && !isWritingRow ? shifted.get(key) ?? key.toUpperCase() : key;
+      button.textContent = label;
+      if (Object.hasOwn(special, key) || key === 'symbols') {
+        const [caption, name] = special[key] ?? [symbols ? 'АБВ' : '123', 'Дополнительные символы'];
+        button.classList.add('special', key);
+        button.textContent = caption;
+        button.setAttribute('aria-label', name);
+      }
+      if (key === 'shift' || key === 'symbols') button.setAttribute('aria-pressed', key === 'shift' ? shift : symbols);
+      if (key === 'emoji') {
+        button.setAttribute('aria-controls', 'emoji-panel');
+        button.setAttribute('aria-expanded', String(!emojiPanel.hidden));
+      }
+      button.addEventListener('pointerdown', keepEditorFocus);
+      button.addEventListener('click', () => pressKey(key, label));
+      row.append(button);
+    });
+    return row;
+  });
+  keyboard.replaceChildren(...renderedRows);
+  if (focusedIndex >= 0) {
+    const next = previousKey === 'symbols' ? keyboard.querySelector('.symbols') : keyboard.querySelectorAll('button')[focusedIndex];
+    next?.focus({ preventScroll: true });
+  }
+}
+
+output.addEventListener('input', () => {
+  status.textContent = '';
+  saveDraft();
+});
+document.querySelectorAll('.actions button').forEach((button) => {
+  button.addEventListener('pointerdown', keepEditorFocus);
+});
+document.getElementById('clear').addEventListener('click', () => setText('', 0, output.value.length));
+document.getElementById('copy').addEventListener('click', async () => {
+  if (!output.value) {
+    status.textContent = 'Поле пустое.';
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(output.value);
+    status.textContent = 'Скопировано.';
+  } catch {
+    output.focus();
+    output.select();
+    status.textContent = document.execCommand('copy') ? 'Скопировано.' : 'Текст выделен.';
+  }
+});
+
+document.getElementById('export').addEventListener('click', () => {
+  if (!output.value) {
+    status.textContent = 'Поле пустое.';
+    return;
+  }
+
+  const savedAt = new Date();
+  const unixMilliseconds = savedAt.getTime();
+  const localTime = savedAt.toLocaleString('ru-RU', {
+    year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'shortOffset'
+  });
+  const programLabel = document.querySelector('.program-id').textContent;
+  const escapedText = output.value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+
+  const html = `<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Экспорт текста</title>
+<style>
+body{margin:clamp(16px,5vw,48px) auto;padding:0 16px;max-width:72ch;font:18px/1.6 system-ui,sans-serif}
+header{padding-bottom:12px;margin-bottom:20px;border-bottom:1px solid #aaa;font-size:14px}
+main{white-space:pre-wrap;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<header>
+<div>${programLabel}</div>
+<div>Время экспорта: <time datetime="${savedAt.toISOString()}">${localTime}</time></div>
+<div>Unix (мс): ${unixMilliseconds}</div>
+</header>
+<main>${escapedText}</main>
+</body>
+</html>`;
+
+  const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `text-${unixMilliseconds}.html`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+for (const emoji of emojis) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = emoji;
+  button.addEventListener('pointerdown', keepEditorFocus);
+  button.addEventListener('click', () => setText(emoji));
+  emojiPanel.append(button);
+}
+
+emojiPanel.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    const toggle = keyboard.querySelector('.emoji');
+    pressKey('emoji');
+    toggle.focus({ preventScroll: true });
+  }
+});
+
+render();
+output.focus({ preventScroll: true });
+restoreDraft();
+</script>
+</body>
+</html>
