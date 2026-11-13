@@ -285,7 +285,7 @@ const rows = [
   [...'1234567890-=', 'backspace'],
   [...'qwertyuiop'],
   [...'asdfghjkl', 'enter'],
-  ['shift', ...'zxcvbnm,.', 'shift'],
+  ['shift', ...'zxcvbnm,.', 'caps'],
   ['mode', 'symbols', 'space', 'emoji']
 ];
 const shifted = new Map(Array.from('1234567890-=,.', (key, index) => [key, '!@#$%^&*()_+<>'[index]]));
@@ -300,12 +300,14 @@ const symbolRows = [
 const special = {
   backspace: ['⌫', '退格'],
   enter: ['↵', '换行'],
-  shift: ['⇧', '大写'],
+  shift: ['⇧', '切换下一个字符'],
+  caps: ['⇧⇧', '持续大写'],
   space: ['空格', '空格'],
   emoji: ['😁', '表情'],
   mode: ['中', '切换中英文输入']
 };
 let shift = false;
+let caps = false;
 let symbols = false;
 
 function keepEditorFocus(event) {
@@ -336,13 +338,15 @@ function pressKey(key, label) {
     }
     return;
   }
-  if (!['shift', 'emoji'].includes(key)) commitPinyin();
+  if (!['shift', 'caps', 'emoji'].includes(key)) commitPinyin();
   const wasShifted = shift;
   if (key === 'emoji') {
     emojiPanel.hidden = !emojiPanel.hidden;
     keyboard.querySelector('.emoji').setAttribute('aria-expanded', String(!emojiPanel.hidden));
   } else if (key === 'shift') {
     shift = !shift;
+  } else if (key === 'caps') {
+    caps = !caps;
   } else if (key === 'symbols') {
     symbols = !symbols;
     shift = false;
@@ -360,7 +364,7 @@ function pressKey(key, label) {
     setText(label);
     if (shift) shift = false;
   }
-  if (key === 'shift' || key === 'symbols' || shift !== wasShifted) render(key);
+  if (key === 'shift' || key === 'caps' || key === 'symbols' || shift !== wasShifted) render(key);
 }
 
 function render(previousKey) {
@@ -379,16 +383,23 @@ function render(previousKey) {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'key';
-      const label = shift && !symbols && !isWritingRow ? shifted.get(key) ?? key.toUpperCase() : key;
+      let label = key;
+      if (!symbols && !isWritingRow) {
+        if (shift) label = shifted.get(key) ?? key.toUpperCase();
+        else if (caps && !chinese && /^\p{L}$/u.test(key)) label = key.toUpperCase();
+      }
       button.textContent = label;
       if (Object.hasOwn(special, key) || key === 'symbols') {
         const [caption, name] = special[key] ?? [symbols ? '字母' : '123', '更多符号'];
         button.classList.add('special', key);
         button.textContent = key === 'mode' && !chinese ? '英' : caption;
         if (key === 'mode') button.setAttribute('aria-pressed', String(chinese));
+        if (key === 'caps') button.disabled = chinese;
         button.setAttribute('aria-label', name);
       }
-      if (key === 'shift' || key === 'symbols') button.setAttribute('aria-pressed', key === 'shift' ? shift : symbols);
+      if (key === 'shift') button.setAttribute('aria-pressed', String(shift));
+      if (key === 'caps') button.setAttribute('aria-pressed', String(caps));
+      if (key === 'symbols') button.setAttribute('aria-pressed', String(symbols));
       if (key === 'emoji') {
         button.setAttribute('aria-controls', 'emoji-panel');
         button.setAttribute('aria-expanded', String(!emojiPanel.hidden));
