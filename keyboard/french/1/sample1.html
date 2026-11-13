@@ -7,39 +7,39 @@
 <link rel="icon" href="french-flag.svg" type="image/svg+xml">
 <meta name="description" content="Clavier français à l’écran pour écrire, copier et enregistrer du texte.">
 <style>
-:root{color-scheme:dark;font-family:"Geist",system-ui,sans-serif;background:#111827;color:#f6f4f0;--surface:#1d2a40;--edge:#7688a5;--accent:#a8c7ff}
+:root{color-scheme:light;font-family:"Geist",system-ui,sans-serif;background:#faf5ed;color:#293950;--surface:#fffdf8;--edge:#8190a6;--accent:#c9dbee;--ink:#293950;--focus:#486487}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#283f65 0%,#111827 70%)}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 70% 0%,#f2dfe3 0%,#faf5ed 72%)}
 main{width:min(100% - 32px,850px);margin:auto;padding:clamp(30px,8vh,76px) 0 32px}
-.program-id{margin:0 0 12px;padding-inline:2px;color:#bdcbe2;font:600 13px/1.4 ui-monospace,monospace;letter-spacing:.08em}
-.editor,.keyboard{border:1px solid var(--edge);background:var(--surface);border-radius:18px;padding:14px}
+.program-id{margin:0 0 12px;padding-inline:2px;color:#52647c;font:600 13px/1.4 ui-monospace,monospace;letter-spacing:.08em}
+.editor,.keyboard{border:1px solid var(--edge);background:var(--surface);border-radius:18px;padding:14px;box-shadow:0 8px 24px #29395012}
 .text-field{position:relative}
 textarea,.caret-measure{padding:13px;font:inherit;font-size:20px}
-textarea{display:block;width:100%;min-height:142px;resize:vertical;background:#121c2e;color:inherit;border:1px solid var(--edge);border-radius:10px;caret-color:var(--accent)}
+textarea{display:block;width:100%;min-height:142px;resize:vertical;background:#fffcf7;color:inherit;border:1px solid var(--edge);border-radius:10px;caret-color:var(--focus)}
 .caret-layer{position:absolute;top:1px;left:1px;overflow:hidden;pointer-events:none}
 .caret-measure{visibility:hidden;white-space:pre-wrap;overflow-wrap:break-word}
-.editor-caret{position:absolute;width:3px;background:var(--accent);animation:caret-blink 1s step-end infinite}
+.editor-caret{position:absolute;width:3px;background:var(--focus);animation:caret-blink 1s step-end infinite}
 @keyframes caret-blink{50%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.editor-caret{animation:none}}
 @media(forced-colors:none){
   .text-field.has-caret textarea{caret-color:transparent}
 }
 @media(forced-colors:active){.caret-layer{display:none}}
-textarea::placeholder{color:#bdcbe2;font-size:16px}
+textarea::placeholder{color:#52647c;font-size:16px}
 .actions{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;grid-template-areas:"copy clear status export";gap:8px;align-items:center;margin-top:10px}
-button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--edge);border-radius:8px;background:#293a55;touch-action:manipulation}
-button:hover{background:#3b5071}
-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-textarea:focus{outline:none}
+button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--edge);border-radius:8px;background:#e8eff7;touch-action:manipulation}
+button:hover{background:#d6e3f2}
+button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+textarea:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 @media(forced-colors:active){textarea:focus-visible{outline:2px solid Highlight;outline-offset:2px}}
 .actions button{min-height:38px;padding:0 13px;font-size:14px;font-weight:650}
-#copy{box-shadow:0 0 14px #a8c7ff33;background:var(--accent);color:#121c2e;border-color:transparent}
-#copy:hover{background:#cee0ff}
+#copy{box-shadow:0 0 14px #c9dbee33;background:var(--accent);color:var(--ink);border-color:var(--edge)}
+#copy:hover{background:#dce8f4}
 #copy{grid-area:copy}
 #clear{grid-area:clear}
-#export{box-shadow:0 0 14px #ffb1b733;grid-area:export;justify-self:end;background:#ffb1b7;color:#121c2e;border-color:transparent}
-#export:hover{background:#ffd0d3}
-#status{grid-area:status;justify-self:end;color:#d8e1ef;font-size:13px}
+#export{box-shadow:0 0 14px #efd5db33;grid-area:export;justify-self:end;background:#efd5db;color:#533d4b;border-color:#9f7e8a}
+#export:hover{background:#f7e4e8}
+#status{grid-area:status;justify-self:end;color:#52647c;font-size:13px}
 #status:empty{display:none}
 @media(max-width:570px){
   .actions{grid-template-columns:auto auto minmax(0,1fr);grid-template-areas:"copy clear export" "status status status";row-gap:0}
@@ -49,11 +49,11 @@ textarea:focus{outline:none}
 .keyboard{margin-top:14px;display:grid;gap:7px}
 .keyboard-rows{display:contents}
 .row{display:flex;justify-content:center;gap:5px}
-.key{padding:0;flex:1 1 0;min-width:0;height:clamp(44px,8vw,57px);font-size:clamp(14px,3.7vw,22px);font-weight:600;box-shadow:0 2px 0 #0d1422;user-select:none}
+.key{padding:0;flex:1 1 0;min-width:0;height:clamp(44px,8vw,57px);font-size:clamp(14px,3.7vw,22px);font-weight:600;box-shadow:0 2px 0 #bfcbdb;user-select:none}
 .key:active{transform:translateY(2px);box-shadow:none}
-.key.special{flex:1.65;color:#f9e9eb;background:#54303e;font-size:clamp(12px,3vw,16px)}
-.key[aria-pressed=true],.key:active{background:var(--accent);color:#121c2e}
-.key[aria-pressed=true]{box-shadow:0 0 12px #a8c7ff55}
+.key.special{flex:1.65;color:#533d4b;background:#f4e3e7;border-color:#9f7e8a;font-size:clamp(12px,3vw,16px)}
+.key[aria-pressed=true],.key:active{background:var(--accent);color:var(--ink)}
+.key[aria-pressed=true]{border-color:var(--focus);box-shadow:inset 0 0 0 1px var(--focus)}
 .key.space{flex:4}
 .key.special.altgr{flex:1.9}
 #status{min-width:0}
