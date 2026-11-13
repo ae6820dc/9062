@@ -106,7 +106,7 @@ function validPath(p){return Array.isArray(p)&&p.length<=MAX_DEPTH&&p.every((x,i
 function pathKey(p=path){
   return '/'+p.map(segment=>segment.replace(/[\/%\\ ]/g,encodeURIComponent)).join('/');
 }
-function folderLabel(symbol){return keyLabels.get(symbol) ?? symbol.toUpperCase();}
+function folderLabel(symbol){return symbol==='Game' ? symbol : (keyLabels.get(symbol) ?? symbol.toUpperCase());}
 function foldersAt(depth){return depth===MAX_DEPTH?[]:depth===0?['Game']:depth<=18?GAME_DIGITS:explorerFolders;}
 function folderOrderKey(p=path){return 'folderOrder:'+pathKey(p);}
 function validName(name){return typeof name==='string'&&name.trim().length>0&&Array.from(name).length<=255&&!name.includes('/')&&!name.includes(String.fromCharCode(92))&&!Array.from(name).some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127)&&name!=='.'&&name!=='..';}
