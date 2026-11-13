@@ -135,6 +135,69 @@ document.addEventListener('selectionchange', scheduleCaret);
 new ResizeObserver(scheduleCaret).observe(output);
 const keyboard = document.getElementById('keyboard');
 const status = document.getElementById('status');
+const draftKey = '5BB1DB0FB9A0C397';
+let draftDatabase;
+let draftChanged = false;
+
+function showDraftError() {
+  status.textContent = 'Автосохранение недоступно.';
+}
+
+function writeDraft() {
+  const transaction = draftDatabase.transaction('drafts', 'readwrite');
+  const drafts = transaction.objectStore('drafts');
+  transaction.addEventListener('abort', showDraftError);
+  if (output.value) {
+    drafts.put(output.value, draftKey);
+  } else {
+    drafts.delete(draftKey);
+  }
+}
+
+function saveDraft() {
+  draftChanged = true;
+  if (draftDatabase) writeDraft();
+}
+
+function restoreDraft() {
+  if (!window.indexedDB) {
+    showDraftError();
+    return;
+  }
+  let opening;
+  try {
+    opening = window.indexedDB.open('9062-keyboard', 1);
+  } catch {
+    showDraftError();
+    return;
+  }
+  opening.addEventListener('upgradeneeded', () => {
+    opening.result.createObjectStore('drafts');
+  });
+  opening.addEventListener('error', showDraftError);
+  opening.addEventListener('blocked', showDraftError);
+  opening.addEventListener('success', () => {
+    draftDatabase = opening.result;
+    draftDatabase.addEventListener('versionchange', () => {
+      draftDatabase.close();
+      draftDatabase = undefined;
+      showDraftError();
+    });
+    if (draftChanged) {
+      writeDraft();
+      return;
+    }
+    const reading = draftDatabase.transaction('drafts').objectStore('drafts').get(draftKey);
+    reading.addEventListener('error', showDraftError);
+    reading.addEventListener('success', () => {
+      if (draftChanged || typeof reading.result !== 'string') return;
+      output.value = reading.result;
+      output.setSelectionRange(output.value.length, output.value.length);
+      revealCaret = true;
+      scheduleCaret();
+    });
+  });
+}
 const emojiPanel = document.getElementById('emoji-panel');
 const emojis = ['😁', '😀', '😄', '😂', '🤣', '😉', '😊', '😍', '🥰', '😎', '🤔', '😮', '😢', '😭', '😡', '👍', '👎', '✌️', '👏', '🙏', '❤️', '🔥', '✨', '🎉'];
 const graphemes = new Intl.Segmenter('ru', { granularity: 'grapheme' });
@@ -174,6 +237,7 @@ function setText(text, start = output.selectionStart, end = output.selectionEnd)
   revealCaret = true;
   scheduleCaret();
   status.textContent = '';
+  saveDraft();
 }
 
 function pressKey(key, label) {
@@ -245,7 +309,10 @@ function render(previousKey) {
   }
 }
 
-output.addEventListener('input', () => { status.textContent = ''; });
+output.addEventListener('input', () => {
+  status.textContent = '';
+  saveDraft();
+});
 document.querySelectorAll('.actions button').forEach((button) => {
   button.addEventListener('pointerdown', keepEditorFocus);
 });
@@ -331,6 +398,7 @@ emojiPanel.addEventListener('keydown', (event) => {
 
 render();
 output.focus({ preventScroll: true });
+restoreDraft();
 </script>
 </body>
 </html>
