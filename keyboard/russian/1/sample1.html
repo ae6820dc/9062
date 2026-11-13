@@ -12,7 +12,18 @@ body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#232
 main{width:min(100% - 32px,850px);margin:auto;padding:clamp(30px,8vh,76px) 0 32px}
 .program-id{margin:0 0 12px;padding-inline:2px;color:#a4aebd;font:600 13px/1.4 ui-monospace,monospace;letter-spacing:.08em}
 .editor,.keyboard{border:1px solid var(--edge);background:var(--surface);border-radius:18px;padding:14px}
-textarea{display:block;width:100%;min-height:142px;resize:vertical;background:#12161e;color:inherit;border:1px solid var(--edge);border-radius:10px;padding:13px;font:inherit;font-size:20px;caret-color:var(--accent);caret-shape:block}
+.text-field{position:relative}
+textarea,.caret-measure{padding:13px;font:inherit;font-size:20px}
+textarea{display:block;width:100%;min-height:142px;resize:vertical;background:#12161e;color:inherit;border:1px solid var(--edge);border-radius:10px;caret-color:var(--accent)}
+.caret-layer{position:absolute;top:1px;left:1px;overflow:hidden;pointer-events:none}
+.caret-measure{visibility:hidden;white-space:pre-wrap;overflow-wrap:break-word}
+.editor-caret{position:absolute;width:.3em;font-size:20px;background:var(--accent);animation:caret-blink 1s step-end infinite}
+@keyframes caret-blink{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.editor-caret{animation:none}}
+@media(forced-colors:none){
+  .text-field.has-caret textarea{caret-color:transparent}
+}
+@media(forced-colors:active){.caret-layer{display:none}}
 textarea::placeholder{color:#a4aebd;font-size:16px}
 .actions{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;grid-template-areas:"copy clear status export";gap:8px;align-items:center;margin-top:10px}
 button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--edge);border-radius:8px;background:#292f3b;touch-action:manipulation}
@@ -53,7 +64,10 @@ textarea:focus{outline:none}
 <main>
 <h1 class="program-id" aria-label="Идентификатор программы 5BB1DB0FB9A0C397">Program ID: 5BB1DB0FB9A0C397</h1>
 <section class="editor" aria-label="Редактор текста">
+<div class="text-field">
 <textarea id="output" aria-label="Текст" placeholder="Начните печатать…" spellcheck="false" inputmode="none"></textarea>
+<div class="caret-layer" aria-hidden="true"><div class="caret-measure"></div><div class="editor-caret" hidden></div></div>
+</div>
 <div class="actions"><button id="copy" type="button">Копировать</button><button id="clear" type="button">Очистить</button><button id="export" type="button">Экспорт</button><span id="status" role="status"></span></div>
 </section>
 <section class="keyboard" aria-label="Русская экранная клавиатура">
@@ -63,6 +77,48 @@ textarea:focus{outline:none}
 </main>
 <script>
 const output = document.getElementById('output');
+const textField = output.parentElement;
+const caretLayer = textField.querySelector('.caret-layer');
+const caretMeasure = textField.querySelector('.caret-measure');
+const editorCaret = textField.querySelector('.editor-caret');
+const caretRange = document.createRange();
+let caretFrame = 0;
+
+function refreshCaret() {
+  caretFrame = 0;
+  const { selectionStart, selectionEnd, value } = output;
+  const showCaret = document.activeElement === output && selectionStart === selectionEnd;
+  if (!showCaret) {
+    editorCaret.hidden = true;
+    textField.classList.remove('has-caret');
+    return;
+  }
+
+  caretLayer.style.width = `${output.clientWidth}px`;
+  caretLayer.style.height = `${output.clientHeight}px`;
+  // Give an empty final line a measurable caret position.
+  const measureText = value === '' || value.endsWith('\n') ? value + '\u200b' : value;
+  if (caretMeasure.textContent !== measureText) caretMeasure.textContent = measureText;
+  caretRange.setStart(caretMeasure.firstChild, selectionStart);
+  caretRange.collapse(true);
+  const rect = caretRange.getBoundingClientRect();
+  const origin = caretMeasure.getBoundingClientRect();
+  editorCaret.hidden = rect.height === 0;
+  textField.classList.toggle('has-caret', !editorCaret.hidden);
+  editorCaret.style.left = `${rect.left - origin.left - output.scrollLeft}px`;
+  editorCaret.style.top = `${rect.top - origin.top - output.scrollTop}px`;
+  editorCaret.style.height = `${rect.height}px`;
+}
+
+function scheduleCaret() {
+  if (!caretFrame) caretFrame = requestAnimationFrame(refreshCaret);
+}
+
+for (const event of ['focus', 'blur', 'input', 'click', 'keyup', 'select', 'scroll']) {
+  output.addEventListener(event, scheduleCaret);
+}
+document.addEventListener('selectionchange', scheduleCaret);
+new ResizeObserver(scheduleCaret).observe(output);
 const keyboard = document.getElementById('keyboard');
 const status = document.getElementById('status');
 const emojiPanel = document.getElementById('emoji-panel');
@@ -101,6 +157,7 @@ function keepEditorFocus(event) {
 
 function setText(text, start = output.selectionStart, end = output.selectionEnd) {
   output.setRangeText(text, start, end, 'end');
+  scheduleCaret();
   status.textContent = '';
 }
 
