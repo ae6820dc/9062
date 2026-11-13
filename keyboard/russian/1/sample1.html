@@ -1,16 +1,15 @@
 <!doctype html>
-<html lang="hu">
+<html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Orosz billentyűzet</title>
-<meta name="description" content="Virtuális orosz billentyűzet cirill szöveg írásához és másolásához.">
+<title>Русская клавиатура</title>
+<meta name="description" content="Русская экранная клавиатура для набора и копирования текста.">
 <style>
 :root{color-scheme:dark;font-family:"Geist",system-ui,sans-serif;background:#11141a;color:#f4f5fa;--surface:#1b2029;--edge:#353c49;--accent:#c6f789}
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#232e33 0%,#11141a 70%)}
 main{width:min(100% - 32px,850px);margin:auto;padding:clamp(30px,8vh,76px) 0 32px}
-h1{font-size:clamp(30px,6vw,55px);letter-spacing:-.065em;margin:0 0 24px;line-height:1}
 .editor,.keyboard{border:1px solid var(--edge);background:var(--surface);border-radius:18px;padding:14px}
 textarea{display:block;width:100%;min-height:142px;resize:vertical;background:#12161e;color:inherit;border:1px solid var(--edge);border-radius:10px;padding:13px;font:inherit;font-size:20px}
 textarea::placeholder{color:#a4aebd;font-size:16px}
@@ -29,17 +28,16 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outl
 .key.special{flex:1.65;background:#222733;font-size:clamp(12px,3vw,16px)}
 .key[aria-pressed=true]{background:var(--accent);color:#18220e}
 .key.space{flex:5}
-@media(max-width:570px){main{width:calc(100% - 16px)}h1{margin-left:6px}.editor,.keyboard{padding:7px;border-radius:12px}.row{gap:2px}.key{border-radius:5px}.keyboard{gap:5px}}
+@media(max-width:570px){main{width:calc(100% - 16px)}.editor,.keyboard{padding:7px;border-radius:12px}.row{gap:2px}.key{border-radius:5px}.keyboard{gap:5px}}
 </style>
 </head>
 <body>
 <main>
-<h1>Orosz billentyűzet</h1>
-<section class="editor" aria-label="Szövegszerkesztő">
-<textarea id="output" aria-label="Szöveg" placeholder="Kezdj el gépelni…" spellcheck="false" inputmode="none"></textarea>
-<div class="actions"><button id="copy" type="button">Másolás</button><button id="clear" type="button">Törlés</button><span id="status" role="status"></span></div>
+<section class="editor" aria-label="Редактор текста">
+<textarea id="output" aria-label="Текст" placeholder="Начните печатать…" spellcheck="false" inputmode="none"></textarea>
+<div class="actions"><button id="copy" type="button">Копировать</button><button id="clear" type="button">Очистить</button><span id="status" role="status"></span></div>
 </section>
-<section id="keyboard" class="keyboard" aria-label="Orosz virtuális billentyűzet"></section>
+<section id="keyboard" class="keyboard" aria-label="Русская экранная клавиатура"></section>
 </main>
 <script>
 const output = document.getElementById('output');
@@ -53,18 +51,19 @@ const rows = [
   ['symbols', 'space']
 ];
 const shifted = new Map(Array.from('1234567890-=\\.', (key, index) => [key, Array.from('!"№;%:?*()_+/,')[index]]));
+const writingMarks = [...'«»„“—–….,!?;:'];
 const symbolRows = [
   [...'1234567890-=', 'backspace'],
   [...'!?"№%:;()[]{}'],
   [...'+*/\\_@#$&<>', 'enter'],
-  [...'.,«»…—€₽', "'", '’'],
+  [...'€₽', "'", '’'],
   ['symbols', 'space']
 ];
 const special = {
-  backspace: ['⌫', 'Visszatörlés'],
-  enter: ['↵', 'Enter'],
-  shift: ['⇧', 'Shift'],
-  space: ['Szóköz', 'Szóköz']
+  backspace: ['⌫', 'Удалить символ'],
+  enter: ['↵', 'Новая строка'],
+  shift: ['⇧', 'Верхний регистр'],
+  space: ['Пробел', 'Пробел']
 };
 let shift = false;
 let symbols = false;
@@ -100,17 +99,23 @@ function pressKey(key, label) {
 function render(previousKey) {
   const active = document.activeElement;
   const focusedIndex = Array.from(keyboard.querySelectorAll('button')).indexOf(active);
-  const renderedRows = (symbols ? symbolRows : rows).map((keys) => {
+  const layout = symbols ? symbolRows : rows;
+  const renderedRows = [...layout.slice(0, -1), writingMarks, layout.at(-1)].map((keys) => {
     const row = document.createElement('div');
     row.className = 'row';
+    const isWritingRow = keys === writingMarks;
+    if (isWritingRow) {
+      row.setAttribute('role', 'group');
+      row.setAttribute('aria-label', 'Знаки препинания');
+    }
     keys.forEach((key) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'key';
-      const label = shift && !symbols ? shifted.get(key) ?? key.toUpperCase() : key;
+      const label = shift && !symbols && !isWritingRow ? shifted.get(key) ?? key.toUpperCase() : key;
       button.textContent = label;
       if (Object.hasOwn(special, key) || key === 'symbols') {
-        const [caption, name] = special[key] ?? [symbols ? 'АБВ' : '123', 'Szimbólumok'];
+        const [caption, name] = special[key] ?? [symbols ? 'АБВ' : '123', 'Дополнительные символы'];
         button.classList.add('special', key);
         button.textContent = caption;
         button.setAttribute('aria-label', name);
@@ -133,16 +138,16 @@ output.addEventListener('input', () => { status.textContent = ''; });
 document.getElementById('clear').addEventListener('click', () => setText('', 0, output.value.length));
 document.getElementById('copy').addEventListener('click', async () => {
   if (!output.value) {
-    status.textContent = 'A szövegmező üres.';
+    status.textContent = 'Поле пустое.';
     return;
   }
   try {
     await navigator.clipboard.writeText(output.value);
-    status.textContent = 'Másolva.';
+    status.textContent = 'Скопировано.';
   } catch {
     output.focus();
     output.select();
-    status.textContent = document.execCommand('copy') ? 'Másolva.' : 'A szöveg kijelölve.';
+    status.textContent = document.execCommand('copy') ? 'Скопировано.' : 'Текст выделен.';
   }
 });
 render();
