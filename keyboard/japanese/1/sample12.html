@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>日本語キーボード</title>
+<link rel="icon" href="japan-flag.svg" type="image/svg+xml">
+<meta name="description" content="ひらがな・カタカナ・英字を入力できる画面キーボード。">
+<style>
+:root{color-scheme:dark;font-family:system-ui,"Yu Gothic",Meiryo,sans-serif;background:#20181b;color:#fff0eb;--surface:#35272d;--edge:#a9808d;--accent:#ffb9ca}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#52313f 0%,#20181b 70%)}
+main{width:min(100% - 32px,850px);margin:auto;padding:clamp(30px,8vh,76px) 0 32px}
+.program-id{margin:0 0 12px;padding-inline:2px;color:#e4bec9;font:600 13px/1.4 ui-monospace,monospace;letter-spacing:.08em}
+.editor,.keyboard{border:1px solid var(--edge);background:var(--surface);border-radius:18px;padding:14px}
+textarea{padding:13px;font:inherit;font-size:20px}
+textarea{display:block;width:100%;min-height:142px;resize:vertical;background:#20161b;color:inherit;border:1px solid var(--edge);border-radius:10px;caret-color:var(--accent)}
+textarea::placeholder{color:#e4bec9;font-size:16px}
+.actions{display:grid;grid-template-columns:auto auto auto minmax(0,1fr) auto;grid-template-areas:"copy clear ime status export";gap:8px;align-items:center;margin-top:10px}
+button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--edge);border-radius:8px;background:#423039;touch-action:manipulation}
+button:hover{background:#624551}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(forced-colors:active){textarea:focus-visible{outline:2px solid Highlight;outline-offset:2px}}
+.actions button{min-height:38px;padding:0 13px;font-size:14px;font-weight:650}
+#copy{box-shadow:0 0 14px #ffb9ca33;background:var(--accent);color:#20161b;border-color:transparent}
+#copy:hover{background:#ffd4de}
+#copy{grid-area:copy}
+#clear{grid-area:clear}
+#ime{grid-area:ime}
+#ime[aria-pressed=true]{background:var(--accent);color:#20161b}
+#export{box-shadow:0 0 14px #edbda233;grid-area:export;justify-self:end;background:#edbda2;color:#20161b;border-color:transparent}
+#export:hover{background:#ffdbc4}
+#status{grid-area:status;justify-self:end;color:#efd0d7;font-size:13px}
+#status:empty{display:none}
+@media(max-width:570px){
+  .actions{grid-template-columns:auto auto auto minmax(0,1fr);grid-template-areas:"copy clear ime export" "status status status status";row-gap:0}
+  .actions button{padding-inline:8px;font-size:13px}
+  #status{margin-top:6px}
+}
+.keyboard{margin-top:14px;display:grid;gap:7px}
+.keyboard-rows{display:contents}
+.row{display:flex;justify-content:center;gap:5px}
+.key{padding:0;flex:1 1 0;min-width:0;height:clamp(44px,8vw,57px);font-size:clamp(14px,3.7vw,22px);font-weight:600;box-shadow:0 2px 0 #1b1016;user-select:none}
+.key:active{transform:translateY(2px);box-shadow:none}
+.key.special{flex:1.65;color:#fce0e6;background:#513747;font-size:clamp(12px,3vw,16px)}
+.key[aria-pressed=true],.key:active{background:var(--accent);color:#20161b}
+.key[aria-pressed=true]{box-shadow:0 0 12px #ffb9ca55}
+.key.space{flex:3}
+.key.special.mode{flex:2.4}
+.emoji-panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(42px,1fr));gap:5px;margin-top:7px}
+.emoji-panel[hidden]{display:none}
+.emoji-panel button{min-height:42px;padding:0;font-size:22px}
+.key.special.emoji{font-size:20px}
+@media(max-width:570px){main{width:calc(100% - 16px)}.editor,.keyboard{padding:7px;border-radius:12px}.row{gap:2px}.key{border-radius:5px}.keyboard{gap:5px}}
+</style>
+</head>
+<body>
+<main>
+<h1 class="program-id" aria-label="プログラム ID 7857C921DE0135D9">Program ID: 7857C921DE0135D9</h1>
+<section class="editor" aria-label="テキストエディター">
+<textarea id="output" aria-label="テキスト" placeholder="ここに入力…" lang="ja" spellcheck="true" inputmode="none"></textarea>
+<div class="actions"><button id="copy" type="button">コピー</button><button id="clear" type="button">消去</button><button id="ime" type="button" aria-label="端末の日本語入力" aria-pressed="false">IME</button><button id="export" type="button">保存</button><span id="status" role="status"></span></div>
+</section>
+<section class="keyboard" aria-label="日本語画面キーボード">
+<div id="keyboard" class="keyboard-rows"></div>
+<div id="emoji-panel" class="emoji-panel" role="group" aria-label="絵文字" hidden></div>
+</section>
+</main>
+<script>
+const output = document.getElementById('output');
+const keyboard = document.getElementById('keyboard');
+const status = document.getElementById('status');
+const draftKey = '7857C921DE0135D9';
+let draftDatabase;
+let draftChanged = false;
+
+function showDraftError() {
+  status.textContent = '自動保存を利用できません。';
+}
+
+function writeDraft() {
+  const transaction = draftDatabase.transaction('drafts', 'readwrite');
+  const drafts = transaction.objectStore('drafts');
+  transaction.addEventListener('abort', showDraftError);
+  if (output.value) {
+    drafts.put(output.value, draftKey);
+  } else {
+    drafts.delete(draftKey);
+  }
+}
+
+function saveDraft() {
+  draftChanged = true;
+  if (draftDatabase) writeDraft();
+}
+
+function restoreDraft() {
+  if (!window.indexedDB) {
+    showDraftError();
+    return;
+  }
+  let opening;
+  try {
+    opening = window.indexedDB.open('9062-keyboard', 1);
+  } catch {
+    showDraftError();
+    return;
+  }
+  opening.addEventListener('upgradeneeded', () => {
+    opening.result.createObjectStore('drafts');
+  });
+  opening.addEventListener('error', showDraftError);
+  opening.addEventListener('blocked', showDraftError);
+  opening.addEventListener('success', () => {
+    draftDatabase = opening.result;
+    draftDatabase.addEventListener('versionchange', () => {
+      draftDatabase.close();
+      draftDatabase = undefined;
+      showDraftError();
+    });
+    if (draftChanged) {
+      writeDraft();
+      return;
+    }
+    const reading = draftDatabase.transaction('drafts').objectStore('drafts').get(draftKey);
+    reading.addEventListener('error', showDraftError);
+    reading.addEventListener('success', () => {
+      if (draftChanged || typeof reading.result !== 'string') return;
+      output.value = reading.result;
+      output.setSelectionRange(output.value.length, output.value.length);
+    });
+  });
+}
+const emojiPanel = document.getElementById('emoji-panel');
+const emojis = ['😁', '😀', '😄', '😂', '🤣', '😉', '😊', '😍', '🥰', '😎', '🤔', '😮', '😢', '😭', '😡', '👍', '👎', '✌️', '👏', '🙏', '❤️', '🔥', '✨', '🎉'];
+const graphemes = new Intl.Segmenter('ja-JP', { granularity: 'grapheme' });
+const latinRows = [
+  [...'`1234567890-=', 'backspace'],
+  [...'qwertyuiop[]\\'],
+  [..."asdfghjkl;'", 'enter'],
+  ['shift', ...'zxcvbnm,./', 'caps'],
+  ['mode', 'symbols', 'space', 'emoji']
+];
+const unshiftedKeys = "`1234567890-=[]\\;',./";
+const shiftedKeys = '~!@#$%^&*()_+{}|:"<>?';
+const latinShifted = new Map(Array.from(unshiftedKeys, (key, index) => [key, shiftedKeys[index]]));
+const kanaRows = [
+  [...'ぬふあうえおやゆよわほへー', 'backspace'],
+  [...'たていすかんなにらせ', '゛', '゜'],
+  [...'ちとしはきくまのりれけむ', 'enter'],
+  ['shift', ...'つさそひこみもねるめろ', 'caps'],
+  ['mode', 'symbols', 'space', 'emoji']
+];
+const kanaShifted = new Map([
+  ['あ', 'ぁ'], ['い', 'ぃ'], ['う', 'ぅ'], ['え', 'ぇ'], ['お', 'ぉ'],
+  ['や', 'ゃ'], ['ゆ', 'ゅ'], ['よ', 'ょ'], ['わ', 'を'], ['つ', 'っ'],
+  ['ね', '、'], ['る', '。'], ['め', '・'], ['゛', '「'], ['゜', '」']
+]);
+const modes = ['ひらがな', 'カタカナ', 'ABC'];
+let mode = 0;
+
+function asKatakana(text) {
+  return text.replace(/[ぁ-ゖ]/g, kana => String.fromCharCode(kana.charCodeAt(0) + 0x60));
+}
+
+function addVoicing(mark) {
+  const { selectionStart: start, selectionEnd: end, value } = output;
+  const previous = value.slice(start - 1, start);
+  if (start === end && start > 0 && /^[ぁ-ゖァ-ヺ]$/.test(previous)) {
+    const base = previous.normalize('NFD').charAt(0);
+    const combining = mark === '゛' ? '\u3099' : '\u309a';
+    const combined = (base + combining).normalize('NFC');
+    if (combined.length === 1) {
+      setText(combined, start - 1, end);
+      return;
+    }
+  }
+  setText(mark);
+}
+const writingMarks = [...'、。「」『』・…〜'];
+const symbolRows = [
+  [...'0123456789-=', 'backspace'],
+  [...'!?\"§%:;()[]{}'],
+  [...'+*/\\_@#$&<>', 'enter'],
+  [...'€£', "'", '’', '°'],
+  ['mode', 'symbols', 'space', 'emoji']
+];
+const special = {
+  backspace: ['⌫', '後退'],
+  enter: ['↵', '改行'],
+  shift: ['⇧', '次の文字だけシフト'],
+  caps: ['⇧⇧', 'シフト固定'],
+  space: ['スペース', 'スペース'],
+  emoji: ['😁', '絵文字']
+};
+let shift = false;
+let caps = false;
+let symbols = false;
+
+function keepEditorFocus(event) {
+  event.preventDefault();
+  output.focus({ preventScroll: true });
+}
+
+function setText(text, start = output.selectionStart, end = output.selectionEnd) {
+  output.setRangeText(text, start, end, 'end');
+  status.textContent = '';
+  saveDraft();
+}
+
+function pressKey(key, label) {
+  const wasShifted = shift;
+  if (key === 'emoji') {
+    emojiPanel.hidden = !emojiPanel.hidden;
+    keyboard.querySelector('.emoji').setAttribute('aria-expanded', String(!emojiPanel.hidden));
+  } else if (key === 'shift') {
+    shift = !shift;
+  } else if (key === 'caps') {
+    caps = !caps;
+  } else if (key === 'mode') {
+    mode = (mode + 1) % modes.length;
+    symbols = false;
+    shift = false;
+    caps = false;
+  } else if (key === 'symbols') {
+    symbols = !symbols;
+    shift = false;
+  } else if (key === 'backspace') {
+    const { selectionStart, selectionEnd, value } = output;
+    const start = selectionStart === selectionEnd && selectionStart > 0
+      ? graphemes.segment(value.slice(0, selectionStart)).containing(selectionStart - 1).index
+      : selectionStart;
+    setText('', start, selectionEnd);
+  } else {
+    if (label === '゛' || label === '゜') {
+      addVoicing(label);
+    } else {
+      setText(key === 'enter' ? '\n' : key === 'space' ? ' ' : label);
+    }
+    if (shift) shift = false;
+  }
+  if (key === 'shift' || key === 'caps' || key === 'symbols' || key === 'mode' || shift !== wasShifted) render(key);
+}
+
+function render(previousKey) {
+  const active = document.activeElement;
+  const focusedIndex = Array.from(keyboard.querySelectorAll('button')).indexOf(active);
+  const latin = mode === 2;
+  const layout = symbols ? symbolRows : latin ? latinRows : kanaRows;
+  const renderedRows = [...layout.slice(0, -1), writingMarks, layout.at(-1)].map((keys) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const isWritingRow = keys === writingMarks;
+    if (isWritingRow) {
+      row.setAttribute('role', 'group');
+      row.setAttribute('aria-label', '句読点');
+    }
+    keys.forEach((key) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'key';
+      let label = key;
+      if (!symbols && !isWritingRow) {
+        if (latin) {
+          if (shift) label = latinShifted.get(key) ?? key.toUpperCase();
+          else if (caps) label = key.toUpperCase();
+        } else {
+          if (shift || caps) label = kanaShifted.get(key) ?? key;
+          if (mode === 1) label = asKatakana(label);
+        }
+      }
+      button.textContent = label;
+      if (Object.hasOwn(special, key) || key === 'symbols' || key === 'mode') {
+        const [caption, name] = key === 'mode'
+          ? [modes[mode], '入力モード：' + modes[mode]]
+          : special[key] ?? [symbols ? '戻る' : '123', '記号と数字'];
+        button.classList.add('special', key);
+        button.textContent = caption;
+        button.setAttribute('aria-label', name);
+      }
+      if (key === 'shift') button.setAttribute('aria-pressed', String(shift));
+      if (key === 'caps') button.setAttribute('aria-pressed', String(caps));
+      if (key === 'symbols') button.setAttribute('aria-pressed', String(symbols));
+      if (key === 'emoji') {
+        button.setAttribute('aria-controls', 'emoji-panel');
+        button.setAttribute('aria-expanded', String(!emojiPanel.hidden));
+      }
+      button.addEventListener('pointerdown', keepEditorFocus);
+      button.addEventListener('click', () => pressKey(key, label));
+      row.append(button);
+    });
+    return row;
+  });
+  keyboard.replaceChildren(...renderedRows);
+  if (focusedIndex >= 0) {
+    const next = previousKey === 'symbols' || previousKey === 'mode'
+      ? keyboard.querySelector('.' + previousKey)
+      : keyboard.querySelectorAll('button')[focusedIndex];
+    next?.focus({ preventScroll: true });
+  }
+}
+
+output.addEventListener('input', () => {
+  status.textContent = '';
+  saveDraft();
+});
+document.querySelectorAll('.actions button').forEach((button) => {
+  if (button.id !== 'ime') button.addEventListener('pointerdown', keepEditorFocus);
+});
+const imeButton = document.getElementById('ime');
+imeButton.addEventListener('click', () => {
+  const enabled = imeButton.getAttribute('aria-pressed') !== 'true';
+  imeButton.setAttribute('aria-pressed', String(enabled));
+  output.inputMode = enabled ? 'text' : 'none';
+  output.blur();
+  output.focus({ preventScroll: true });
+});
+document.getElementById('clear').addEventListener('click', () => setText('', 0, output.value.length));
+document.getElementById('copy').addEventListener('click', async () => {
+  if (!output.value) {
+    status.textContent = 'テキストが空です。';
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(output.value);
+    status.textContent = 'コピーしました。';
+  } catch {
+    output.focus();
+    output.select();
+    status.textContent = document.execCommand('copy') ? 'コピーしました。' : 'テキストを選択しました。';
+  }
+});
+
+document.getElementById('export').addEventListener('click', () => {
+  if (!output.value) {
+    status.textContent = 'テキストが空です。';
+    return;
+  }
+
+  const savedAt = new Date();
+  const unixMilliseconds = savedAt.getTime();
+  const localTime = savedAt.toLocaleString('ja-JP', {
+    year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'shortOffset'
+  });
+  const programLabel = document.querySelector('.program-id').textContent;
+  const escapedText = output.value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+
+  const html = `<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>テキストの書き出し</title>
+<style>
+body{margin:clamp(16px,5vw,48px) auto;padding:0 16px;max-width:72ch;font:18px/1.6 system-ui,sans-serif}
+header{padding-bottom:12px;margin-bottom:20px;border-bottom:1px solid #aaa;font-size:14px}
+main{white-space:pre-wrap;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<header>
+<div>${programLabel}</div>
+<div>保存日時： <time datetime="${savedAt.toISOString()}">${localTime}</time></div>
+<div>Unix 時刻（ミリ秒）： ${unixMilliseconds}</div>
+</header>
+<main>${escapedText}</main>
+</body>
+</html>`;
+
+  const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `text-${unixMilliseconds}.html`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+for (const emoji of emojis) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = emoji;
+  button.addEventListener('pointerdown', keepEditorFocus);
+  button.addEventListener('click', () => pressKey('insert-emoji', emoji));
+  emojiPanel.append(button);
+}
+
+emojiPanel.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    const toggle = keyboard.querySelector('.emoji');
+    pressKey('emoji');
+    toggle.focus({ preventScroll: true });
+  }
+});
+
+render();
+output.focus({ preventScroll: true });
+restoreDraft();
+</script>
+</body>
+</html>
