@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Русская клавиатура</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <meta name="description" content="Русская экранная клавиатура для набора и копирования текста.">
 <style>
 :root{color-scheme:dark;font-family:"Geist",system-ui,sans-serif;background:#11141a;color:#f4f5fa;--surface:#1b2029;--edge:#353c49;--accent:#c6f789}
@@ -17,7 +18,7 @@ textarea,.caret-measure{padding:13px;font:inherit;font-size:20px}
 textarea{display:block;width:100%;min-height:142px;resize:vertical;background:#12161e;color:inherit;border:1px solid var(--edge);border-radius:10px;caret-color:var(--accent)}
 .caret-layer{position:absolute;top:1px;left:1px;overflow:hidden;pointer-events:none}
 .caret-measure{visibility:hidden;white-space:pre-wrap;overflow-wrap:break-word}
-.editor-caret{position:absolute;width:.3em;font-size:20px;background:var(--accent);animation:caret-blink 1s step-end infinite}
+.editor-caret{position:absolute;width:3px;background:var(--accent);animation:caret-blink 1s step-end infinite}
 @keyframes caret-blink{50%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.editor-caret{animation:none}}
 @media(forced-colors:none){
@@ -83,9 +84,12 @@ const caretMeasure = textField.querySelector('.caret-measure');
 const editorCaret = textField.querySelector('.editor-caret');
 const caretRange = document.createRange();
 let caretFrame = 0;
+let revealCaret = false;
 
 function refreshCaret() {
   caretFrame = 0;
+  const shouldReveal = revealCaret;
+  revealCaret = false;
   const { selectionStart, selectionEnd, value } = output;
   const showCaret = document.activeElement === output && selectionStart === selectionEnd;
   if (!showCaret) {
@@ -106,7 +110,17 @@ function refreshCaret() {
   editorCaret.hidden = rect.height === 0;
   textField.classList.toggle('has-caret', !editorCaret.hidden);
   editorCaret.style.left = `${rect.left - origin.left - output.scrollLeft}px`;
-  editorCaret.style.top = `${rect.top - origin.top - output.scrollTop}px`;
+  const caretTop = rect.top - origin.top;
+  if (shouldReveal && !editorCaret.hidden) {
+    const visibleTop = output.scrollTop;
+    const visibleBottom = visibleTop + output.clientHeight;
+    if (caretTop < visibleTop) {
+      output.scrollTop = Math.floor(caretTop);
+    } else if (caretTop + rect.height > visibleBottom) {
+      output.scrollTop = Math.ceil(caretTop + rect.height - output.clientHeight);
+    }
+  }
+  editorCaret.style.top = `${caretTop - output.scrollTop}px`;
   editorCaret.style.height = `${rect.height}px`;
 }
 
@@ -157,6 +171,7 @@ function keepEditorFocus(event) {
 
 function setText(text, start = output.selectionStart, end = output.selectionEnd) {
   output.setRangeText(text, start, end, 'end');
+  revealCaret = true;
   scheduleCaret();
   status.textContent = '';
 }
