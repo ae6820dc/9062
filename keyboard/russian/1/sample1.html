@@ -14,14 +14,24 @@ main{width:min(100% - 32px,850px);margin:auto;padding:clamp(30px,8vh,76px) 0 32p
 .editor,.keyboard{border:1px solid var(--edge);background:var(--surface);border-radius:18px;padding:14px}
 textarea{display:block;width:100%;min-height:142px;resize:vertical;background:#12161e;color:inherit;border:1px solid var(--edge);border-radius:10px;padding:13px;font:inherit;font-size:20px}
 textarea::placeholder{color:#a4aebd;font-size:16px}
-.actions{display:flex;gap:8px;align-items:center;margin-top:10px}
+.actions{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;grid-template-areas:"copy clear status export";gap:8px;align-items:center;margin-top:10px}
 button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--edge);border-radius:8px;background:#292f3b;touch-action:manipulation}
 button:hover{background:#373f4d}
 button:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .actions button{min-height:38px;padding:0 13px;font-size:14px;font-weight:650}
 #copy{background:var(--accent);color:#18220e;border-color:transparent}
 #copy:hover{background:#d8ffac}
-#status{color:#c4ced9;font-size:13px;margin-left:auto}
+#copy{grid-area:copy}
+#clear{grid-area:clear}
+#export{grid-area:export;justify-self:end;background:#c4b8f8;color:#211940;border-color:transparent}
+#export:hover{background:#dbd2ff}
+#status{grid-area:status;justify-self:end;color:#c4ced9;font-size:13px}
+#status:empty{display:none}
+@media(max-width:570px){
+  .actions{grid-template-columns:auto auto minmax(0,1fr);grid-template-areas:"copy clear export" "status status status";row-gap:0}
+  .actions button{padding-inline:8px;font-size:13px}
+  #status{margin-top:6px}
+}
 .keyboard{margin-top:14px;display:grid;gap:7px}
 .row{display:flex;justify-content:center;gap:5px}
 .key{padding:0;flex:1 1 0;min-width:0;height:clamp(44px,8vw,57px);font-size:clamp(14px,3.7vw,22px);font-weight:600;box-shadow:0 2px 0 #0c1015;user-select:none}
@@ -37,7 +47,7 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outl
 <h1 class="program-id" aria-label="Идентификатор программы 5BB1DB0FB9A0C397">Program ID: 5BB1DB0FB9A0C397</h1>
 <section class="editor" aria-label="Редактор текста">
 <textarea id="output" aria-label="Текст" placeholder="Начните печатать…" spellcheck="false" inputmode="none"></textarea>
-<div class="actions"><button id="copy" type="button">Копировать</button><button id="clear" type="button">Очистить</button><span id="status" role="status"></span></div>
+<div class="actions"><button id="copy" type="button">Копировать</button><button id="clear" type="button">Очистить</button><button id="export" type="button">Экспорт</button><span id="status" role="status"></span></div>
 </section>
 <section id="keyboard" class="keyboard" aria-label="Русская экранная клавиатура"></section>
 </main>
@@ -152,6 +162,54 @@ document.getElementById('copy').addEventListener('click', async () => {
     status.textContent = document.execCommand('copy') ? 'Скопировано.' : 'Текст выделен.';
   }
 });
+
+document.getElementById('export').addEventListener('click', () => {
+  if (!output.value) {
+    status.textContent = 'Поле пустое.';
+    return;
+  }
+
+  const savedAt = new Date();
+  const unixMilliseconds = savedAt.getTime();
+  const localTime = savedAt.toLocaleString('ru-RU', {
+    year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'shortOffset'
+  });
+  const programLabel = document.querySelector('.program-id').textContent;
+  const escapedText = output.value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+
+  const html = `<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Экспорт текста</title>
+<style>
+body{margin:clamp(16px,5vw,48px) auto;padding:0 16px;max-width:72ch;font:18px/1.6 system-ui,sans-serif}
+header{padding-bottom:12px;margin-bottom:20px;border-bottom:1px solid #aaa;font-size:14px}
+main{white-space:pre-wrap;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<header>
+<div>${programLabel}</div>
+<div>Время экспорта: <time datetime="${savedAt.toISOString()}">${localTime}</time></div>
+<div>Unix (мс): ${unixMilliseconds}</div>
+</header>
+<main>${escapedText}</main>
+</body>
+</html>`;
+
+  const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `text-${unixMilliseconds}.html`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
 render();
 </script>
 </body>
