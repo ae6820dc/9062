@@ -22,12 +22,8 @@ body {
 }
 main {
   width: min(100% - 32px, 800px);
-  height: 100vh;
-  height: 100dvh;
   margin: auto;
   padding: clamp(10px, 3dvh, 28px) 0 12px;
-  display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
 }
 .page-header { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 1px 13px; margin-bottom: 18px; }
 .title-mark {
@@ -51,6 +47,11 @@ h1 { margin: 0; font: 500 clamp(27px, 5vw, 43px)/1.1 "Instrument Serif", Georgia
   border-radius: 15px;
   background: var(--surface);
   box-shadow: 0 12px 32px #130c0960;
+}
+.editor {
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 .text-field { position: relative; }
 textarea, .caret-measure {
@@ -101,15 +102,11 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; z-
 #export { margin-inline-start: auto; border-color: #ae7a55; color: #ffcd9e; }
 #status { flex-basis: 100%; color: #dfbea3; font-size: 13px; }
 #status:empty { display: none; }
-.keyboard {
-  margin-top: 12px;
-  min-height: 0;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-}
+.keyboard { margin-top: 12px; }
 .keyboard-scroll {
+  max-height: 60vh;
+  max-height: clamp(245px, 60dvh, 590px);
   overflow-y: auto;
-  overscroll-behavior-y: contain;
   scrollbar-width: thin;
   scrollbar-color: #ae7a55 #2c211b;
   scrollbar-gutter: stable;
@@ -159,6 +156,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; z-
   main { width: calc(100% - 16px); }
   .editor, .keyboard { padding: 8px; border-radius: 11px; }
   .row { gap: 3px; }
+  .keyboard-scroll { max-height: clamp(220px, 56dvh, 430px); }
   .keyboard-rows { gap: 5px; }
   .key { border-radius: 5px; }
   .keyboard-rows[data-layout="abc"] .key { font-size: clamp(11px, 3vw, 15px); }
@@ -173,6 +171,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; z-
   .actions { margin-top: 4px; }
   .actions button, .keyboard-toolbar button { min-height: 34px; }
   .keyboard { margin-top: 6px; }
+  .keyboard-scroll { max-height: clamp(155px, 63dvh, 310px); }
   .keyboard-toolbar { margin-bottom: 1px; padding-bottom: 4px; }
 }
 </style>
