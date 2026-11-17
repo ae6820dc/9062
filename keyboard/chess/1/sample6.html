@@ -26,7 +26,13 @@ body {
 main {
   width: min(100% - 32px, 800px);
   margin: auto;
-  padding: clamp(10px, 3dvh, 28px) 0 12px;
+  --page-bottom: 12px;
+  padding: clamp(10px, 3dvh, 28px) 0 var(--page-bottom);
+}
+/* Leave room to scroll past the heading even when all the key rows fit. */
+.workspace {
+  min-height: calc(100vh - var(--page-bottom));
+  min-height: calc(100dvh - var(--page-bottom));
 }
 .page-header { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 1px 13px; margin-bottom: 18px; }
 .title-mark {
@@ -184,7 +190,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; z-
 @media(max-height: 690px) { :root { --visible-rows: 5; } }
 @media(max-height: 540px) {
   :root { --visible-rows: 4; }
-  main { padding-block: 5px; }
+  main { --page-bottom: 5px; padding-top: 5px; }
   .page-header { margin-bottom: 5px; }
   .page-header h1 { font-size: 24px; }
   .title-mark { width: 35px; font-size: 25px; }
@@ -205,6 +211,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; z-
   <h1>Chess billentyűzet</h1>
   <p class="program-id">Program ID: 19850E6D5B3E74B5</p>
 </header>
+<div class="workspace">
 <div class="sticky-controls">
 <section class="editor" aria-label="Szövegszerkesztő">
 <div class="text-field">
@@ -229,6 +236,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; z-
   <div id="emoji-panel" class="emoji-panel" role="group" aria-label="Emoji" hidden></div>
 </div>
 </section>
+</div>
 </main>
 <script>
 const output = document.getElementById('output');
