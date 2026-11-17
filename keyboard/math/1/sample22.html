@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Math billentyűzet</title>
+<link rel="icon" type="image/png" sizes="64x64" href="data:image/png;base64,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">
+<meta name="description" content="Magyar felületű képernyőbillentyűzet matematikai jelölésekhez.">
+<style>
+:root {
+  color-scheme: dark;
+  font-family: "Instrument Sans", system-ui, sans-serif;
+  background: #0c1428;
+  color: #eaf2ff;
+  --surface: #14233b;
+  --edge: #436285;
+  --accent: #a6e6fb;
+  --key-height: 44px;
+  --row-gap: 7px;
+}
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at 50% 0%, #203c5e 0%, #111c34 65%, #0c1428 100%);
+}
+main {
+  width: min(100% - 32px, 800px);
+  margin: auto;
+  --page-bottom: 12px;
+  padding: clamp(10px, 3dvh, 28px) 0 var(--page-bottom);
+}
+/* Leave room to scroll past the heading even when all the key rows fit. */
+.workspace {
+  min-height: calc(100vh - var(--page-bottom));
+  min-height: calc(100dvh - var(--page-bottom));
+}
+.page-header { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 1px 13px; margin-bottom: 18px; }
+.title-mark {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 49px;
+  aspect-ratio: 1;
+  border: 1px solid #5e94b4;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #275172, #162745);
+  color: #bcefff;
+  font: 34px/1 "DejaVu Sans", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;
+}
+h1 { margin: 0; font: 500 clamp(27px, 5vw, 43px)/1.1 "Instrument Serif", Georgia, serif; letter-spacing: -.025em; }
+.program-id { margin: 2px 0 0; color: #a9c1db; font: 600 11px/1.4 ui-monospace, monospace; letter-spacing: .06em; }
+* { box-sizing: border-box; }
+.editor, .keyboard {
+  padding: 14px;
+  border: 1px solid var(--edge);
+  border-radius: 15px;
+  background: var(--surface);
+  box-shadow: 0 12px 32px #050b1860;
+}
+.sticky-controls {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding-bottom: 9px;
+  border-radius: 15px 15px 0 0;
+  background: #14233b;
+}
+.sticky-controls.is-collapsed { padding-bottom: 0; border-radius: 15px; }
+.text-field { position: relative; }
+textarea, .caret-measure {
+  padding: 12px;
+  font: 19px/1.45 "DejaVu Sans", "Segoe UI Symbol", "Noto Sans Symbols 2", system-ui, sans-serif;
+}
+textarea {
+  display: block;
+  width: 100%;
+  height: clamp(84px, 21vh, 180px);
+  height: clamp(72px, 21dvh, 180px);
+  resize: none;
+  outline: none;
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  background: #101b31;
+  color: inherit;
+  caret-color: var(--accent);
+}
+textarea:focus { border-color: #84cfe9; }
+textarea::placeholder { color: #9bb2cb; }
+
+.caret-layer{position:absolute;top:1px;left:1px;overflow:hidden;pointer-events:none}
+.caret-measure{visibility:hidden;white-space:pre-wrap;overflow-wrap:break-word}
+.editor-caret{position:absolute;width:3px;background:var(--accent);animation:caret-blink 1s step-end infinite}
+@keyframes caret-blink{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.editor-caret{animation:none}}
+@media(forced-colors:none){
+  .text-field.has-caret textarea{caret-color:transparent}
+}
+@media(forced-colors:active){.caret-layer{visibility:hidden}}
+.actions, .keyboard-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+.actions { margin-top: 10px; }
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: 1px solid var(--edge);
+  border-radius: 7px;
+  background: #1e3351;
+  touch-action: manipulation;
+}
+button:hover { background: #29496d; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; z-index: 1; }
+.actions button, .keyboard-toolbar button { min-height: 40px; padding: 0 12px; font-size: 14px; font-weight: 650; }
+#copy { color: #0b2337; background: var(--accent); border-color: var(--accent); }
+#copy:hover:hover { background: #cff4ff; }
+#export { margin-inline-start: auto; border-color: #6e9abe; color: #b9eafa; }
+#status { flex-basis: 100%; color: #b8d0e9; font-size: 13px; }
+#status:empty { display: none; }
+.keyboard {
+  border-radius: 0 0 15px 15px;
+  border-top: 0;
+  padding-top: 4px;
+}
+.keyboard-scroll {
+  max-height: clamp(150px, 49dvh, 490px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #6e9abe #14233b;
+  scrollbar-gutter: stable;
+  padding: 3px 4px 5px 3px;
+}
+.keyboard-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.keyboard-toolbar {
+  padding: 9px 14px 0;
+}
+.is-collapsed .keyboard-toolbar { padding-bottom: 9px; }
+.keyboard-toolbar #panel-toggle { min-width: 36px; padding-inline: 7px; font-size: 20px; }
+.keyboard-rows { display: grid; gap: var(--row-gap); }
+
+.key {
+  min-width: 0;
+  height: var(--key-height);
+  padding: 0;
+  font-weight: 650;
+  background: linear-gradient(180deg, #223a5b, #1b304e);
+  box-shadow: 0 2px 0 #0b1428;
+  user-select: none;
+}
+.key:hover { background: #30557a; }
+.key:active { transform: translateY(2px); box-shadow: none; }
+@media(max-width: 570px) {
+  main { width: calc(100% - 16px); }
+  :root { --row-gap: 5px; }
+  .editor { padding: 8px; border-radius: 11px; }
+  .keyboard { padding: 4px 8px 8px; border-radius: 0 0 11px 11px; }
+  .keyboard-toolbar { padding-inline: 8px; gap: 4px; }
+  .keyboard-toolbar button { min-height: 36px; padding-inline: 7px; font-size: 13px; }
+  .key { border-radius: 5px; }
+}
+@media(max-height: 540px) {
+  main { --page-bottom: 5px; padding-top: 5px; }
+  .page-header { margin-bottom: 5px; }
+  .page-header h1 { font-size: 24px; }
+  .title-mark { width: 35px; font-size: 25px; }
+  .editor, .keyboard { padding: 6px; }
+  textarea { height: clamp(54px, 19dvh, 102px); }
+  .actions { margin-top: 4px; }
+  .actions button, .keyboard-toolbar button { min-height: 34px; }
+  .sticky-controls { padding-bottom: 5px; }
+  .keyboard-toolbar { padding-top: 4px; }
+}
+.keyboard-toolbar label { color: #b8d0e9; font-size: 13px; }
+#group-picker {
+  max-width: 100%;
+  min-height: 38px;
+  padding: 0 8px;
+  border: 1px solid var(--edge);
+  border-radius: 7px;
+  color: inherit;
+  background: #1e3351;
+  font: inherit;
+  font-size: 14px;
+}
+#panel-toggle { margin-inline-start: auto; }
+.key-group + .key-group { margin-top: 5px; }
+.key-group h2 {
+  margin: 2px 0 6px;
+  color: #b8d0e9;
+  font-size: 14px;
+  font-weight: 600;
+}
+.key-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(59px, 1fr)); gap: var(--row-gap); }
+.template-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+.key { font-size: clamp(16px, 3.8vw, 20px); }
+.key.caption { font-size: clamp(12px, 3.5vw, 16px); }
+.key-group:first-child .key { color: var(--accent); }
+@media(max-width: 360px) {
+  .keyboard-toolbar label { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); }
+}
+</style>
+</head>
+<body>
+<main>
+<header class="page-header">
+  <div class="title-mark" aria-hidden="true">∑</div>
+  <h1>Math billentyűzet</h1>
+  <p class="program-id">Program ID: 159DEC3E7E0311D0</p>
+</header>
+<div class="workspace">
+<div class="sticky-controls">
+<section class="editor" aria-label="Szövegszerkesztő">
+<div class="text-field">
+<textarea id="output" aria-label="Matematikai jegyzet" placeholder="Példa: ∫ sin(x) dx = −cos(x) + C" lang="hu" spellcheck="false" autocapitalize="off" autocomplete="off" inputmode="none"></textarea>
+<div class="caret-layer" aria-hidden="true"><div class="caret-measure"></div><div class="editor-caret" hidden></div></div>
+</div>
+<div class="actions"><button id="copy" type="button">Másolás</button><button id="clear" type="button">Törlés</button><button id="export" type="button">Export</button><span id="status" role="status"></span></div>
+</section>
+<div class="keyboard-toolbar">
+  <label for="group-picker">Ugrás a jelekhez</label>
+  <select id="group-picker" aria-controls="keyboard"></select>
+  <button type="button" id="panel-toggle" aria-expanded="true" aria-controls="keyboard-panel" aria-label="Billentyűzet összecsukása" title="Billentyűzet összecsukása">⌃</button>
+</div>
+</div>
+<section id="keyboard-panel" class="keyboard" aria-label="Matematikai képernyőbillentyűzet">
+<div id="keyboard-scroll" class="keyboard-scroll" role="region" aria-label="Görgethető billentyűk" tabindex="0">
+  <div id="keyboard" class="keyboard-rows"></div>
+</div>
+</section>
+</div>
+</main>
+<script>
+const output = document.getElementById('output');
+const textField = output.parentElement;
+const caretLayer = textField.querySelector('.caret-layer');
+const caretMeasure = textField.querySelector('.caret-measure');
+const editorCaret = textField.querySelector('.editor-caret');
+const caretRange = document.createRange();
+let caretFrame = 0;
+let revealCaret = false;
+
+function refreshCaret() {
+  caretFrame = 0;
+  const shouldReveal = revealCaret;
+  revealCaret = false;
+  const { selectionStart, selectionEnd, value } = output;
+  const showCaret = document.activeElement === output && selectionStart === selectionEnd;
+  if (!showCaret && !shouldReveal) {
+    editorCaret.hidden = true;
+    textField.classList.remove('has-caret');
+    return;
+  }
+
+  caretLayer.style.width = `${output.clientWidth}px`;
+  caretLayer.style.height = `${output.clientHeight}px`;
+  // Keep the final line measurable, including after a trailing newline.
+  const measureText = value + '\u200b';
+  if (caretMeasure.textContent !== measureText) caretMeasure.textContent = measureText;
+  caretRange.setStart(caretMeasure.firstChild, selectionStart);
+  caretRange.collapse(true);
+  let rect = caretRange.getBoundingClientRect();
+  // At a wrap boundary, a collapsed range may still point to the previous line.
+  caretRange.setEnd(caretMeasure.firstChild, selectionStart + 1);
+  const nextRect = caretRange.getBoundingClientRect();
+  if (nextRect.height && (!rect.height || nextRect.top - rect.top > rect.height / 2)) rect = nextRect;
+
+  const origin = caretMeasure.getBoundingClientRect();
+  if (shouldReveal && rect.height && output.scrollHeight > output.clientHeight) {
+    const style = getComputedStyle(output);
+    const lineHeight = parseFloat(style.lineHeight);
+    const paddingTop = parseFloat(style.paddingTop);
+    const paddingBottom = parseFloat(style.paddingBottom);
+    const line = Math.floor((rect.top + rect.height / 2 - origin.top - paddingTop) / lineHeight);
+    const lineTop = paddingTop + line * lineHeight;
+    if (lineTop < output.scrollTop + paddingTop) {
+      output.scrollTop = lineTop - paddingTop;
+    } else if (lineTop + lineHeight > output.scrollTop + output.clientHeight - paddingBottom) {
+      output.scrollTop = Math.ceil(lineTop + lineHeight + paddingBottom - output.clientHeight);
+    }
+  }
+  editorCaret.hidden = !showCaret || rect.height === 0;
+  textField.classList.toggle('has-caret', !editorCaret.hidden);
+  editorCaret.style.left = `${rect.left - origin.left - output.scrollLeft}px`;
+  const caretTop = rect.top - origin.top;
+  editorCaret.style.top = `${caretTop - output.scrollTop}px`;
+  editorCaret.style.height = `${rect.height}px`;
+}
+
+function scheduleCaret() {
+  if (!caretFrame) caretFrame = requestAnimationFrame(refreshCaret);
+}
+
+for (const event of ['focus', 'blur', 'input', 'click', 'keyup', 'select', 'scroll']) {
+  output.addEventListener(event, scheduleCaret);
+}
+document.addEventListener('selectionchange', scheduleCaret);
+new ResizeObserver(scheduleCaret).observe(output);
+const keyboard = document.getElementById('keyboard');
+const keyboardScroll = document.getElementById('keyboard-scroll');
+const status = document.getElementById('status');
+const draftKey = '159DEC3E7E0311D0';
+let draftDatabase;
+let draftChanged = false;
+let settingsChanged = false;
+let activeGroup = 0;
+const settingsKey = draftKey + ':settings';
+
+function showDraftError() {
+  status.textContent = 'Az automatikus mentés nem érhető el.';
+}
+
+function writeDraft() {
+  const transaction = draftDatabase.transaction('drafts', 'readwrite');
+  const drafts = transaction.objectStore('drafts');
+  transaction.addEventListener('abort', showDraftError);
+  if (output.value) {
+    drafts.put(output.value, draftKey);
+  } else {
+    drafts.delete(draftKey);
+  }
+}
+
+function saveDraft() {
+  draftChanged = true;
+  if (draftDatabase) writeDraft();
+}
+
+function saveSettings() {
+  settingsChanged = true;
+  if (draftDatabase) writeSettings();
+}
+
+function writeSettings() {
+  const transaction = draftDatabase.transaction('drafts', 'readwrite');
+  transaction.addEventListener('abort', showDraftError);
+  transaction.objectStore('drafts').put({ keyboardOpen: !keyboardPanel.hidden, activeGroup }, settingsKey);
+}
+
+function restoreSettings() {
+  if (settingsChanged) {
+    writeSettings();
+    return;
+  }
+  const reading = draftDatabase.transaction('drafts').objectStore('drafts').get(settingsKey);
+  reading.addEventListener('error', showDraftError);
+  reading.addEventListener('success', () => {
+    const settings = reading.result;
+    if (settingsChanged || !settings || typeof settings !== 'object') return;
+    keyboardPanel.hidden = settings.keyboardOpen === false;
+    if (Number.isInteger(settings.activeGroup) && groupElements[settings.activeGroup]) {
+      activeGroup = settings.activeGroup;
+      groupPicker.value = String(activeGroup);
+    }
+    updateKeyboardControls();
+    if (!keyboardPanel.hidden) jumpToGroup(activeGroup);
+  });
+}
+
+function restoreDraft() {
+  if (!window.indexedDB) {
+    showDraftError();
+    return;
+  }
+  let opening;
+  try {
+    opening = window.indexedDB.open('9062-keyboard', 1);
+  } catch {
+    showDraftError();
+    return;
+  }
+  opening.addEventListener('upgradeneeded', () => {
+    opening.result.createObjectStore('drafts');
+  });
+  opening.addEventListener('error', showDraftError);
+  opening.addEventListener('blocked', showDraftError);
+  opening.addEventListener('success', () => {
+    draftDatabase = opening.result;
+    draftDatabase.addEventListener('versionchange', () => {
+      draftDatabase.close();
+      draftDatabase = undefined;
+      showDraftError();
+    });
+    restoreSettings();
+    if (draftChanged) {
+      writeDraft();
+      return;
+    }
+    const reading = draftDatabase.transaction('drafts').objectStore('drafts').get(draftKey);
+    reading.addEventListener('error', showDraftError);
+    reading.addEventListener('success', () => {
+      if (draftChanged || typeof reading.result !== 'string') return;
+      output.value = reading.result;
+      output.setSelectionRange(output.value.length, output.value.length);
+      revealCaret = true;
+      scheduleCaret();
+    });
+  });
+}
+const graphemes = new Intl.Segmenter('hu', { granularity: 'grapheme' });
+const keyboardPanel = document.getElementById('keyboard-panel');
+const panelToggle = document.getElementById('panel-toggle');
+const stickyControls = document.querySelector('.sticky-controls');
+const groupPicker = document.getElementById('group-picker');
+
+const tex = String.raw;
+
+const groups = [
+  ['Szerkesztés', [
+    ['←', () => moveCaret(-1), 'Kurzor balra'],
+    ['→', () => moveCaret(1), 'Kurzor jobbra'],
+    ['Szóköz', ' '],
+    ['↵', '\n', 'Új sor'],
+    ['⌫', backspace, 'Visszatörlés'],
+    ['Kijelöl', selectAll, 'Minden szöveg kijelölése']
+  ]],
+  ['Számok', [...'0123456789']],
+  ['Műveletek és összehasonlítás', [...'+−×÷±∓=≠≈≡<>≤≥%!']],
+  ['Algebra', ['x', 'y', 'z', 'n', 'e', 'i', '(', ')', '[', ']', '{', '}', '|', '.', ',', '·']],
+  ['Függvények és analízis', [
+    '√', '∛', ['sin', 'sin()'], ['cos', 'cos()'], ['tan', 'tan()'],
+    ['ln', 'ln()'], ['log', 'log()'], '∫', '∑', '∏', '∂', ['lim', 'lim']
+  ]],
+  ['Görög betűk', [...'αβγδεζηθικλμνξοπρστυφχψω']],
+  ['Halmazok és logika', [...'∈∉⊂⊆⊄∪∩∅∀∃¬∧∨⇒⇔∞']],
+  ['Geometria és számhalmazok', [...'∠°′″⊥∥△↔ℕℤℚℝ']],
+  ['Kitevők és indexek', [...'⁰¹²³⁴⁵⁶⁷⁸⁹ⁿᵀ₀₁₂₃₄₅₆₇₈₉']],
+  ['Magyar ABC – kisbetűk', [...'aábcdeéfghiíjklmnoóöőpqrstuúüűvwxyz']],
+  ['Magyar ABC – nagybetűk', [...'AÁBCDEÉFGHIÍJKLMNOÓÖŐPQRSTUÚÜŰVWXYZ']],
+  ['Görög nagybetűk', [...'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ']],
+  ['További tudományos jelek', [...'∇∮∬∭ℂℵℏ⊗⊕⊙∝∼≅≃∣〈〉†']],
+  ['Írásjelek és LaTeX-karakterek', ['\\', '^', '_', '&', '$', '#', '~', '*', '/', "'", ':', ';', '-', '?', '"', '„', '”', '–']],
+  ['LaTeX – képletek és szerkezetek', [
+    ['Tört', tex`\frac{¦}{}`],
+    ['Gyök', tex`\sqrt{¦}`],
+    ['n. gyök', tex`\sqrt[¦]{}`],
+    ['Kitevő', tex`^{¦}`],
+    ['Alsó index', tex`_{¦}`],
+    ['Határérték', tex`\lim_{¦\to\infty}`],
+    ['Összeg', tex`\sum_{¦}^{}`],
+    ['Szorzat', tex`\prod_{¦}^{}`],
+    ['Integrál', tex`\int_{¦}^{}\!\,\mathrm{d}x`],
+    ['Derivált', tex`\frac{\mathrm{d}¦}{\mathrm{d}x}`],
+    ['Parciális', tex`\frac{\partial ¦}{\partial x}`],
+    ['Gradiens', tex`\nabla ¦`],
+    ['Vektor', tex`\vec{¦}`],
+    ['Norma', tex`\left\lVert ¦\right\rVert`],
+    ['Abszolút', tex`\left|¦\right|`],
+    ['Mátrix', tex`\begin{pmatrix}
+¦ & b \\
+c & d
+\end{pmatrix}`],
+    ['Determináns', tex`\begin{vmatrix}
+¦ & b \\
+c & d
+\end{vmatrix}`],
+    ['Esetek', tex`\begin{cases}
+¦ & \text{ha } x \geq 0 \\
+0 & \text{egyébként}
+\end{cases}`],
+    ['Igazítás', tex`\begin{aligned}
+¦ &= b \\
+  &= c
+\end{aligned}`],
+    ['Számozás', tex`\begin{equation}
+¦
+\end{equation}`],
+    ['Egyenlet', tex`\[
+¦
+\]`],
+    ['Képlet sorban', tex`\(¦\)`],
+    ['Szöveg', tex`\text{¦}`],
+    ['Számhalmaz', tex`\mathbb{¦}`],
+    ['Kalligrafikus', tex`\mathcal{¦}`],
+    ['Félkövér jel', tex`\boldsymbol{¦}`],
+    ['Felülvonás', tex`\overline{¦}`],
+    ['Kalap', tex`\hat{¦}`],
+    ['Binomiális', tex`\binom{¦}{}`],
+    ['Leképezés', tex`¦ \colon X \to Y`],
+    ['Tenzor', tex`¦^{\mu}{}_{\nu}`],
+    ['Kommutátor', tex`\left[¦, B\right]`],
+    ['Bra', tex`\langle ¦ \rvert`],
+    ['Ket', tex`\lvert ¦ \rangle`],
+    ['Bra–ket', tex`\langle ¦ \mid \phi \rangle`],
+    ['Kongruencia', tex`¦ \equiv b \pmod{n}`]
+  ]]
+];
+
+const groupElements = groups.map(([name, keys], index) => {
+  const section = document.createElement('section');
+  const heading = document.createElement('h2');
+  const grid = document.createElement('div');
+  section.className = 'key-group';
+  heading.id = `math-group-${index}`;
+  heading.textContent = name;
+  section.setAttribute('aria-labelledby', heading.id);
+  grid.className = index === groups.length - 1 ? 'key-grid template-grid' : 'key-grid';
+  for (const key of keys) {
+    const [caption, action, label] = typeof key === 'string' ? [key, key] : key;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = Array.from(caption).length > 1 ? 'key caption' : 'key';
+    button.textContent = caption;
+    if (label) button.setAttribute('aria-label', label);
+    if (typeof action === 'string' && action.includes('¦')) {
+      button.title = action.replace('¦', '…');
+    }
+    button.addEventListener('pointerdown', keepEditorFocus);
+    button.addEventListener('click', () => {
+      if (typeof action === 'function') {
+        action();
+      } else if (action.includes('¦')) {
+        insertTemplate(action);
+      } else if (action.endsWith('()')) {
+        insertTemplate(action.slice(0, -1) + '¦)');
+      } else {
+        setText(action);
+      }
+    });
+    grid.append(button);
+  }
+  section.append(heading, grid);
+  groupPicker.add(new Option(name, String(index)));
+  return section;
+});
+keyboard.append(...groupElements);
+
+function jumpToGroup(index) {
+  const group = groupElements[index];
+  const top = group.getBoundingClientRect().top - keyboardScroll.getBoundingClientRect().top;
+  keyboardScroll.scrollTop += top - 3;
+}
+
+function insertTemplate(template) {
+  const { selectionStart, selectionEnd, value } = output;
+  const selected = value.slice(selectionStart, selectionEnd);
+  const [before, after] = template.split('¦');
+  setText(before + selected + after);
+  if (!selected) {
+    const cursor = selectionStart + before.length;
+    output.setSelectionRange(cursor, cursor);
+  }
+}
+
+function backspace() {
+  const { selectionStart, selectionEnd, value } = output;
+  const start = selectionStart === selectionEnd && selectionStart > 0
+    ? graphemes.segment(value).containing(selectionStart - 1).index
+    : selectionStart;
+  setText('', start, selectionEnd);
+}
+
+function selectAll() {
+  output.focus({ preventScroll: true });
+  output.select();
+}
+
+function moveCaret(direction) {
+  const { selectionStart, selectionEnd, value } = output;
+  let next = direction < 0 ? selectionStart : selectionEnd;
+  if (selectionStart === selectionEnd) {
+    const segment = graphemes.segment(value).containing(direction < 0 ? next - 1 : next);
+    if (segment) next = direction < 0 ? segment.index : segment.index + segment.segment.length;
+  }
+  output.setSelectionRange(next, next);
+  revealCaret = true;
+  scheduleCaret();
+}
+
+
+function keepEditorFocus(event) {
+  if (event.pointerType === 'touch' && keyboardScroll.contains(event.currentTarget)) return;
+  event.preventDefault();
+  output.focus({ preventScroll: true });
+}
+
+function setText(text, start = output.selectionStart, end = output.selectionEnd) {
+  output.setRangeText(text, start, end, 'end');
+  revealCaret = true;
+  scheduleCaret();
+  status.textContent = '';
+  saveDraft();
+}
+
+output.addEventListener('input', () => {
+  status.textContent = '';
+  saveDraft();
+});
+document.querySelectorAll('.actions button').forEach((button) => {
+  button.addEventListener('pointerdown', keepEditorFocus);
+});
+document.getElementById('clear').addEventListener('click', () => setText('', 0, output.value.length));
+document.getElementById('copy').addEventListener('click', async () => {
+  if (!output.value) {
+    status.textContent = 'A szövegmező üres.';
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(output.value);
+    status.textContent = 'Másolva.';
+  } catch {
+    output.focus();
+    output.select();
+    status.textContent = document.execCommand('copy') ? 'Másolva.' : 'A szöveg kijelölve.';
+  }
+});
+
+document.getElementById('export').addEventListener('click', () => {
+  if (!output.value) {
+    status.textContent = 'A szövegmező üres.';
+    return;
+  }
+
+  const savedAt = new Date();
+  const unixMilliseconds = savedAt.getTime();
+  const localTime = savedAt.toLocaleString('hu-HU', {
+    year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'shortOffset'
+  });
+  const programLabel = document.querySelector('.program-id').textContent;
+  const escapedText = output.value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+
+  const html = `<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Math jegyzet</title>
+<style>
+body{margin:clamp(16px,5vw,48px) auto;padding:0 16px;max-width:72ch;font:18px/1.6 system-ui,sans-serif}
+header{padding-bottom:12px;margin-bottom:20px;border-bottom:1px solid #aaa;font-size:14px}
+main{white-space:pre-wrap;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<header>
+<div>${programLabel}</div>
+<div>Exportálás ideje: <time datetime="${savedAt.toISOString()}">${localTime}</time></div>
+<div>Unix (ms): ${unixMilliseconds}</div>
+</header>
+<main>${escapedText}</main>
+</body>
+</html>`;
+
+  const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `math-${unixMilliseconds}.html`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+// Focus after a tap so dragging on a key can scroll the panel normally.
+keyboardScroll.addEventListener('click', (event) => {
+  if (event.detail > 0 && event.target.closest('button')) output.focus({ preventScroll: true });
+}, { capture: true });
+
+function updateKeyboardControls() {
+  groupPicker.disabled = keyboardPanel.hidden;
+  const open = !keyboardPanel.hidden;
+  const toggleLabel = open ? 'Billentyűzet összecsukása' : 'Billentyűzet lenyitása';
+  stickyControls.classList.toggle('is-collapsed', !open);
+  panelToggle.setAttribute('aria-expanded', String(open));
+  panelToggle.setAttribute('aria-label', toggleLabel);
+  panelToggle.title = toggleLabel;
+  panelToggle.textContent = open ? '⌃' : '⌄';
+}
+
+groupPicker.addEventListener('change', () => {
+  activeGroup = Number(groupPicker.value);
+  jumpToGroup(activeGroup);
+  saveSettings();
+});
+
+panelToggle.addEventListener('click', () => {
+  keyboardPanel.hidden = !keyboardPanel.hidden;
+  updateKeyboardControls();
+  if (!keyboardPanel.hidden && !keyboardScroll.scrollTop) jumpToGroup(activeGroup);
+  saveSettings();
+});
+
+updateKeyboardControls();
+restoreDraft();
+</script>
+</body>
+</html>
