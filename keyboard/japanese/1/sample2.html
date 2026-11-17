@@ -13,7 +13,7 @@ body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#523
 main{width:min(100% - 32px,850px);margin:auto;padding:clamp(30px,8vh,76px) 0 32px}
 .program-id{margin:0 0 12px;padding-inline:2px;color:#e4bec9;font:600 13px/1.4 ui-monospace,monospace;letter-spacing:.08em}
 .editor,.keyboard{border:1px solid var(--edge);background:var(--surface);border-radius:18px;padding:14px}
-textarea{padding:13px;font:inherit;font-size:20px}
+textarea{padding:13px;font:inherit;font-size:20px;line-height:1.4}
 textarea{display:block;width:100%;min-height:142px;resize:vertical;background:#20161b;color:inherit;border:1px solid var(--edge);border-radius:10px;caret-color:var(--accent)}
 textarea::placeholder{color:#e4bec9;font-size:16px}
 .actions{display:grid;grid-template-columns:auto auto auto minmax(0,1fr) auto;grid-template-areas:"copy clear ime status export";gap:8px;align-items:center;margin-top:10px}
@@ -203,8 +203,49 @@ function keepEditorFocus(event) {
   output.focus({ preventScroll: true });
 }
 
+function revealCaret() {
+  if (output.scrollHeight <= output.clientHeight) return;
+
+  // Match the textarea's wrapping without moving its selection or scrolling the page.
+  const style = getComputedStyle(output);
+  const mirror = document.createElement('div');
+  Object.assign(mirror.style, {
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    visibility: 'hidden',
+    width: `${output.clientWidth}px`,
+    padding: style.padding,
+    font: style.font,
+    whiteSpace: 'pre-wrap',
+    overflowWrap: 'break-word'
+  });
+  const text = document.createTextNode(output.value + '\u200b');
+  mirror.append(text);
+  document.body.append(mirror);
+
+  const caret = document.createRange();
+  caret.setStart(text, output.selectionEnd);
+  caret.setEnd(text, output.selectionEnd + 1);
+  const lineHeight = parseFloat(style.lineHeight);
+  const paddingTop = parseFloat(style.paddingTop);
+  const paddingBottom = parseFloat(style.paddingBottom);
+  const rect = caret.getBoundingClientRect();
+  const textTop = mirror.getBoundingClientRect().top + paddingTop;
+  const line = Math.floor((rect.top + rect.height / 2 - textTop) / lineHeight);
+  const lineTop = paddingTop + line * lineHeight;
+  mirror.remove();
+
+  if (lineTop < output.scrollTop + paddingTop) {
+    output.scrollTop = lineTop - paddingTop;
+  } else if (lineTop + lineHeight > output.scrollTop + output.clientHeight - paddingBottom) {
+    output.scrollTop = Math.ceil(lineTop + lineHeight + paddingBottom - output.clientHeight);
+  }
+}
+
 function setText(text, start = output.selectionStart, end = output.selectionEnd) {
   output.setRangeText(text, start, end, 'end');
+  revealCaret();
   status.textContent = '';
   saveDraft();
 }
