@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chess billentyűzet · Útmutató</title>
+<style>
+:root { color-scheme: dark; font-family: "Instrument Sans", system-ui, sans-serif; background: #1c1411; color: #f7ead8; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse at top, #4d3326, #1c1411 75%); }
+main { width: min(100% - 32px, 780px); margin: auto; padding: clamp(24px, 6vw, 54px) 0; }
+h1, h2 { font-family: "Instrument Serif", Georgia, serif; font-weight: 500; }
+h1 { font-size: clamp(30px, 6vw, 46px); margin: 0 0 8px; }
+h2 { margin: 0 0 15px; font-size: 27px; }
+p { line-height: 1.6; margin: 0 0 10px; }
+section { background: #2c211b; border: 1px solid #6f503d; border-radius: 14px; padding: clamp(14px, 4vw, 24px); margin: 18px 0; }
+dl { display: grid; grid-template-columns: max-content 1fr; gap: 12px 20px; margin: 0; }
+dt { color: #edb987; font-weight: 700; }
+dd { margin: 0; line-height: 1.5; }
+ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 8px; list-style: none; padding: 0; margin: 0; }
+a { color: #edb987; }
+li a { display: grid; gap: 3px; padding: 10px; text-decoration: none; background: #382920; border: 1px solid #6f503d; border-radius: 8px; }
+li a:hover { background: #51382b; text-decoration: underline; }
+a:focus-visible { outline: 2px solid #edb987; outline-offset: 2px; }
+code { font-size: .87em; }
+@media(max-width: 480px) {
+  dl { grid-template-columns: 1fr; gap: 4px; }
+  dd { margin-bottom: 8px; }
+  ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  li code { font-size: clamp(9px, 3vw, 13px); }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>♞ Chess billentyűzet</h1>
+<p>Az 1-es verzió útmutatója</p>
+<section>
+<h2>Használat</h2>
+<dl>
+  <dt>Jelölés</dt><dd>Magyar módban <code>Hf3</code>, angol módban <code>Nf3</code>, figurás módban <code>♘f3</code> írható. A módváltás a következő beírt bábukra érvényes.</dd>
+  <dt>Sakk és ABC</dt><dd>A sakkbillentyűkön a bábuk, mezőjelek, sáncolás, eredmények és elemzőjelek érhetők el. Az ABC magyar szöveges jegyzetekhez használható.</dd>
+  <dt>Görgetés</dt><dd>A szövegmező és a módváltók együtt maradnak felül. A gombsorok külön görgethetők. A jobb oldali nyíllal az egész billentyűpanel összecsukható és újra kinyitható.</dd>
+  <dt>Automatikus mentés</dt><dd>Minden minta a saját böngészőtárában menti a szöveget, a jelölést, az ABC vagy sakk nézetet, a nagybetű- és jelnézetet, valamint az emoji- és billentyűpanel állapotát. A Törlés gomb a szöveget üríti.</dd>
+  <dt>Export</dt><dd>A Másolás a vágólapra teszi a jegyzetet. A HTML-export tartalmazza a Program ID-t és az időbélyeget.</dd>
+</dl>
+</section>
+<section>
+<h2>Mind a 24 minta</h2>
+<ul>
+    <li><a href="sample1.html">Minta 1<code>629A631DF2739E08</code></a></li>
+    <li><a href="sample2.html">Minta 2<code>E98FC34927A72496</code></a></li>
+    <li><a href="sample3.html">Minta 3<code>9783960ACFF20828</code></a></li>
+    <li><a href="sample4.html">Minta 4<code>A9608C1B1FD22674</code></a></li>
+    <li><a href="sample5.html">Minta 5<code>CB62560460752CCF</code></a></li>
+    <li><a href="sample6.html">Minta 6<code>19850E6D5B3E74B5</code></a></li>
+    <li><a href="sample7.html">Minta 7<code>5273DF2DA0D668F4</code></a></li>
+    <li><a href="sample8.html">Minta 8<code>B213911AF0DCB84E</code></a></li>
+    <li><a href="sample9.html">Minta 9<code>009ACCF74C8069FE</code></a></li>
+    <li><a href="sample10.html">Minta 10<code>65BF9FCB3A559CD9</code></a></li>
+    <li><a href="sample11.html">Minta 11<code>16A09C6FBADA2DEF</code></a></li>
+    <li><a href="sample12.html">Minta 12<code>7A50F69765B06D0D</code></a></li>
+    <li><a href="sample13.html">Minta 13<code>87364515E37913FF</code></a></li>
+    <li><a href="sample14.html">Minta 14<code>DCA45D47BBAC1EDD</code></a></li>
+    <li><a href="sample15.html">Minta 15<code>FA8686BD56BE2C90</code></a></li>
+    <li><a href="sample16.html">Minta 16<code>D581A4700738E353</code></a></li>
+    <li><a href="sample17.html">Minta 17<code>0087BC2A5BE66C05</code></a></li>
+    <li><a href="sample18.html">Minta 18<code>1C947652176C1267</code></a></li>
+    <li><a href="sample19.html">Minta 19<code>1659C04FBAF7F545</code></a></li>
+    <li><a href="sample20.html">Minta 20<code>D22F8FC889C830ED</code></a></li>
+    <li><a href="sample21.html">Minta 21<code>B5AD7F5D920BEF13</code></a></li>
+    <li><a href="sample22.html">Minta 22<code>A4C0B453BAC7BAA1</code></a></li>
+    <li><a href="sample23.html">Minta 23<code>3C9FB87933742923</code></a></li>
+    <li><a href="sample24.html">Minta 24<code>CCF26415B149C8E6</code></a></li>
+</ul>
+</section>
+</main>
+</body>
+</html>

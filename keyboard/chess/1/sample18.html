@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chess billentyűzet</title>
+<link rel="icon" href="data:image/png;base64,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" type="image/png">
+<meta name="description" content="Sakkbillentyűzet játszmák lejegyzéséhez magyar, angol vagy figurás jelöléssel.">
+<style>
+:root {
+  color-scheme: dark;
+  font-family: "Instrument Sans", system-ui, sans-serif;
+  background: #1c1411;
+  color: #f7ead8;
+  --surface: #2c211b;
+  --edge: #6f503d;
+  --accent: #edb987;
+  --key-height: 44px;
+  --row-gap: 7px;
+  --visible-rows: 8;
+}
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at 50% 0%, #4d3326 0%, #221813 65%, #1c1411 100%);
+}
+main {
+  width: min(100% - 32px, 800px);
+  margin: auto;
+  padding: clamp(10px, 3dvh, 28px) 0 12px;
+}
+.page-header { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 1px 13px; margin-bottom: 18px; }
+.title-mark {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 49px;
+  aspect-ratio: 1;
+  border: 1px solid #9b6c4c;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #593a2b, #2c201b);
+  color: #f5ca98;
+  font: 34px/1 "DejaVu Sans", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;
+}
+h1 { margin: 0; font: 500 clamp(27px, 5vw, 43px)/1.1 "Instrument Serif", Georgia, serif; letter-spacing: -.025em; }
+.program-id { margin: 2px 0 0; color: #d2b39a; font: 600 11px/1.4 ui-monospace, monospace; letter-spacing: .06em; }
+* { box-sizing: border-box; }
+.editor, .keyboard {
+  padding: 14px;
+  border: 1px solid var(--edge);
+  border-radius: 15px;
+  background: var(--surface);
+  box-shadow: 0 12px 32px #130c0960;
+}
+.sticky-controls {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding-bottom: 9px;
+  border-radius: 15px 15px 0 0;
+  background: #2c211b;
+}
+.sticky-controls.is-collapsed { padding-bottom: 0; border-radius: 15px; }
+.text-field { position: relative; }
+textarea, .caret-measure {
+  padding: 12px;
+  font: 19px/1.45 "DejaVu Sans", "Segoe UI Symbol", "Noto Sans Symbols 2", system-ui, sans-serif;
+}
+textarea {
+  display: block;
+  width: 100%;
+  height: clamp(84px, 21vh, 180px);
+  height: clamp(72px, 21dvh, 180px);
+  resize: none;
+  outline: none;
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  background: #211813;
+  color: inherit;
+  caret-color: var(--accent);
+}
+textarea:focus { border-color: #b5815d; }
+textarea::placeholder { color: #b69a85; }
+
+.caret-layer{position:absolute;top:1px;left:1px;overflow:hidden;pointer-events:none}
+.caret-measure{visibility:hidden;white-space:pre-wrap;overflow-wrap:break-word}
+.editor-caret{position:absolute;width:3px;background:var(--accent);animation:caret-blink 1s step-end infinite}
+@keyframes caret-blink{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.editor-caret{animation:none}}
+@media(forced-colors:none){
+  .text-field.has-caret textarea{caret-color:transparent}
+}
+@media(forced-colors:active){.caret-layer{visibility:hidden}}
+.actions, .keyboard-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+.actions { margin-top: 10px; }
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: 1px solid var(--edge);
+  border-radius: 7px;
+  background: #382920;
+  touch-action: manipulation;
+}
+button:hover { background: #51382b; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; z-index: 1; }
+.actions button, .keyboard-toolbar button { min-height: 40px; padding: 0 12px; font-size: 14px; font-weight: 650; }
+#copy, .keyboard-toolbar button[aria-pressed=true] { color: #2a1b14; background: var(--accent); border-color: var(--accent); }
+#copy:hover, .keyboard-toolbar button[aria-pressed=true]:hover { background: #ffca99; }
+#export { margin-inline-start: auto; border-color: #ae7a55; color: #ffcd9e; }
+#status { flex-basis: 100%; color: #dfbea3; font-size: 13px; }
+#status:empty { display: none; }
+.keyboard {
+  border-radius: 0 0 15px 15px;
+  border-top: 0;
+  padding-top: 4px;
+}
+.keyboard-scroll {
+  max-height: calc(var(--visible-rows) * (var(--key-height) + var(--row-gap)) - var(--row-gap) + 8px);
+  overflow-y: auto;
+  scroll-snap-type: y proximity;
+  scroll-padding-block: 3px 5px;
+  scrollbar-width: thin;
+  scrollbar-color: #ae7a55 #2c211b;
+  scrollbar-gutter: stable;
+  padding: 3px 4px 5px 3px;
+}
+.keyboard-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.keyboard-toolbar {
+  justify-content: space-between;
+  padding: 9px 14px 0;
+}
+.is-collapsed .keyboard-toolbar { padding-bottom: 9px; }
+.keyboard-toolbar #panel-toggle { min-width: 36px; padding-inline: 7px; font-size: 20px; }
+#notation { display: flex; gap: 4px; }
+#notation[hidden] { display: none; }
+#layout-toggle { margin-inline-start: auto; }
+.keyboard-rows { display: grid; gap: var(--row-gap); }
+.emoji-panel:not([hidden]) { margin-top: var(--row-gap); }
+.row { display: flex; gap: 5px; scroll-snap-align: start; }
+.key {
+  flex: 1 1 0;
+  min-width: 0;
+  height: var(--key-height);
+  padding: 0;
+  font-size: clamp(14px, 3.5vw, 19px);
+  font-weight: 650;
+  background: linear-gradient(180deg, #433026, #37271f);
+  box-shadow: 0 2px 0 #1b120d;
+  user-select: none;
+}
+.key:hover { background: #654633; }
+.key:active { transform: translateY(2px); box-shadow: none; }
+.row .piece {
+  position: relative;
+  font-family: "DejaVu Sans", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;
+  font-size: clamp(24px, 6vw, 32px);
+  font-weight: 400;
+  line-height: 1;
+}
+.piece small { position: absolute; inset: auto 5px 3px auto; color: inherit; font: 600 10px/1 system-ui, sans-serif; }
+.light-pieces .key { background: #dbb68c; border-color: #ebc39c; color: #33231c; }
+.light-pieces .key:hover { background: #f2cda5; }
+.dark-pieces .key { background: #4c3429; color: #fae5c4; }
+.dark-pieces .key:hover { background: #6d4938; }
+.result-keys .key { color: #f4c499; }
+.key.special { flex: 1.55; color: #f4c499; font-size: clamp(13px, 3vw, 16px); }
+.key[aria-pressed=true] { background: var(--accent); color: #2a1b14; }
+.key.space { flex: 4; }
+.emoji-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(40px, 1fr)); gap: var(--row-gap); }
+.emoji-panel[hidden] { display: none; }
+.emoji-panel button { height: var(--key-height); padding: 0; font-size: 22px; scroll-snap-align: start; }
+@media(max-width: 570px) {
+  main { width: calc(100% - 16px); }
+  :root { --row-gap: 5px; --visible-rows: 7; }
+  .editor { padding: 8px; border-radius: 11px; }
+  .keyboard { padding: 4px 8px 8px; border-radius: 0 0 11px 11px; }
+  .keyboard-toolbar { padding-inline: 8px; gap: 4px; }
+  .keyboard-toolbar button { min-height: 36px; padding-inline: 7px; font-size: 13px; }
+  .row { gap: 3px; }
+  .key { border-radius: 5px; }
+  .keyboard-rows[data-layout="abc"] .key { font-size: clamp(11px, 3vw, 15px); }
+}
+@media(max-height: 800px) { :root { --visible-rows: 6; } }
+@media(max-height: 690px) { :root { --visible-rows: 5; } }
+@media(max-height: 540px) {
+  :root { --visible-rows: 4; }
+  main { padding-block: 5px; }
+  .page-header { margin-bottom: 5px; }
+  .page-header h1 { font-size: 24px; }
+  .title-mark { width: 35px; font-size: 25px; }
+  .editor, .keyboard { padding: 6px; }
+  textarea { height: clamp(54px, 19dvh, 102px); }
+  .actions { margin-top: 4px; }
+  .actions button, .keyboard-toolbar button { min-height: 34px; }
+  .sticky-controls { padding-bottom: 5px; }
+  .keyboard-toolbar { padding-top: 4px; }
+}
+@media(max-height: 390px) { :root { --visible-rows: 3; } }
+</style>
+</head>
+<body>
+<main>
+<header class="page-header">
+  <div class="title-mark" aria-hidden="true">♞</div>
+  <h1>Chess billentyűzet</h1>
+  <p class="program-id">Program ID: 1C947652176C1267</p>
+</header>
+<div class="sticky-controls">
+<section class="editor" aria-label="Szövegszerkesztő">
+<div class="text-field">
+<textarea id="output" aria-label="Játszma vagy jegyzet" placeholder="1. e4 e5 2. Hf3…" lang="hu" spellcheck="false" autocapitalize="off" autocomplete="off" inputmode="none"></textarea>
+<div class="caret-layer" aria-hidden="true"><div class="caret-measure"></div><div class="editor-caret" hidden></div></div>
+</div>
+<div class="actions"><button id="copy" type="button">Másolás</button><button id="clear" type="button">Törlés</button><button id="export" type="button">Export</button><span id="status" role="status"></span></div>
+</section>
+<div class="keyboard-toolbar">
+  <div id="notation" role="group" aria-label="Jelölési mód">
+    <button type="button" data-mode="hu" aria-pressed="true">Magyar</button>
+    <button type="button" data-mode="en" aria-pressed="false">Angol</button>
+    <button type="button" data-mode="figures" aria-pressed="false">Figurák</button>
+  </div>
+  <button type="button" id="layout-toggle" aria-pressed="false" aria-controls="keyboard">ABC</button>
+  <button type="button" id="panel-toggle" aria-expanded="true" aria-controls="keyboard-panel" aria-label="Billentyűzet összecsukása" title="Billentyűzet összecsukása">⌃</button>
+</div>
+</div>
+<section id="keyboard-panel" class="keyboard" aria-label="Chess képernyőbillentyűzet">
+<div id="keyboard-scroll" class="keyboard-scroll" role="region" aria-label="Görgethető billentyűk" tabindex="0">
+  <div id="keyboard" class="keyboard-rows"></div>
+  <div id="emoji-panel" class="emoji-panel" role="group" aria-label="Emoji" hidden></div>
+</div>
+</section>
+</main>
+<script>
+const output = document.getElementById('output');
+const textField = output.parentElement;
+const caretLayer = textField.querySelector('.caret-layer');
+const caretMeasure = textField.querySelector('.caret-measure');
+const editorCaret = textField.querySelector('.editor-caret');
+const caretRange = document.createRange();
+let caretFrame = 0;
+let revealCaret = false;
+
+function refreshCaret() {
+  caretFrame = 0;
+  const shouldReveal = revealCaret;
+  revealCaret = false;
+  const { selectionStart, selectionEnd, value } = output;
+  const showCaret = document.activeElement === output && selectionStart === selectionEnd;
+  if (!showCaret && !shouldReveal) {
+    editorCaret.hidden = true;
+    textField.classList.remove('has-caret');
+    return;
+  }
+
+  caretLayer.style.width = `${output.clientWidth}px`;
+  caretLayer.style.height = `${output.clientHeight}px`;
+  // Keep the final line measurable, including after a trailing newline.
+  const measureText = value + '\u200b';
+  if (caretMeasure.textContent !== measureText) caretMeasure.textContent = measureText;
+  caretRange.setStart(caretMeasure.firstChild, selectionStart);
+  caretRange.collapse(true);
+  let rect = caretRange.getBoundingClientRect();
+  // At a wrap boundary, a collapsed range may still point to the previous line.
+  caretRange.setEnd(caretMeasure.firstChild, selectionStart + 1);
+  const nextRect = caretRange.getBoundingClientRect();
+  if (nextRect.height && (!rect.height || nextRect.top - rect.top > rect.height / 2)) rect = nextRect;
+
+  const origin = caretMeasure.getBoundingClientRect();
+  if (shouldReveal && rect.height && output.scrollHeight > output.clientHeight) {
+    const style = getComputedStyle(output);
+    const lineHeight = parseFloat(style.lineHeight);
+    const paddingTop = parseFloat(style.paddingTop);
+    const paddingBottom = parseFloat(style.paddingBottom);
+    const line = Math.floor((rect.top + rect.height / 2 - origin.top - paddingTop) / lineHeight);
+    const lineTop = paddingTop + line * lineHeight;
+    if (lineTop < output.scrollTop + paddingTop) {
+      output.scrollTop = lineTop - paddingTop;
+    } else if (lineTop + lineHeight > output.scrollTop + output.clientHeight - paddingBottom) {
+      output.scrollTop = Math.ceil(lineTop + lineHeight + paddingBottom - output.clientHeight);
+    }
+  }
+  editorCaret.hidden = !showCaret || rect.height === 0;
+  textField.classList.toggle('has-caret', !editorCaret.hidden);
+  editorCaret.style.left = `${rect.left - origin.left - output.scrollLeft}px`;
+  const caretTop = rect.top - origin.top;
+  editorCaret.style.top = `${caretTop - output.scrollTop}px`;
+  editorCaret.style.height = `${rect.height}px`;
+}
+
+function scheduleCaret() {
+  if (!caretFrame) caretFrame = requestAnimationFrame(refreshCaret);
+}
+
+for (const event of ['focus', 'blur', 'input', 'click', 'keyup', 'select', 'scroll']) {
+  output.addEventListener(event, scheduleCaret);
+}
+document.addEventListener('selectionchange', scheduleCaret);
+new ResizeObserver(scheduleCaret).observe(output);
+const keyboard = document.getElementById('keyboard');
+const keyboardScroll = document.getElementById('keyboard-scroll');
+const status = document.getElementById('status');
+const draftKey = '1C947652176C1267';
+let draftDatabase;
+let draftChanged = false;
+let settingsChanged = false;
+const settingsKey = draftKey + ':settings';
+
+function showDraftError() {
+  status.textContent = 'Az automatikus mentés nem érhető el.';
+}
+
+function writeDraft() {
+  const transaction = draftDatabase.transaction('drafts', 'readwrite');
+  const drafts = transaction.objectStore('drafts');
+  transaction.addEventListener('abort', showDraftError);
+  if (output.value) {
+    drafts.put(output.value, draftKey);
+  } else {
+    drafts.delete(draftKey);
+  }
+}
+
+function saveDraft() {
+  draftChanged = true;
+  if (draftDatabase) writeDraft();
+}
+
+function saveSettings() {
+  settingsChanged = true;
+  if (draftDatabase) writeSettings();
+}
+
+function writeSettings() {
+  const transaction = draftDatabase.transaction('drafts', 'readwrite');
+  transaction.addEventListener('abort', showDraftError);
+  transaction.objectStore('drafts').put({
+    notationMode, chessLayout, caps, symbols,
+    emojiOpen: !emojiPanel.hidden,
+    keyboardOpen: !keyboardPanel.hidden
+  }, settingsKey);
+}
+
+function restoreSettings() {
+  if (settingsChanged) {
+    writeSettings();
+    return;
+  }
+  const reading = draftDatabase.transaction('drafts').objectStore('drafts').get(settingsKey);
+  reading.addEventListener('error', showDraftError);
+  reading.addEventListener('success', () => {
+    const settings = reading.result;
+    if (settingsChanged || !settings || typeof settings !== 'object') return;
+    if (Object.hasOwn(notationExamples, settings.notationMode)) notationMode = settings.notationMode;
+    chessLayout = settings.chessLayout !== false;
+    caps = settings.caps === true;
+    symbols = settings.symbols === true;
+    emojiPanel.hidden = settings.emojiOpen !== true;
+    keyboardPanel.hidden = settings.keyboardOpen === false;
+    updateKeyboardControls();
+    render();
+  });
+}
+
+function restoreDraft() {
+  if (!window.indexedDB) {
+    showDraftError();
+    return;
+  }
+  let opening;
+  try {
+    opening = window.indexedDB.open('9062-keyboard', 1);
+  } catch {
+    showDraftError();
+    return;
+  }
+  opening.addEventListener('upgradeneeded', () => {
+    opening.result.createObjectStore('drafts');
+  });
+  opening.addEventListener('error', showDraftError);
+  opening.addEventListener('blocked', showDraftError);
+  opening.addEventListener('success', () => {
+    draftDatabase = opening.result;
+    draftDatabase.addEventListener('versionchange', () => {
+      draftDatabase.close();
+      draftDatabase = undefined;
+      showDraftError();
+    });
+    restoreSettings();
+    if (draftChanged) {
+      writeDraft();
+      return;
+    }
+    const reading = draftDatabase.transaction('drafts').objectStore('drafts').get(draftKey);
+    reading.addEventListener('error', showDraftError);
+    reading.addEventListener('success', () => {
+      if (draftChanged || typeof reading.result !== 'string') return;
+      output.value = reading.result;
+      output.setSelectionRange(output.value.length, output.value.length);
+      revealCaret = true;
+      scheduleCaret();
+    });
+  });
+}
+const emojiPanel = document.getElementById('emoji-panel');
+const emojis = ['😁', '😀', '😄', '😂', '🤣', '😉', '😊', '😍', '🥰', '😎', '🤔', '😮', '😢', '😭', '😡', '👍', '👎', '✌️', '👏', '🙏', '❤️', '🔥', '✨', '🎉'];
+const graphemes = new Intl.Segmenter('hu', { granularity: 'grapheme' });
+const rows = [
+  [...'0123456789öüó', 'backspace'],
+  [...'qwertzuiopőú'],
+  [...'asdfghjkléáű', 'enter'],
+  ['shift', ...'íyxcvbnm,.-', 'caps'],
+  ['symbols', 'space', 'emoji']
+];
+const shifted = new Map(Array.from('0123456789,.-', (key, index) => [key, "§'\"+!%/=()?:_"[index]]));
+const writingMarks = [...'„”»«—–…!?;:'];
+const symbolRows = [
+  [...'0123456789-=', 'backspace'],
+  [...'!?\"§%:;()[]{}'],
+  [...'+*/\\_@#$&<>', 'enter'],
+  [...'€£', "'", '’', '°'],
+  ['symbols', 'space', 'emoji']
+];
+const special = {
+  backspace: ['⌫', 'Visszatörlés'],
+  enter: ['↵', 'Új sor'],
+  shift: ['⇧', 'Shift a következő karakterhez'],
+  caps: ['⇧⇧', 'Folyamatos nagybetű'],
+  space: ['Szóköz', 'Szóköz'],
+  emoji: ['😁', 'Emoji']
+};
+let shift = false;
+let caps = false;
+let symbols = false;
+let chessLayout = true;
+let notationMode = 'hu';
+
+const pieceNames = ['király', 'vezér', 'bástya', 'futó', 'huszár', 'gyalog'];
+const pieceLetters = { hu: 'KVBFH', en: 'KQRBN' };
+const whitePieces = [...'♔♕♖♗♘♙'];
+const blackPieces = [...'♚♛♜♝♞♟'];
+const notation = document.getElementById('notation');
+const layoutToggle = document.getElementById('layout-toggle');
+const keyboardPanel = document.getElementById('keyboard-panel');
+const panelToggle = document.getElementById('panel-toggle');
+const stickyControls = document.querySelector('.sticky-controls');
+const notationExamples = { hu: '1. e4 e5 2. Hf3…', en: '1. e4 e5 2. Nf3…', figures: '1. e4 e5 2. ♘f3…' };
+const chessRows = [
+  ['Világos bábuk', whitePieces, 'light-pieces'],
+  ['Sötét bábuk', blackPieces, 'dark-pieces'],
+  ['Oszlopok', [...'abcdefgh']],
+  ['Sorok', [...'12345678']],
+  ['Lépésjelek', ['x', '+', '#', '=', 'O-O', 'O-O-O']],
+  ['Lépésértékelés', ['!', '?', '!!', '??', '!?', '?!']],
+  ['Állásértékelés és változatok', ['±', '∓', '∞', '(', ')', '.', '…']],
+  ['Eredmény és további számjegyek', ['1-0', '0-1', '½–½', '0', '9'], 'result-keys'],
+  ['Szerkesztés', ['left', 'right', 'space', 'enter', 'backspace', 'emoji']]
+];
+Object.assign(special, {
+  left: ['←', 'Kurzor balra'],
+  right: ['→', 'Kurzor jobbra']
+});
+
+function moveCaret(direction) {
+  const { selectionStart, selectionEnd, value } = output;
+  let next = direction < 0 ? selectionStart : selectionEnd;
+  if (selectionStart === selectionEnd) {
+    const segment = graphemes.segment(value).containing(direction < 0 ? next - 1 : next);
+    if (segment) next = direction < 0 ? segment.index : segment.index + segment.segment.length;
+  }
+  output.setSelectionRange(next, next);
+  revealCaret = true;
+  scheduleCaret();
+}
+
+
+function keepEditorFocus(event) {
+  if (event.pointerType === 'touch' && keyboardScroll.contains(event.currentTarget)) return;
+  event.preventDefault();
+  output.focus({ preventScroll: true });
+}
+
+function setText(text, start = output.selectionStart, end = output.selectionEnd) {
+  output.setRangeText(text, start, end, 'end');
+  revealCaret = true;
+  scheduleCaret();
+  status.textContent = '';
+  saveDraft();
+}
+
+function pressKey(key, label) {
+  const wasShifted = shift;
+  if (key === 'emoji') {
+    emojiPanel.hidden = !emojiPanel.hidden;
+    keyboard.querySelector('.emoji').setAttribute('aria-expanded', String(!emojiPanel.hidden));
+    saveSettings();
+  } else if (key === 'shift') {
+    shift = !shift;
+  } else if (key === 'caps') {
+    caps = !caps;
+    saveSettings();
+  } else if (key === 'symbols') {
+    symbols = !symbols;
+    shift = false;
+    saveSettings();
+  } else if (key === 'left' || key === 'right') {
+    moveCaret(key === 'left' ? -1 : 1);
+  } else if (key === 'backspace') {
+    const { selectionStart, selectionEnd, value } = output;
+    const start = selectionStart === selectionEnd && selectionStart > 0
+      ? graphemes.segment(value.slice(0, selectionStart)).containing(selectionStart - 1).index
+      : selectionStart;
+    setText('', start, selectionEnd);
+  } else if (key === 'enter') {
+    setText('\n');
+  } else if (key === 'space') {
+    setText(' ');
+  } else {
+    setText(label);
+    if (!chessLayout) shift = false;
+  }
+  if (!chessLayout && (key === 'shift' || key === 'caps' || key === 'symbols' || shift !== wasShifted)) render(key);
+}
+
+function renderChess() {
+  const rows = chessRows.map(([label, keys, theme]) => {
+    const row = document.createElement('div');
+    row.className = ['row', theme].filter(Boolean).join(' ');
+    row.setAttribute('role', 'group');
+    row.setAttribute('aria-label', label);
+
+    keys.forEach((key, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'key';
+      let value = key;
+      button.textContent = key;
+
+      if (keys === whitePieces || keys === blackPieces) {
+        const color = keys === whitePieces ? 'Világos' : 'Sötét';
+        const letter = pieceLetters[notationMode]?.[index];
+        value = letter ?? key;
+        button.classList.add('piece');
+        button.setAttribute('aria-label', [color, pieceNames[index], letter].filter(Boolean).join(' '));
+        if (letter) {
+          const hint = document.createElement('small');
+          hint.textContent = letter;
+          hint.setAttribute('aria-hidden', 'true');
+          button.append(hint);
+        }
+      }
+
+      if (Object.hasOwn(special, key)) {
+        const [caption, name] = special[key];
+        button.classList.add('special', key);
+        button.textContent = caption;
+        button.setAttribute('aria-label', name);
+      }
+      if (key === 'emoji') {
+        button.setAttribute('aria-controls', 'emoji-panel');
+        button.setAttribute('aria-expanded', String(!emojiPanel.hidden));
+      }
+      button.addEventListener('pointerdown', keepEditorFocus);
+      button.addEventListener('click', () => pressKey(key, value));
+      row.append(button);
+    });
+    return row;
+  });
+  keyboard.replaceChildren(...rows);
+}
+
+function render(previousKey) {
+  keyboard.dataset.layout = chessLayout ? 'chess' : 'abc';
+  if (chessLayout) {
+    renderChess();
+    return;
+  }
+
+  const active = document.activeElement;
+  const focusedIndex = Array.from(keyboard.querySelectorAll('button')).indexOf(active);
+  const layout = symbols ? symbolRows : rows;
+  const renderedRows = [...layout.slice(0, -1), writingMarks, layout.at(-1)].map((keys) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const isWritingRow = keys === writingMarks;
+    if (isWritingRow) {
+      row.setAttribute('role', 'group');
+      row.setAttribute('aria-label', 'Írásjelek');
+    }
+    keys.forEach((key) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'key';
+      let label = key;
+      if (!symbols && !isWritingRow) {
+        if (shift) label = shifted.get(key) ?? key.toUpperCase();
+        else if (caps && /^\p{L}$/u.test(key)) label = key.toUpperCase();
+      }
+      button.textContent = label;
+      if (Object.hasOwn(special, key) || key === 'symbols') {
+        const [caption, name] = special[key] ?? [symbols ? 'ABC' : '123', 'További jelek'];
+        button.classList.add('special', key);
+        button.textContent = caption;
+        button.setAttribute('aria-label', name);
+      }
+      if (key === 'shift') button.setAttribute('aria-pressed', String(shift));
+      if (key === 'caps') button.setAttribute('aria-pressed', String(caps));
+      if (key === 'symbols') button.setAttribute('aria-pressed', String(symbols));
+      if (key === 'emoji') {
+        button.setAttribute('aria-controls', 'emoji-panel');
+        button.setAttribute('aria-expanded', String(!emojiPanel.hidden));
+      }
+      button.addEventListener('pointerdown', keepEditorFocus);
+      button.addEventListener('click', () => pressKey(key, label));
+      row.append(button);
+    });
+    return row;
+  });
+  keyboard.replaceChildren(...renderedRows);
+  if (focusedIndex >= 0) {
+    const next = previousKey === 'symbols' ? keyboard.querySelector('.symbols') : keyboard.querySelectorAll('button')[focusedIndex];
+    next?.focus({ preventScroll: true });
+  }
+}
+
+output.addEventListener('input', () => {
+  status.textContent = '';
+  saveDraft();
+});
+document.querySelectorAll('.actions button').forEach((button) => {
+  button.addEventListener('pointerdown', keepEditorFocus);
+});
+document.getElementById('clear').addEventListener('click', () => setText('', 0, output.value.length));
+document.getElementById('copy').addEventListener('click', async () => {
+  if (!output.value) {
+    status.textContent = 'A szövegmező üres.';
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(output.value);
+    status.textContent = 'Másolva.';
+  } catch {
+    output.focus();
+    output.select();
+    status.textContent = document.execCommand('copy') ? 'Másolva.' : 'A szöveg kijelölve.';
+  }
+});
+
+document.getElementById('export').addEventListener('click', () => {
+  if (!output.value) {
+    status.textContent = 'A szövegmező üres.';
+    return;
+  }
+
+  const savedAt = new Date();
+  const unixMilliseconds = savedAt.getTime();
+  const localTime = savedAt.toLocaleString('hu-HU', {
+    year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'shortOffset'
+  });
+  const programLabel = document.querySelector('.program-id').textContent;
+  const escapedText = output.value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+
+  const html = `<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chess jegyzet</title>
+<style>
+body{margin:clamp(16px,5vw,48px) auto;padding:0 16px;max-width:72ch;font:18px/1.6 system-ui,sans-serif}
+header{padding-bottom:12px;margin-bottom:20px;border-bottom:1px solid #aaa;font-size:14px}
+main{white-space:pre-wrap;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<header>
+<div>${programLabel}</div>
+<div>Exportálás ideje: <time datetime="${savedAt.toISOString()}">${localTime}</time></div>
+<div>Unix (ms): ${unixMilliseconds}</div>
+</header>
+<main>${escapedText}</main>
+</body>
+</html>`;
+
+  const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `chess-${unixMilliseconds}.html`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+for (const emoji of emojis) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = emoji;
+  button.addEventListener('pointerdown', keepEditorFocus);
+  button.addEventListener('click', () => setText(emoji));
+  emojiPanel.append(button);
+}
+
+emojiPanel.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    const toggle = keyboard.querySelector('.emoji');
+    pressKey('emoji');
+    toggle.focus({ preventScroll: true });
+  }
+});
+
+// Focus after a tap so dragging on a key can scroll the panel normally.
+keyboardScroll.addEventListener('click', (event) => {
+  if (event.detail > 0 && event.target.closest('button')) output.focus({ preventScroll: true });
+}, { capture: true });
+
+function updateKeyboardControls() {
+  for (const button of notation.querySelectorAll('button')) {
+    button.setAttribute('aria-pressed', String(button.dataset.mode === notationMode));
+  }
+  notation.hidden = !chessLayout;
+  output.placeholder = notationExamples[notationMode];
+  layoutToggle.textContent = chessLayout ? 'ABC' : 'Sakk';
+  layoutToggle.setAttribute('aria-pressed', String(!chessLayout));
+
+  const open = !keyboardPanel.hidden;
+  const toggleLabel = open ? 'Billentyűzet összecsukása' : 'Billentyűzet lenyitása';
+  stickyControls.classList.toggle('is-collapsed', !open);
+  panelToggle.setAttribute('aria-expanded', String(open));
+  panelToggle.setAttribute('aria-label', toggleLabel);
+  panelToggle.title = toggleLabel;
+  panelToggle.textContent = open ? '⌃' : '⌄';
+}
+
+notation.addEventListener('click', (event) => {
+  const selected = event.target.closest('[data-mode]');
+  if (!selected) return;
+  notationMode = selected.dataset.mode;
+  updateKeyboardControls();
+  render();
+  saveSettings();
+});
+notation.querySelectorAll('button').forEach(button => button.addEventListener('pointerdown', keepEditorFocus));
+
+layoutToggle.addEventListener('pointerdown', keepEditorFocus);
+layoutToggle.addEventListener('click', () => {
+  chessLayout = !chessLayout;
+  updateKeyboardControls();
+  render();
+  keyboardScroll.scrollTop = 0;
+  saveSettings();
+});
+
+panelToggle.addEventListener('pointerdown', keepEditorFocus);
+panelToggle.addEventListener('click', () => {
+  keyboardPanel.hidden = !keyboardPanel.hidden;
+  updateKeyboardControls();
+  saveSettings();
+});
+
+updateKeyboardControls();
+render();
+restoreDraft();
+</script>
+</body>
+</html>
