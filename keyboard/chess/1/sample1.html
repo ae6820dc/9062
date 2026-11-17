@@ -21,7 +21,15 @@ body {
   min-height: 100vh;
   background: radial-gradient(ellipse at 50% 0%, #4d3326 0%, #221813 65%, #1c1411 100%);
 }
-main { width: min(100% - 32px, 800px); margin: auto; padding: clamp(20px, 5vh, 46px) 0 24px; }
+main {
+  width: min(100% - 32px, 800px);
+  height: 100vh;
+  height: 100dvh;
+  margin: auto;
+  padding: clamp(10px, 3dvh, 28px) 0 12px;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
 .page-header { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 1px 13px; margin-bottom: 18px; }
 .title-mark {
   grid-row: span 2;
@@ -53,8 +61,9 @@ textarea, .caret-measure {
 textarea {
   display: block;
   width: 100%;
-  min-height: clamp(124px, 24vh, 200px);
-  resize: vertical;
+  height: clamp(84px, 21vh, 180px);
+  height: clamp(72px, 21dvh, 180px);
+  resize: none;
   outline: none;
   border: 1px solid var(--edge);
   border-radius: 8px;
@@ -93,12 +102,27 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; z-
 #export { margin-inline-start: auto; border-color: #ae7a55; color: #ffcd9e; }
 #status { flex-basis: 100%; color: #dfbea3; font-size: 13px; }
 #status:empty { display: none; }
-.keyboard { margin-top: 12px; display: grid; gap: 7px; }
+.keyboard {
+  margin-top: 12px;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+.keyboard-scroll {
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #ae7a55 #2c211b;
+  scrollbar-gutter: stable;
+  padding: 3px 4px 5px 3px;
+}
+.keyboard-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .keyboard-toolbar { justify-content: space-between; margin-bottom: 4px; padding-bottom: 10px; border-bottom: 1px solid #654633; }
 #notation { display: flex; gap: 4px; }
 #notation[hidden] { display: none; }
 #layout-toggle { margin-inline-start: auto; }
-.keyboard-rows { display: contents; }
+.keyboard-rows { display: grid; gap: 7px; }
+.emoji-panel:not([hidden]) { margin-top: 7px; }
 .row { display: flex; gap: 5px; }
 .key {
   flex: 1 1 0;
@@ -136,9 +160,21 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; z-
   main { width: calc(100% - 16px); }
   .editor, .keyboard { padding: 8px; border-radius: 11px; }
   .row { gap: 3px; }
-  .keyboard { gap: 5px; }
+  .keyboard-rows { gap: 5px; }
   .key { border-radius: 5px; }
   .keyboard-rows[data-layout="abc"] .key { font-size: clamp(11px, 3vw, 15px); }
+}
+@media(max-height: 540px) {
+  main { padding-block: 5px; }
+  .page-header { margin-bottom: 5px; }
+  .page-header h1 { font-size: 24px; }
+  .title-mark { width: 35px; font-size: 25px; }
+  .editor, .keyboard { padding: 6px; }
+  textarea { height: clamp(54px, 19dvh, 102px); }
+  .actions { margin-top: 4px; }
+  .actions button, .keyboard-toolbar button { min-height: 34px; }
+  .keyboard { margin-top: 6px; }
+  .keyboard-toolbar { margin-bottom: 1px; padding-bottom: 4px; }
 }
 </style>
 </head>
@@ -165,8 +201,10 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; z-
   </div>
   <button type="button" id="layout-toggle" aria-pressed="false" aria-controls="keyboard">ABC</button>
 </div>
-<div id="keyboard" class="keyboard-rows"></div>
-<div id="emoji-panel" class="emoji-panel" role="group" aria-label="Emoji" hidden></div>
+<div id="keyboard-scroll" class="keyboard-scroll" role="region" aria-label="Görgethető billentyűk" tabindex="0">
+  <div id="keyboard" class="keyboard-rows"></div>
+  <div id="emoji-panel" class="emoji-panel" role="group" aria-label="Emoji" hidden></div>
+</div>
 </section>
 </main>
 <script>
@@ -236,6 +274,7 @@ for (const event of ['focus', 'blur', 'input', 'click', 'keyup', 'select', 'scro
 document.addEventListener('selectionchange', scheduleCaret);
 new ResizeObserver(scheduleCaret).observe(output);
 const keyboard = document.getElementById('keyboard');
+const keyboardScroll = document.getElementById('keyboard-scroll');
 const status = document.getElementById('status');
 const draftKey = '629A631DF2739E08';
 let draftDatabase;
@@ -369,6 +408,7 @@ function moveCaret(direction) {
 
 
 function keepEditorFocus(event) {
+  if (event.pointerType === 'touch' && keyboardScroll.contains(event.currentTarget)) return;
   event.preventDefault();
   output.focus({ preventScroll: true });
 }
@@ -600,6 +640,11 @@ emojiPanel.addEventListener('keydown', (event) => {
   }
 });
 
+// Focus after a tap so dragging on a key can scroll the panel normally.
+keyboardScroll.addEventListener('click', (event) => {
+  if (event.detail > 0 && event.target.closest('button')) output.focus({ preventScroll: true });
+}, { capture: true });
+
 notation.addEventListener('click', (event) => {
   const selected = event.target.closest('[data-mode]');
   if (!selected) return;
@@ -619,6 +664,7 @@ layoutToggle.addEventListener('click', () => {
   layoutToggle.textContent = chessLayout ? 'ABC' : 'Sakk';
   layoutToggle.setAttribute('aria-pressed', String(!chessLayout));
   render();
+  keyboardScroll.scrollTop = 0;
 });
 
 render();
