@@ -1,6 +1,10 @@
 package io.github.ae6820dc.web9062;
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Build;
+import android.graphics.Insets;
+import android.view.WindowInsets;
+import android.widget.FrameLayout;
 import android.webkit.*;
 import android.content.Intent;
 import android.net.Uri;
@@ -8,7 +12,18 @@ public class MainActivity extends Activity {
  private WebView web;
  @Override public void onCreate(Bundle b){
   super.onCreate(b);
-  web=new WebView(this);setContentView(web);
+  web = new WebView(this);
+  FrameLayout content = new FrameLayout(this);
+  content.addView(web);
+  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+   content.setOnApplyWindowInsetsListener((view, windowInsets) -> {
+    Insets insets = windowInsets.getInsets(
+      WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+    view.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+    return windowInsets;
+   });
+  }
+  setContentView(content);
   WebSettings s=web.getSettings();
   s.setJavaScriptEnabled(true);
   s.setDomStorageEnabled(true);
@@ -30,7 +45,13 @@ public class MainActivity extends Activity {
     return true;
    }
   });
-  web.loadUrl("https://ae6820dc.github.io/9062/index.html");
+  if (b == null || web.restoreState(b) == null) {
+   web.loadUrl("https://ae6820dc.github.io/9062/index.html");
+  }
+ }
+ @Override protected void onSaveInstanceState(Bundle state) {
+  web.saveState(state);
+  super.onSaveInstanceState(state);
  }
  @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}
 }
