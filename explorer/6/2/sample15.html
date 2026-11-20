@@ -69,7 +69,7 @@ function readFolderOrder(settings,p,onOrder){
 }
 function validName(name){return typeof name==='string'&&name.trim().length>0&&Array.from(name).length<=255&&!name.includes('/')&&!name.includes(String.fromCharCode(92))&&!Array.from(name).some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127)&&name!=='.'&&name!=='..';}
 
-const DATABASE_NAME='97a483fe8c617f55';
+const DATABASE_NAME='fda683fe8c617f55';
 function databaseTask(stores,mode,operation){return new Promise((resolve,reject)=>{let tx,result;try{tx=database.transaction(stores,mode);tx.oncomplete=()=>resolve(result);tx.onabort=()=>reject(tx.error||new Error('Storage operation cancelled.'));tx.onerror=()=>{};operation(tx,value=>{result=value;});}catch(error){if(tx)try{tx.abort();}catch(e){}reject(error);}});}
 function storedFile(folder,file){return {folder,name:file.name,nameFold:file.name.toLocaleLowerCase('en-US'),created:file.created||Date.now()};}
 function readFolder(folder){return databaseTask(['files'],'readonly',(tx,result)=>{const r=tx.objectStore('files').index('folder').getAll(folder);r.onsuccess=()=>result(r.result);});}
