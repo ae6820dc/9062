@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chess Explorer 2 — README</title>
+<style>body{font:17px/1.65 system-ui,sans-serif;max-width:850px;margin:40px auto;padding:0 22px;background:#101827;color:#f2f5ff}a{color:#91caff}code{background:#293349;padding:3px 6px;border-radius:5px}</style>
+<h1>Chess Explorer 2</h1>
+<p><a href="sample1.html">Open sample1.html</a></p>
+<p>The root is <code>Game</code>, followed by 18 digit folders (0–9), then up to 65,536 chess levels.</p>
+<p>At every chess level, the 64 square folders (a8–h1) and four player folders (Player0–Player3) remain available. Six additional result folders can terminate a branch at any level:</p>
+<p><code>+1</code> · <code>0</code> · <code>-1</code> · <code>+2</code> · <code>00</code> · <code>-2</code></p>
+<p>Result folders are terminal: no further subfolders appear inside them. You may still create named files there. The meaning of the six result labels is user-defined.</p>
+<p>Version 2 uses its own Program ID and separate IndexedDB storage. The original <a href="../1/sample1.html">Chess Explorer 1</a> is unchanged.</p>
+</html>
