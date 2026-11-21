@@ -11,8 +11,8 @@ android {
         applicationId 'io.github.ae6820dc.web9062'
         minSdk 23
         targetSdk 36
-        versionCode 3
+        versionCode 4
         testInstrumentationRunner 'io.github.ae6820dc.web9062.RefreshTestRunner'
-        versionName '1.2'
+        versionName '1.3'
     }
 }
