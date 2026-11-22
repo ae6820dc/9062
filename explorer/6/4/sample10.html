@@ -108,7 +108,7 @@ function navigate(next){if(!validPath(next)||!ready||busy)return;if(next.join('/
 function enter(letter){if(isResult(path.at(-1)))return;if(path.length===MAX_DEPTH){toast('You reached the 65536-level limit.');return;}return navigate([...path,letter]);}
 function goBack(){if(cursor>0)return runTask(async()=>{const next=history[cursor-1],{files,order}=await locationTask(next,listMode);cursor--;path=[...next];setLocationEntries(files,order);render();});}
 function goForward(){if(cursor<history.length-1)return runTask(async()=>{const next=history[cursor+1],{files,order}=await locationTask(next,listMode);cursor++;path=[...next];setLocationEntries(files,order);render();});}
-function up(){if(!path.length)return;return navigate(path.length>20?path.slice(0,20):[]);}
+function up(){if(!path.length)return;return navigate(path.length>19?path.slice(0,19):[]);}
 const folderGrid=$('folders');
 let draggedFolder=null,dropTarget=null;
 
