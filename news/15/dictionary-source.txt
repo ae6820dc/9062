@@ -1,0 +1,8 @@
+Viet74K Vietnamese word and phrase list, compiled by Hồ Ngọc Đức.
+Original project: http://www.informatik.uni-leipzig.de/~duc/software/misc/wordlist.html
+Source snapshot: https://github.com/duyet/vietnamese-wordlist/blob/688b0953c8cdb21ee090ce80b83cefdb052fe2cd/Viet74K.txt
+Dictionary data license: GNU General Public License, version 2. See dictionary-license.txt.
+
+This version normalizes Unicode to NFC, normalizes spacing, keeps Latin-alphabet
+entries with spaces or hyphens, removes case-insensitive duplicates, and splits
+the resulting 71810 words and phrases into separate UTF-8 files.
