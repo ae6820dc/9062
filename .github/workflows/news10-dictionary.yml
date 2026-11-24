@@ -1,0 +1,50 @@
+name: Import Arabic dictionary
+on:
+  push:
+    paths:
+      - '.github/workflows/news10-dictionary.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and extract Arabic Hunspell entries
+        run: |
+          python3 - <<'PY'
+          import urllib.request,re,pathlib
+          url='https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ar/ar.dic'
+          with urllib.request.urlopen(url,timeout=120) as response:
+              raw=response.read()
+          candidates=[]
+          for enc in ('utf-8-sig','cp1256','iso-8859-6'):
+              try: content=raw.decode(enc)
+              except UnicodeDecodeError: continue
+              words=set()
+              for line in content.splitlines():
+                  parts=line.split('/',1)[0].split()
+                  if not parts: continue
+                  word=parts[0]
+                  word=re.sub(r'[\u064b-\u065f\u0670\u0640]','',word)
+                  if re.fullmatch(r'[\u0621-\u064a\u0671-\u06d3]{2,}',word):
+                      words.add(word)
+              candidates.append((len(words),enc,words))
+          if not candidates: raise RuntimeError('No readable Arabic dictionary')
+          count,enc,words=max(candidates,key=lambda x:x[0])
+          if count<10000: raise RuntimeError(f'Only {count} Arabic entries')
+          output=pathlib.Path('news/10/arabic-dictionary.txt')
+          output.parent.mkdir(parents=True,exist_ok=True)
+          output.write_text('\n'.join(sorted(words))+'\n',encoding='utf-8')
+          print('Saved',count,'distinct Arabic dictionary entries, encoding:',enc)
+          PY
+      - name: Commit Arabic dictionary
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add news/10/arabic-dictionary.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Add Arabic Hunspell dictionary to news/10"
+            git push
+          fi
