@@ -1,0 +1,49 @@
+name: Import Latin dictionary
+on:
+  push:
+    paths:
+      - '.github/workflows/news9-dictionary.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and extract licensed Latin Hunspell words
+        run: |
+          python3 - <<'PY'
+          import urllib.request,re,pathlib
+          url='https://raw.githubusercontent.com/wooorm/dictionaries/main/dictionaries/la/index.dic'
+          with urllib.request.urlopen(url,timeout=120) as response:
+              raw=response.read()
+          candidates=[]
+          for enc in ('utf-8-sig','iso-8859-1','cp1252'):
+              try: content=raw.decode(enc)
+              except UnicodeDecodeError: continue
+              words=set()
+              for line in content.splitlines():
+                  parts=line.split('/',1)[0].split()
+                  if not parts: continue
+                  word=parts[0]
+                  if re.fullmatch(r'[A-Za-zÀ-ÿÆæŒœ]{2,}',word):
+                      words.add(word)
+              candidates.append((len(words),enc,words))
+          if not candidates: raise RuntimeError('No readable Latin dictionary')
+          count,enc,words=max(candidates,key=lambda x:x[0])
+          if count<10000: raise RuntimeError(f'Only {count} Latin dictionary entries')
+          output=pathlib.Path('news/9/latin-dictionary.txt')
+          output.parent.mkdir(parents=True,exist_ok=True)
+          output.write_text('\n'.join(sorted(words,key=str.casefold))+'\n',encoding='utf-8')
+          print('Saved',count,'distinct Latin dictionary entries, encoding:',enc)
+          PY
+      - name: Commit Latin dictionary
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add news/9/latin-dictionary.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Add licensed Latin dictionary to news/9"
+            git push
+          fi
