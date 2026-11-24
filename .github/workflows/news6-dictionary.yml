@@ -1,0 +1,47 @@
+name: Import Italian dictionary
+on:
+  push:
+    paths:
+      - '.github/workflows/news6-dictionary.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and extract licensed Italian dictionary
+        run: |
+          python3 - <<'PY'
+          import urllib.request, re, pathlib
+          url='https://raw.githubusercontent.com/wooorm/dictionaries/main/dictionaries/it/index.dic'
+          with urllib.request.urlopen(url,timeout=120) as response:
+              raw=response.read()
+          try:
+              content=raw.decode('utf-8-sig')
+          except UnicodeDecodeError:
+              content=raw.decode('iso-8859-1')
+          words=set()
+          for line in content.splitlines()[1:]:
+              entry=line.split('/')[0].split()[0] if line.strip() else ''
+              if re.fullmatch(r'[A-Za-zÀÈÉÌÍÎÒÓÙÚàèéìíîòóùú]{2,}',entry):
+                  words.add(entry)
+          if len(words)<10000:
+              raise RuntimeError(f'Only {len(words)} valid Italian dictionary entries')
+          output=pathlib.Path('news/6/italian-dictionary.txt')
+          output.parent.mkdir(parents=True,exist_ok=True)
+          output.write_text('\n'.join(sorted(words,key=str.casefold))+'\n',encoding='utf-8')
+          print('Saved',len(words),'distinct Italian dictionary entries')
+          with urllib.request.urlopen('https://raw.githubusercontent.com/spdx/license-list-data/main/text/GPL-3.0-only.txt',timeout=60) as response:
+              pathlib.Path('news/6/GPL-3.0-DICTIONARY.txt').write_bytes(response.read())
+          PY
+      - name: Commit Italian dictionary and GPL license
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add news/6/italian-dictionary.txt news/6/GPL-3.0-DICTIONARY.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Add licensed Italian dictionary to news/6"
+            git push
+          fi
