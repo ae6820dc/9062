@@ -17,7 +17,7 @@ jobs:
           import urllib.request, re, pathlib
           base='https://raw.githubusercontent.com/LibreOffice/dictionaries/master/de/de_DE_frami.dic'
           with urllib.request.urlopen(base, timeout=120) as response:
-              raw=response.read().decode('utf-8-sig')
+              raw=response.read().decode('iso-8859-1')
           words=set()
           for line in raw.splitlines()[1:]:
               word=line.split('/')[0].split()[0] if line.strip() else ''
