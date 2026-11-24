@@ -1,0 +1,26 @@
+{
+  "id": "/9062/news/12/",
+  "name": "세상을 뒤흔드는 뉴스",
+  "short_name": "세계 뉴스",
+  "lang": "ko",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#101827",
+  "background_color": "#eef1f6",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

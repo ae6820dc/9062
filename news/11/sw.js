@@ -1,1 +1,10 @@
-const CACHE='zhongwen-news11-v1-random-20261124';const ASSETS=['./','./index.html','./manifest-zh.webmanifest','./icon.svg'];self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('fetch',e=>{if(e.request.method==='GET'&&new URL(e.request.url).origin===location.origin)e.respondWith(fetch(e.request).then(r=>{let copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request)))});
+importScripts('../pwa-worker.js');
+
+configureNewsWorker([
+  '../pwa-install.js',
+  'manifest-zh.webmanifest',
+  'icon-192.png',
+  'icon-512.png',
+  'apple-touch-icon.png',
+  'chinese-dictionary.txt'
+], 'zhongwen-news11-v1-random-20261124');

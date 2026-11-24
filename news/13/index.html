@@ -4,6 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#10203b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="חדשות העולם">
+  <link rel="manifest" href="./manifest-he.webmanifest">
+  <link rel="icon" href="./icon-192.png" type="image/png">
   <title>חדשות שמרעידות את העולם</title>
   <style>
     * { box-sizing: border-box; }
@@ -32,6 +36,8 @@
     footer a { color: #224e9a; }
   </style>
   <script defer src="./news.js"></script>
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <script defer src="../pwa-install.js"></script>
 </head>
 <body>
   <header><h1>🌪️ חדשות שמרעידות את העולם</h1></header>
@@ -41,6 +47,7 @@
     <div class="tools">
       <button id="new" disabled>🎲 יצירת 12 כתבות</button>
       <button id="one" disabled>📰 עוד כתבה</button>
+      <button id="install" type="button" hidden data-ios-help="בתפריט השיתוף של הדפדפן בחרו ״הוספה למסך הבית״ ואז ״הוסף״. אם מופיעה האפשרות ״פתיחה כיישום אינטרנט״, הפעילו אותה.">📲 התקנת היישום</button>
       <input id="search" type="search" placeholder="חיפוש בכתבות…" aria-label="חיפוש בכתבות">
     </div>
     <div id="status" role="status">טוען את המילון…</div>

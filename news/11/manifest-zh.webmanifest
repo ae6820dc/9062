@@ -1,18 +1,25 @@
 {
+  "id": "/9062/news/11/",
   "name": "震撼世界的新闻",
   "short_name": "世界新闻",
-  "id": "/9062/news/11/",
+  "lang": "zh-Hans",
+  "dir": "ltr",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "lang": "zh-Hans",
-  "background_color": "#eef1f6",
   "theme_color": "#101827",
+  "background_color": "#eef1f6",
   "icons": [
     {
-      "src": "./icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]

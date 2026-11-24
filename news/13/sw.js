@@ -1,0 +1,20 @@
+importScripts('../pwa-worker.js');
+
+configureNewsWorker([
+  '../pwa-install.js',
+  'manifest-he.webmanifest',
+  'icon-192.png',
+  'icon-512.png',
+  'apple-touch-icon.png',
+  'hebrew-dictionary-01.txt',
+  'hebrew-dictionary-02.txt',
+  'hebrew-dictionary-03.txt',
+  'hebrew-dictionary-04.txt',
+  'hebrew-dictionary-05.txt',
+  'hebrew-dictionary-06.txt',
+  'hebrew-dictionary-07.txt',
+  'hebrew-dictionary-08.txt',
+  'hebrew-dictionary-09.txt',
+  'hebrew-dictionary-10.txt',
+  'news.js'
+]);

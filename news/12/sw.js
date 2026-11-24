@@ -1,0 +1,22 @@
+importScripts('../pwa-worker.js');
+
+configureNewsWorker([
+  '../pwa-install.js',
+  'manifest-ko.webmanifest',
+  'icon-192.png',
+  'icon-512.png',
+  'apple-touch-icon.png',
+  'korean-dictionary-01.txt',
+  'korean-dictionary-02.txt',
+  'korean-dictionary-03.txt',
+  'korean-dictionary-04.txt',
+  'korean-dictionary-05.txt',
+  'korean-dictionary-06.txt',
+  'korean-dictionary-07.txt',
+  'korean-dictionary-08.txt',
+  'korean-dictionary-09.txt',
+  'korean-dictionary-10.txt',
+  'korean-dictionary-11.txt',
+  'korean-dictionary-12.txt',
+  'korean-dictionary-13.txt'
+]);
