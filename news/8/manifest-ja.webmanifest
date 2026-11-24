@@ -1,0 +1,18 @@
+{
+  "name": "世界を揺るがすニュース",
+  "short_name": "世界のニュース",
+  "id": "/9062/news/8/",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f3f6",
+  "theme_color": "#101827",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
