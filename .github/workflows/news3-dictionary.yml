@@ -1,0 +1,43 @@
+name: Import German dictionary
+on:
+  push:
+    paths:
+      - '.github/workflows/news3-dictionary.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import verified German Hunspell words
+        run: |
+          python3 - <<'PY'
+          import urllib.request, re, pathlib
+          base='https://raw.githubusercontent.com/LibreOffice/dictionaries/master/de/de_DE_frami.dic'
+          with urllib.request.urlopen(base, timeout=120) as response:
+              raw=response.read().decode('utf-8-sig')
+          words=set()
+          for line in raw.splitlines()[1:]:
+              word=line.split('/')[0].split()[0] if line.strip() else ''
+              if re.fullmatch(r'[A-Za-zÄÖÜäöüß]{2,}',word):
+                  words.add(word)
+          if len(words)<10000:
+              raise RuntimeError(f'German dictionary has only {len(words)} valid words')
+          out=pathlib.Path('news/3/german-dictionary.txt')
+          out.parent.mkdir(parents=True,exist_ok=True)
+          out.write_text('\n'.join(sorted(words,key=str.casefold))+'\n',encoding='utf-8')
+          print('Saved',len(words),'distinct German dictionary entries')
+          with urllib.request.urlopen('https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt',timeout=60) as response:
+              pathlib.Path('news/3/GPL-2.0-DICTIONARY.txt').write_bytes(response.read())
+          PY
+      - name: Commit German dictionary and GPL text
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add news/3/german-dictionary.txt news/3/GPL-2.0-DICTIONARY.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Add German dictionary and GPL license to news/3"
+            git push
+          fi
