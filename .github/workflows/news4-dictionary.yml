@@ -33,7 +33,7 @@ jobs:
           output.parent.mkdir(parents=True,exist_ok=True)
           output.write_text('\n'.join(sorted(words,key=str.casefold))+'\n',encoding='utf-8')
           print('Saved',len(words),'distinct French dictionary entries')
-          with urllib.request.urlopen('https://www.mozilla.org/media/MPL/2.0/index.f75d2927d3c1.txt',timeout=60) as response:
+          with urllib.request.urlopen('https://raw.githubusercontent.com/spdx/license-list-data/main/text/MPL-2.0.txt',timeout=60) as response:
               pathlib.Path('news/4/MPL-2.0-DICTIONARY.txt').write_bytes(response.read())
           PY
       - name: Commit dictionary and license
