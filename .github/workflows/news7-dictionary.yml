@@ -1,0 +1,56 @@
+name: Import Russian dictionary
+on:
+  push:
+    paths:
+      - '.github/workflows/news7-dictionary.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and extract licensed Russian dictionary
+        run: |
+          python3 - <<'PY'
+          import urllib.request, re, pathlib
+          url='https://raw.githubusercontent.com/wooorm/dictionaries/main/dictionaries/ru/index.dic'
+          with urllib.request.urlopen(url,timeout=120) as response:
+              raw=response.read()
+          if not raw:
+              raise RuntimeError('Downloaded dictionary is empty')
+          candidates=[]
+          for encoding in ('utf-8-sig','cp1251','koi8-r','iso-8859-5'):
+              try:
+                  content=raw.decode(encoding)
+              except UnicodeDecodeError:
+                  continue
+              words=set()
+              for line in content.splitlines():
+                  entry=line.split('/',1)[0].split()
+                  if not entry:
+                      continue
+                  word=entry[0]
+                  if re.fullmatch(r'[А-Яа-яЁё]{2,}',word):
+                      words.add(word)
+              candidates.append((len(words),encoding,words))
+          if not candidates:
+              raise RuntimeError('Could not decode Russian dictionary')
+          count,encoding,words=max(candidates,key=lambda item:item[0])
+          if count<10000:
+              raise RuntimeError(f'Only {count} Russian entries after decoding with {encoding}')
+          output=pathlib.Path('news/7/russian-dictionary.txt')
+          output.parent.mkdir(parents=True,exist_ok=True)
+          output.write_text('\n'.join(sorted(words,key=str.casefold))+'\n',encoding='utf-8')
+          print('Saved',count,'distinct Russian dictionary entries; decoded as',encoding)
+          PY
+      - name: Commit Russian dictionary
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add news/7/russian-dictionary.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Add licensed Russian dictionary to news/7"
+            git push
+          fi
