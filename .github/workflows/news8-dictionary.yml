@@ -1,0 +1,62 @@
+name: Import Japanese dictionary
+on:
+  push:
+    paths:
+      - '.github/workflows/news8-dictionary.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and extract Japanese JMdict entries
+        run: |
+          python3 - <<'PY'
+          import urllib.request, gzip, re, pathlib, xml.etree.ElementTree as ET, io
+          urls=[
+              'https://www.edrdg.org/pub/Nihongo/JMdict_e.gz',
+              'https://ftp.edrdg.org/pub/Nihongo/JMdict_e.gz'
+          ]
+          raw=None
+          for url in urls:
+              try:
+                  req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 (compatible; DictionaryImporter/1.0)'})
+                  with urllib.request.urlopen(req,timeout=120) as response:
+                      raw=response.read()
+                  if raw and raw[:2]==b'\x1f\x8b':
+                      print('Downloaded',len(raw),'bytes from',url)
+                      break
+                  raw=None
+              except Exception as exc:
+                  print('Download failed:',url,repr(exc))
+          if raw is None:
+              raise RuntimeError('Could not download official JMdict_e.gz')
+          words=set()
+          with gzip.GzipFile(fileobj=io.BytesIO(raw)) as stream:
+              for event,entry in ET.iterparse(stream,events=('end',)):
+                  if entry.tag!='entry':
+                      continue
+                  for tag in ('keb','reb'):
+                      for node in entry.iter(tag):
+                          word=(node.text or '').strip()
+                          if 2<=len(word)<=20 and re.fullmatch(r'[\u3040-\u30ff\u3400-\u9fff々〆ヶー]+',word):
+                              words.add(word)
+                  entry.clear()
+          if len(words)<10000:
+              raise RuntimeError(f'Only {len(words)} valid Japanese dictionary entries')
+          output=pathlib.Path('news/8/japanese-dictionary.txt')
+          output.parent.mkdir(parents=True,exist_ok=True)
+          output.write_text('\n'.join(sorted(words))+'\n',encoding='utf-8')
+          print('Saved',len(words),'distinct Japanese dictionary entries')
+          PY
+      - name: Commit Japanese dictionary
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add news/8/japanese-dictionary.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Add attributed JMdict Japanese dictionary to news/8"
+            git push
+          fi
