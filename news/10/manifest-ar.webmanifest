@@ -1,0 +1,20 @@
+{
+  "name": "أخبار تهز العالم",
+  "short_name": "أخبار العالم",
+  "id": "/9062/news/10/",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "dir": "rtl",
+  "lang": "ar",
+  "background_color": "#eef1f6",
+  "theme_color": "#101827",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
