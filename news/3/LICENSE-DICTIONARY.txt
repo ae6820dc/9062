@@ -1,0 +1,29 @@
+German dictionary provenance and license
+
+Source: https://github.com/LibreOffice/dictionaries/blob/master/de/de_DE_frami.dic
+Source project: igerman98 Ispell German dictionary
+License: GNU General Public License, version 2 or 3 (at your option), as stated by the source maintainers.
+Original authors: Bjoern Jacke (base dictionary), Franz Michael Baumann (extension).
+The dictionary word list is transformed to a newline-separated UTF-8 file, extracting entries before Hunspell flags and keeping German alphabetic words only. The original source and its license terms remain applicable.
+
+Original source notice (verbatim):
+
+Bei dem Wörterbuch xxx_frami handelt es sich um ein Addon. Es enthält
+alle Wörter des Basiswörterbuchs, zusätzlich jedoch etliche, die entweder
+im Basiswörterbuch noch fehlen oder die nicht unbedingt zum Kernwortschatz
+des Deutschen gehören. Die zusätzlichen Aufnahmen sind ungeprüft.
+Dieses Wörterbuch basiert auf dem igerman98 Ispell-Wörterbuch, zu finden
+unter https://www.j3e.de/ispell/igerman98/ .
+
+Das Wörterbuch und alle enthaltenen Wortlisten sind lizenziert unter der
+GNU GPL, Version 2 oder 3.
+Fehlermeldungen oder Ergänzungswünsche können gemailt werden an:
+Franz Michael Baumann <fm.baumann@uni-muenster.de>
+
+Autor des Grundwörterbuchs:
+Bjoern Jacke <bjoern@j3e.de>
+
+Autor der Erweiterung
+Franz Michael Baumann <fm.baumann@uni-muenster.de>
+
+Full GNU GPL license texts: https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt and https://www.gnu.org/licenses/gpl-3.0.txt
