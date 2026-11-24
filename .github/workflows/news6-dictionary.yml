@@ -24,7 +24,10 @@ jobs:
               content=raw.decode('iso-8859-1')
           words=set()
           for line in content.splitlines()[1:]:
-              entry=line.split('/')[0].split()[0] if line.strip() else ''
+              fields=line.split('/',1)[0].split()
+              if not fields:
+                  continue
+              entry=fields[0]
               if re.fullmatch(r'[A-Za-zÀÈÉÌÍÎÒÓÙÚàèéìíîòóùú]{2,}',entry):
                   words.add(entry)
           if len(words)<10000:
