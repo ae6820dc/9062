@@ -1,0 +1,18 @@
+{
+  "name": "Новости, потрясающие мир",
+  "short_name": "Новости мира",
+  "id": "/9062/news/7/",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f3f6",
+  "theme_color": "#101827",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
