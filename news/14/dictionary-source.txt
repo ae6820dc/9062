@@ -1,0 +1,12 @@
+Based on Lilak, Persian Spell Checking Dictionary.
+Copyright 2015 Mostafa Sedaghat Joo.
+Upstream project: https://github.com/b00f/lilak
+Source snapshot: https://github.com/LibreOffice/dictionaries/blob/1bee012fc52a625fe0e0abec071ed1b002fac918/fa_IR/fa-IR.dic
+Upstream attribution: https://github.com/LibreOffice/dictionaries/blob/1bee012fc52a625fe0e0abec071ed1b002fac918/fa_IR/README_fa_IR.txt
+Licensed under the Apache License, Version 2.0. See dictionary-license.txt.
+
+Changes for this edition: extracted dictionary headwords from the Hunspell file,
+omitted NOSUGGEST entries, removed short-vowel and related reading marks, applied
+NFC and Persian kaf/yeh normalization, preserved the half-space and hamza, kept
+single written forms, deduplicated and sorted the list, then split it into files.
+The 100183 entries are word forms for random generation.
