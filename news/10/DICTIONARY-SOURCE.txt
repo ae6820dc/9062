@@ -1,0 +1,5 @@
+Arabic spellchecker source: Ayaspell project, distributed via LibreOffice dictionaries.
+Dictionary: https://github.com/LibreOffice/dictionaries/tree/master/ar
+Readme: https://github.com/LibreOffice/dictionaries/blob/master/ar/README_ar.txt
+Original project: http://ayaspell.sourceforge.net/
+The generated arabic-dictionary.txt contains extracted Arabic word entries, with diacritics and duplicate entries removed. Verify upstream licensing before redistributing this derived wordlist.
