@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10203b">
+  <title>חדשות שמרעידות את העולם</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #eef3fb; color: #15253d; font-family: system-ui, sans-serif; }
+    header { background: #10203b; color: white; padding: 24px max(16px, calc((100vw - 1090px) / 2)); }
+    h1 { margin: 0; font-size: clamp(25px, 5vw, 43px); }
+    .ticker { background: #224e9a; color: white; padding: 12px max(16px, calc((100vw - 1090px) / 2)); font-weight: 750; }
+    main { max-width: 1120px; margin: auto; padding: 20px 15px; }
+    .notice { background: #fff4d8; border-inline-start: 5px solid #e3a720; border-radius: 8px; padding: 12px 16px; }
+    .tools, .actions { display: flex; gap: 9px; flex-wrap: wrap; }
+    .tools { margin: 16px 0; }
+    button, input { font: inherit; padding: 10px 14px; border: 1px solid #aabbd1; border-radius: 10px; }
+    button { background: #152f58; color: white; cursor: pointer; }
+    button:disabled { opacity: .6; cursor: wait; }
+    input { flex: 1; min-inline-size: min(180px, 100%); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 315px), 1fr)); gap: 17px; }
+    article { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 5px 22px #15253d15; }
+    .art { display: grid; place-items: center; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #132646, #426fb6); font-size: 68px; }
+    .content { padding: 18px; }
+    .tag { color: #224e9a; font-weight: 800; font-size: .86rem; }
+    h2 { margin: 8px 0; line-height: 1.35; overflow-wrap: anywhere; }
+    p { line-height: 1.7; white-space: pre-line; }
+    dialog { border: 0; color: inherit; border-radius: 16px; width: min(690px, calc(100% - 24px)); max-height: 90vh; padding: 20px; }
+    dialog::backdrop { background: #0c1424b9; }
+    footer { text-align: center; padding: 24px; }
+    footer a { color: #224e9a; }
+  </style>
+  <script defer src="./news.js"></script>
+</head>
+<body>
+  <header><h1>🌪️ חדשות שמרעידות את העולם</h1></header>
+  <div class="ticker">🔴 מבזק: המציאות שוב סירבה לקחת אחריות על הכותרות!</div>
+  <main>
+    <div class="notice">🤣 כל הכתבות כאן הן סאטירה בדיונית שנוצרה ממילים אקראיות.</div>
+    <div class="tools">
+      <button id="new" disabled>🎲 יצירת 12 כתבות</button>
+      <button id="one" disabled>📰 עוד כתבה</button>
+      <input id="search" type="search" placeholder="חיפוש בכתבות…" aria-label="חיפוש בכתבות">
+    </div>
+    <div id="status" role="status">טוען את המילון…</div>
+    <section id="grid" class="grid" aria-label="כתבות"></section>
+  </main>
+  <dialog id="detail" aria-labelledby="detail-title">
+    <form method="dialog"><button>סגירה</button></form>
+    <h2 id="detail-title"></h2>
+    <p id="detail-body"></p>
+  </dialog>
+  <footer>
+    <div><bdi dir="ltr">Program ID: 906200000000000D</bdi></div>
+    <a href="https://github.com/roni5604/hebrew-words-db">מקור המילון (CC0)</a>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,5 @@
+Hebrew word-form list: hebrew-words-db by Roni Michaeli
+Source: https://github.com/roni5604/hebrew-words-db
+Original UTF-8 list: https://raw.githubusercontent.com/roni5604/hebrew-words-db/879f0f46f687015b97a02469dd745c824c0e8589/data/words.txt
+Data license: CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/)
+The original 196227 lines are preserved in order across the ten numbered files.
