@@ -1,0 +1,6 @@
+Japanese dictionary source: Electronic Dictionary Research and Development Group (EDRDG), JMdict project.
+Source URL: https://www.edrdg.org/pub/Nihongo/JMdict_e.gz
+Project and attribution: https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project
+Copyright: Electronic Dictionary Research and Development Group and JMdict contributors.
+License: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0), see https://creativecommons.org/licenses/by-sa/4.0/
+This application extracts Japanese headwords (keb/ reb) from the original dictionary, removes duplicate entries, and stores them as newline-separated UTF-8 text. This is a transformed version of JMdict; attribution and ShareAlike requirements apply to the resulting dictionary file.
