@@ -1,0 +1,18 @@
+importScripts('../pwa-worker.js');
+
+configureNewsWorker([
+  "../pwa-install.js",
+  "manifest-nb.webmanifest",
+  "icon-192.png",
+  "icon-512.png",
+  "apple-touch-icon.png",
+  "news.js",
+  "norwegian-dictionary-01.txt",
+  "norwegian-dictionary-02.txt",
+  "norwegian-dictionary-03.txt",
+  "norwegian-dictionary-04.txt",
+  "norwegian-dictionary-05.txt",
+  "norwegian-dictionary-06.txt",
+  "norwegian-dictionary-07.txt",
+  "norwegian-dictionary-08.txt"
+]);
