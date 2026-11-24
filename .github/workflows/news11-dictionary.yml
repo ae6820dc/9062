@@ -1,0 +1,48 @@
+name: Import Chinese dictionary
+on:
+  push:
+    paths:
+      - '.github/workflows/news11-dictionary.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and extract licensed CC-CEDICT Chinese words
+        run: |
+          python3 - <<'PY'
+          import urllib.request,zipfile,io,re,pathlib
+          url='https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.zip'
+          request=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 (dictionary import; CC-CEDICT attribution)'})
+          with urllib.request.urlopen(request,timeout=120) as response:
+              data=response.read()
+          with zipfile.ZipFile(io.BytesIO(data)) as archive:
+              files=[n for n in archive.namelist() if n.lower().endswith(('.u8','.txt'))]
+              if not files: raise RuntimeError('No CC-CEDICT text file in archive')
+              content=archive.read(files[0]).decode('utf-8-sig')
+          words=set()
+          for line in content.splitlines():
+              if line.startswith('#'): continue
+              match=re.match(r'^(\S+)\s+(\S+)\s+\[',line)
+              if not match: continue
+              simplified=match.group(2)
+              if re.fullmatch(r'[\u3400-\u9fff\uf900-\ufaff]{2,8}',simplified):
+                  words.add(simplified)
+          if len(words)<10000: raise RuntimeError(f'Only {len(words)} Chinese entries')
+          output=pathlib.Path('news/11/chinese-dictionary.txt')
+          output.parent.mkdir(parents=True,exist_ok=True)
+          output.write_text('\n'.join(sorted(words))+'\n',encoding='utf-8')
+          print('Saved',len(words),'distinct Simplified Chinese CC-CEDICT entries')
+          PY
+      - name: Commit Chinese dictionary
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add news/11/chinese-dictionary.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Import CC-CEDICT Chinese dictionary into news/11"
+            git push
+          fi
