@@ -28,7 +28,7 @@ jobs:
               raise RuntimeError('Unexpected duplicate in selected words')
           out=pathlib.Path('news/2/english-dictionary-100k.txt')
           out.parent.mkdir(parents=True, exist_ok=True)
-          out.write_text('\\n'.join(selected)+'\\n', encoding='utf-8')
+          out.write_text('\n'.join(selected)+'\n', encoding='utf-8')
           print(f'Saved {len(selected)} unique English dictionary entries from {len(valid)} valid source words')
           PY
       - name: Commit dictionary to own repository
