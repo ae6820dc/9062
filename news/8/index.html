@@ -11,10 +11,28 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 const subjects=('政府 首相 市長 科学者 研究者 博士 教授 宇宙飛行士 気象予報士 編集長 市民 観光客 ロボット 人工知能 猫 ペンギン 宇宙人 忍者 侍 国会 委員会 研究所 大学 図書館 宇宙船').split(' ');
 const actions=['緊急会議を開いた','新しい理論を発表した','前代未聞の実験を始めた','正式に謝罪した','世界中に声明を出した','予想外の結果を確認した','調査の中止を決定した','極秘計画を公開した','まったく理解できないと認めた','記録を更新した','新しい法律を提案した','突然姿を消した','大規模な調査を開始した','専門家に説明を求めた','新たな発見に驚いた'];
 const links=['ところが','一方で','その後','さらに','しかし','同時に','これに対して','翌朝','数時間後','専門家によると'];
-function randomSentence(){const a=pick(subjects),b=pick(wordForms),d=pick(wordForms),action=pick(actions);return pick([a+'は「'+b+'」について'+action+'。',a+'によると、'+b+'と'+d+'の関係が大きな議論を呼んでいる。',links[Math.floor(Math.random()*links.length)]+'、'+a+'は'+b+'の存在を確認したと発表した。',b+'をめぐる騒動で、'+a+'は'+d+'の重要性を強調した。',a+'は'+b+'が'+d+'に影響する可能性を指摘した。',b+'と'+d+'を比較した結果、'+a+'は予想外の結論に達した。'])}
-function generate(){let body='';for(let i=0;i<22;i++)body+=randomSentence()+(i%5===4?'\n\n':'');let title=pick(subjects)+'、'+pick(wordForms)+'をめぐり'+pick(['緊急会見','世界が騒然','前代未聞の発表','新たな謎','異例の決定','専門家も困惑'])+'！';return {title,body,category:pick(categories),symbol:pick(['☀️','🌙','🪐','🚀','🐔','🌍','👽','🚌','🥔','🐧','⏰','☁️'])}}
+// Fully random dictionary words: no grammatical or semantic sentence templates.
+const randomEndings=["。","！","？"];
+const randomSeparators=["、","，","；"];
+function randomSentence(){
+  const n=5+Math.floor(Math.random()*14);
+  const arr=Array.from({length:n},()=>pick(wordForms));
+  const joiner='';
+  if(n>7&&Math.random()<0.65){const pos=2+Math.floor(Math.random()*(n-4));arr[pos-1]+=''+pick(randomSeparators);}
+  let s=arr.join(joiner).trim();
+  // Chinese, Japanese and Arabic scripts have no uppercase/lowercase distinction.
+  return s+pick(randomEndings);
+}
+function generate(){
+  const body=Array.from({length:22},(_,i)=>randomSentence()+(i%5===4?'\\n\\n':'')).join('').replace(/\\n/g,'\\n');
+  const titleWords=Array.from({length:4+Math.floor(Math.random()*7)},()=>pick(wordForms));
+  let title=titleWords.join('');
+  
+  title+=pick(randomEndings);
+  return {title,body,category:pick(categories),symbol:pick(['☀️','🌙','🪐','🚀','🐔','🌍','👽','🚌','🥔','🐧','⏰','☁️'])};
+}
 function art(symbol){const svg='<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450"><defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#14233c"/><stop offset="1" stop-color="#523f75"/></linearGradient></defs><rect width="800" height="450" fill="url(#g)"/><text x="400" y="235" font-size="150" text-anchor="middle">'+symbol+'</text><text x="400" y="365" font-family="sans-serif" font-size="28" fill="white" text-anchor="middle">世界のニュース · 風刺</text></svg>';return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)}
-const key='sekai-news-8-v1';let stories;try{stories=JSON.parse(localStorage.getItem(key));if(!Array.isArray(stories)||!stories.length)throw 0}catch(e){stories=Array.from({length:12},generate)}function save(){try{localStorage.setItem(key,JSON.stringify(stories))}catch(e){}}save();
+const key='sekai-news-8-v1-pure-random-v2';let stories;try{stories=JSON.parse(localStorage.getItem(key));if(!Array.isArray(stories)||!stories.length)throw 0}catch(e){stories=Array.from({length:12},generate)}function save(){try{localStorage.setItem(key,JSON.stringify(stories))}catch(e){}}save();
 const grid=document.querySelector('#grid'),dialog=document.querySelector('#detail');function openStory(i){let s=stories[i],el=document.querySelector('#detailbody');el.replaceChildren();let img=document.createElement('img');img.src=art(s.symbol);img.alt='ユーモラスなイラスト： '+s.symbol;let tag=document.createElement('div');tag.className='tag';tag.textContent=s.category+' · 架空の風刺';let h=document.createElement('h2');h.textContent=s.title;let p=document.createElement('p');p.textContent=s.body;let note=document.createElement('small');note.textContent='この記事は自動生成された架空の風刺です。';el.append(img,tag,h,p,note);dialog.showModal()}
 function render(){let q=document.querySelector('#search').value.toLowerCase();grid.replaceChildren();stories.forEach((s,i)=>{if(!(s.title+' '+s.body+' '+s.category).toLocaleLowerCase('ja').includes(q))return;let article=document.createElement('article');article.className='article';let img=document.createElement('img');img.className='art';img.src=art(s.symbol);img.alt='イラスト： '+s.symbol;let content=document.createElement('div');content.className='content';let tag=document.createElement('span');tag.className='tag';tag.textContent=s.category+' · 風刺';let h=document.createElement('h2');h.textContent=s.title;let p=document.createElement('p');p.textContent=s.body;content.append(tag,h,p);let foot=document.createElement('div');foot.className='foot';let read=document.createElement('button');read.textContent='全文を読む';read.onclick=()=>openStory(i);let share=document.createElement('button');share.textContent='共有';share.onclick=async()=>{let text='🤣 架空の風刺ニュース： '+s.title+'\n\n'+s.body+'\n\n'+location.href.split('#')[0];try{if(navigator.share)await navigator.share({title:s.title,text});else if(navigator.clipboard){await navigator.clipboard.writeText(text);alert('ニュースをコピーしました！')}else prompt('コピー：',text)}catch(e){}};foot.append(read,share);article.append(img,content,foot);grid.append(article)})}
 document.querySelector('#new').onclick=()=>{stories=Array.from({length:12},generate);save();render()};document.querySelector('#one').onclick=()=>{stories.unshift(generate());stories=stories.slice(0,24);save();render();window.scrollTo({top:0,behavior:'smooth'})};document.querySelector('#search').oninput=render;document.querySelector('#close').onclick=()=>dialog.close();render();loadDictionary();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});let deferred;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;document.querySelector('#install').style.display='block'});document.querySelector('#install').onclick=async()=>{if(deferred){deferred.prompt();await deferred.userChoice;deferred=null}};
