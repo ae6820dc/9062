@@ -24,7 +24,7 @@ function randomSentence(){
   return s+pick(randomEndings);
 }
 function generate(){
-  const body=Array.from({length:22},(_,i)=>randomSentence()+(i%5===4?'\\n\\n':' ')).join('').replace(/\\n/g,'\\n');
+  const body=Array.from({length:22},(_,i)=>randomSentence()+(i%5===4?'\n\n':' ')).join('');
   const titleWords=Array.from({length:4+Math.floor(Math.random()*7)},()=>pick(wordForms));
   let title=titleWords.join(' ');
   title=title.charAt(0).toLocaleUpperCase("de")+title.slice(1);
