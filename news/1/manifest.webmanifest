@@ -1,6 +1,6 @@
 {
-  "name": "Világrengető Hírek – Szatíra",
-  "short_name": "Világrengető",
+  "name": "Világrengető Hírek",
+  "short_name": "Világrengető Hírek",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
