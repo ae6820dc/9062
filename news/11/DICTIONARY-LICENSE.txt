@@ -1,0 +1,7 @@
+CC-CEDICT Chinese-English Dictionary, © CC-CEDICT contributors.
+Source: https://www.mdbg.net/chinese/dictionary?page=cc-cedict
+Download: https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.zip
+License: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).
+License text: https://creativecommons.org/licenses/by-sa/4.0/
+Modifications: extracted Simplified Chinese headwords; removed duplicates and entries containing non-CJK characters; kept lengths 2-8 Chinese characters; sorted for web usage.
+Attribution and share-alike obligations apply to this adapted wordlist.
