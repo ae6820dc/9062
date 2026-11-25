@@ -3,7 +3,7 @@
 function configureNewsWorker(files, legacyCache) {
   const scope = new URL(self.registration.scope);
   const prefix = '9062-news-pwa:' + scope.pathname + ':';
-  const cacheName = prefix + '2';
+  const cacheName = prefix + '3';
   const index = new URL('index.html', scope).href;
   const assets = new Set(files.map(file => new URL(file, scope).href));
 

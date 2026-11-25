@@ -1,6 +1,7 @@
 importScripts('../pwa-worker.js');
 
 configureNewsWorker([
+  "../reading-state.js",
   '../pwa-install.js',
   'manifest-zh.webmanifest',
   'icon-192.png',

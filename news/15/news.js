@@ -16,6 +16,9 @@ const pick = items => items[Math.floor(Math.random() * items.length)];
 
 let words = [];
 let stories = [];
+const readingState = setupNewsReadingState({
+  key: storageKey, dialog: detail, search, getStories: () => stories, openStory
+});
 
 function restoreStories() {
   try {
@@ -85,21 +88,25 @@ function normalizeSearch(text) {
   return text.toLocaleLowerCase('vi').normalize('NFD').replace(/\p{M}/gu, '').replace(/đ/g, 'd');
 }
 
+function openStory(index) {
+  const story = stories[index];
+  document.querySelector('#detail-title').textContent = story.title;
+  document.querySelector('#detail-body').textContent = story.body;
+  detail.showModal();
+  readingState.opened(index);
+}
+
 function render() {
   const query = normalizeSearch(search.value.trim());
   grid.replaceChildren();
-  for (const story of stories) {
+  for (const [index, story] of stories.entries()) {
     const text = normalizeSearch([story.title, story.body, story.category].join(' '));
     if (!text.includes(query)) continue;
 
     const art = element('div', story.symbol, 'art');
     art.setAttribute('aria-hidden', 'true');
     const read = element('button', 'Đọc tin');
-    read.onclick = () => {
-      document.querySelector('#detail-title').textContent = story.title;
-      document.querySelector('#detail-body').textContent = story.body;
-      detail.showModal();
-    };
+    read.onclick = () => openStory(index);
     const share = element('button', 'Chia sẻ');
     share.onclick = () => shareStory(story);
     const actions = element('div', '', 'actions');
@@ -151,4 +158,5 @@ oneButton.onclick = () => {
 search.oninput = render;
 stories = restoreStories();
 render();
+readingState.restore();
 loadDictionary();
