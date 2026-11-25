@@ -1,0 +1,42 @@
+Polskie formy wyrazowe pochodzą ze słownika ortograficznego SJP.PL.
+
+Autor i źródło: Słownik języka polskiego SJP.PL — https://sjp.pl/en/
+Wersja słownika Hunspell: 2026-11-01
+Archiwum: https://sjp.pl/sl/ort/sjp-hunspell-pl-20261101.zip
+Licencja wykorzystana w tej edycji: Creative Commons Uznanie autorstwa 4.0 Międzynarodowa
+https://creativecommons.org/licenses/by/4.0/
+
+Zmiany: konwersja ISO-8859-2 do UTF-8, normalizacja NFC, usunięcie flag
+Hunspell, zachowanie małych liter alfabetu polskiego z opcjonalnym łącznikiem,
+pominięcie jednoliterowych wpisów poza a, i, o, u, w, z, usunięcie duplikatów
+i podział na pliki tekstowe. Łącznie: 295903 form wyrazowych.
+
+Oryginalna informacja o licencji:
+
+English:
+========
+
+This dictionary for spell-checking Polish texts is licensed under
+GPL 2, LGPL 2.1, MPL (Mozilla Public License) 1.1, Apache 2.0 and
+Creative Commons Attribution 4.0 International
+
+This version of the dictionary was generated on 2026-11-01
+
+https://sjp.pl/sl/en/
+
+Contact: sjpslownik@gmail.com
+
+
+Polski:
+=======
+
+Slownik do sprawdzania pisowni jest udostepniany na licencjach
+GPL 2, LGPL 2.1, MPL (Mozilla Public License) 1.1, Apache 2.0 i
+Creative Commons Attribution 4.0 International
+
+Data utworzenia tej wersji: 2026-11-01
+
+https://sjp.pl
+
+Contact: sjpslownik@gmail.com
+

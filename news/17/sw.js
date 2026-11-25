@@ -1,0 +1,19 @@
+importScripts('../pwa-worker.js');
+
+configureNewsWorker([
+  "../reading-state.js",
+  "../pwa-install.js",
+  "manifest-pl.webmanifest",
+  "icon-192.png",
+  "icon-512.png",
+  "apple-touch-icon.png",
+  "news.js",
+  "polish-dictionary-01.txt",
+  "polish-dictionary-02.txt",
+  "polish-dictionary-03.txt",
+  "polish-dictionary-04.txt",
+  "polish-dictionary-05.txt",
+  "polish-dictionary-06.txt",
+  "polish-dictionary-07.txt",
+  "polish-dictionary-08.txt"
+]);
