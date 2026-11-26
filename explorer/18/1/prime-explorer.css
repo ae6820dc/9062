@@ -16,6 +16,4 @@ dialog{border:1px solid #d9e1ee;border-radius:16px;padding:28px;width:min(420px,
 .folders.list .folder[data-drop-side]::after{inset:-2px 4px auto;width:auto;height:3px}
 .folders.list .folder[data-drop-side="after"]::after{top:auto;bottom:-2px}
 
-.folder[data-symbol="_"] svg { filter: grayscale(1); }
 .depth { min-width: max-content; }
-.folder[data-symbol="_"] .folder-name { font-size: 15px; }

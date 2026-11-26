@@ -1,6 +1,5 @@
 'use strict';
 const MAX_DEPTH = 65536;
-const EMPTY_FOLDER = '_';
 const NUMBER_FOLDER_COUNT = 256;
 
 function buildNumberFolders() {
@@ -18,7 +17,7 @@ const $=id=>document.getElementById(id);
 const playerFolders=['Player0','Player1','Player2','Player3'];
 const resultFolders=['R0','R1','R2','R3'];
 const isResult=name=>resultFolders.includes(name);
-const explorerFolders = [...symbols, EMPTY_FOLDER, ...playerFolders, ...resultFolders];
+const explorerFolders = [...symbols, ...playerFolders, ...resultFolders];
 function normalizePlayerFolder(name){return name.replace(/^player ?([0-3])$/i,'Player$1');}
 const explorerFolderSet=new Set(explorerFolders);
 function validPath(parts) {
@@ -30,14 +29,13 @@ function normalizeFolderName(name) {
   if (/^r[0-3]$/i.test(name)) return name.toUpperCase();
   return normalizePlayerFolder(name);
 }
-function folderLabel(name) {
-  return name === EMPTY_FOLDER ? 'Empty folder' : name;
+function hasSubfolders(parts) {
+  return parts.length < MAX_DEPTH && !isResult(parts.at(-1));
 }
 function pathKey(p=path){return '/'+p.join('/');}
-function canCreateFile() { return path.at(-1) !== EMPTY_FOLDER; }
 const FOLDER_ORDER_KEY = 'folderOrder:explorer';
 function readFolderOrder(settings, parts, onOrder) {
-  if (parts.length === MAX_DEPTH || isResult(parts.at(-1))) {
+  if (!hasSubfolders(parts)) {
     onOrder([]);
     return;
   }
@@ -69,7 +67,86 @@ function setBusy(value){busy=value;document.querySelector('.window').inert=!read
 function storageProblem(error){if(error&&error.name==='ConstraintError')return 'A file with this name already exists here.';if(error&&error.name==='QuotaExceededError')return 'Device storage is full. No changes were saved.';return 'Could not access saved data. No changes were saved. Please try again.';}
 async function runTask(operation,errorElement){if(!ready||busy)return;setBusy(true);try{await operation();}catch(error){const message=storageProblem(error);if(errorElement)errorElement.textContent=message;else toast(message);}finally{setBusy(false);}}
 function notice(message,retry=false){$('storageNotice').hidden=false;$('storageMessage').textContent=message;$('retryStorage').hidden=!retry;document.querySelector('.window').inert=true;}
-function openDatabase(){return new Promise((resolve,reject)=>{if(!window.indexedDB){reject(new Error('Saved games are unavailable in this browser.'));return;}const request=indexedDB.open(DATABASE_NAME,1);request.onupgradeneeded=()=>{const db=request.result;const fileStore=db.createObjectStore('files',{keyPath:['folder','name']});fileStore.createIndex('folder','folder');fileStore.createIndex('uniqueName',['folder','nameFold'],{unique:true});db.createObjectStore('settings',{keyPath:'key'});};request.onerror=()=>reject(request.error);request.onblocked=()=>notice('Close other Explorer tabs, then reload to open your saved game.',true);request.onsuccess=()=>{const db=request.result;db.onversionchange=()=>{db.close();ready=false;notice('This game was updated in another tab. Reload to continue.',true);};resolve(db);};});}
+function migratePassages(transaction) {
+  const settings = transaction.objectStore('settings');
+  const savedState = settings.get('state');
+  savedState.onsuccess = () => {
+    const state = savedState.result;
+    if (state?.path?.includes('_')) {
+      settings.put({ ...state, path: state.path.filter(name => name !== '_') });
+    }
+  };
+
+  const files = transaction.objectStore('files');
+  const byName = files.index('uniqueName');
+  const request = files.openCursor();
+  request.onsuccess = () => {
+    const cursor = request.result;
+    if (!cursor) return;
+    const original = cursor.value;
+    const parts = original.folder.slice(1).split('/');
+    if (!parts.includes('_')) {
+      cursor.continue();
+      return;
+    }
+
+    const destination = parts.filter(name => name !== '_');
+    const folder = pathKey(destination);
+    const originalCharacters = Array.from(original.name);
+    function moveFile(number) {
+      const suffix = number === 1 ? '' : ' (' + number + ')';
+      const name = originalCharacters.slice(0, 255 - suffix.length).join('') + suffix;
+      if (hasSubfolders(destination) && explorerFolderSet.has(normalizeFolderName(name))) {
+        moveFile(number + 1);
+        return;
+      }
+      const moved = storedFile(folder, { ...original, name });
+      const existing = byName.getKey([folder, moved.nameFold]);
+      existing.onsuccess = () => {
+        if (existing.result !== undefined) {
+          moveFile(number + 1);
+          return;
+        }
+        files.add(moved);
+        cursor.delete();
+        cursor.continue();
+      };
+    }
+    moveFile(1);
+  };
+}
+
+function openDatabase() {
+  return new Promise((resolve, reject) => {
+    if (!window.indexedDB) {
+      reject(new Error('Saved games are unavailable in this browser.'));
+      return;
+    }
+    const request = indexedDB.open(DATABASE_NAME, 2);
+    request.onupgradeneeded = event => {
+      if (event.oldVersion === 1) {
+        migratePassages(request.transaction);
+        return;
+      }
+      const db = request.result;
+      const files = db.createObjectStore('files', { keyPath: ['folder', 'name'] });
+      files.createIndex('folder', 'folder');
+      files.createIndex('uniqueName', ['folder', 'nameFold'], { unique: true });
+      db.createObjectStore('settings', { keyPath: 'key' });
+    };
+    request.onerror = () => reject(request.error);
+    request.onblocked = () => notice('Close other Explorer tabs, then reload to open your saved game.', true);
+    request.onsuccess = () => {
+      const db = request.result;
+      db.onversionchange = () => {
+        db.close();
+        ready = false;
+        notice('This game was updated in another tab. Reload to continue.', true);
+      };
+      resolve(db);
+    };
+  });
+}
 async function initialize(){notice('Opening saved game…');try{database=await openDatabase();const state=await readSetting('state');path=state&&validPath(state.path)?[...state.path]:[];listMode=!!(state&&state.listMode);history=[[...path]];cursor=0;const [files,order]=await Promise.all([readFolder(pathKey()),databaseTask(['settings'],'readonly',(tx,result)=>readFolderOrder(tx.objectStore('settings'),path,result))]);setLocationEntries(files,order);ready=true;setBusy(false);$('storageNotice').hidden=true;render();}catch(error){ready=false;if(database)database.close();notice('Could not open your saved game. Close other Explorer tabs and reload to try again.',true);}}
 let toastTimer;
 function toast(s){$('toast').textContent=s;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').textContent='',3500);}
@@ -159,7 +236,7 @@ folderGrid.addEventListener('drop',event=>{
     });
     folderOrder=names;
     applyFolderOrder(folderOrder);
-    $('announcement').textContent=folderLabel(source.dataset.symbol)+' moved. Order updated at all levels.';
+    $('announcement').textContent=source.dataset.symbol+' moved. Order updated at all levels.';
   });
 });
 
@@ -171,14 +248,11 @@ clearFolderDrag();
 const depth = path.length;
 const current = path.at(-1);
 const atResult = isResult(current);
-const atEnd = atResult || depth === MAX_DEPTH;
+const atEnd = !hasSubfolders(path);
 const folderNames = atEnd ? [] : explorerFolders;
 const folderCount = folderNames.length;
 $('depth').textContent = depth;
-$('heading').textContent = depth ? folderLabel(current) : 'Prime Drive';
-$('subtitle').textContent = 'Pass through by opening a folder below.';
-$('subtitle').hidden = canCreateFile() || atEnd;
-$('newFile').hidden = !canCreateFile();
+$('heading').textContent = depth ? current : 'Prime Drive';
 $('address').value = pathKey();
 $('back').disabled = cursor === 0;
 $('forward').disabled = cursor === history.length - 1;
@@ -192,21 +266,17 @@ $('status').textContent = (folderCount+currentFiles.length)+' items · Level '+d
 $('announcement').textContent = 'Level '+depth+'. '+$('count').textContent+'.';
 const folders=$('folders');folders.replaceChildren();folders.hidden=atEnd&&!currentFiles.length;$('terminal').hidden=!atEnd;
 $('terminalHeading').textContent=atResult?'Result '+path.at(-1):'You reached level 65536!';
-$('terminalNote').textContent = canCreateFile()
-  ? 'Create a file here or return to level 0 to explore another branch.'
-  : 'Return to level 0 to explore another branch.';
 for (const symbol of folderNames) {
   const button = document.createElement('button');
-  const label = folderLabel(symbol);
   button.className = 'folder';
   button.dataset.symbol = symbol;
   button.draggable = true;
-  button.setAttribute('aria-label', 'Open ' + label + ', level ' + (depth + 1));
+  button.setAttribute('aria-label', 'Open ' + symbol + ', level ' + (depth + 1));
   button.innerHTML = '<svg aria-hidden="true"><use href="#folder-icon"/></svg><span class="folder-name"></span><span class="folder-info"></span>';
-  button.querySelector('.folder-name').textContent = label;
+  button.querySelector('.folder-name').textContent = symbol;
   button.querySelector('.folder-info').textContent = isResult(symbol) ? 'Result · no subfolders' :
     depth === MAX_DEPTH - 1 ? 'Level 65536 · final level' :
-    symbol === EMPTY_FOLDER ? 'Pass through' : explorerFolders.length + ' subfolders';
+    explorerFolders.length + ' subfolders';
   button.onclick = () => enter(symbol);
   folders.append(button);
 }
@@ -222,19 +292,19 @@ $('addressForm').onsubmit = event => {
   const value = $('address').value.trim().replace(/^\/+|\/+$/g, '');
   const next = value ? value.split('/').map(normalizeFolderName) : [];
   if (!validPath(next)) {
-    toast('Use 1 or one of the first 255 primes, _ for Empty folder, or Player0–Player3. R0–R3 end the path.');
+    toast('Use 1, one of the first 255 primes, or Player0–Player3. R0–R3 end the path.');
     return;
   }
   navigate(next);
   $('address').blur();
 };
 $('copy').onclick=async()=>{const text=pathKey();try{await navigator.clipboard.writeText(text);toast('Path copied.');}catch(e){$('address').focus();$('address').select();try{if(!document.execCommand('copy'))throw Error();toast('Path copied.');}catch(e){toast('Path selected. You can copy it manually.');}}};
-$('newFile').onclick=()=>{if(!canCreateFile())return;$('fileName').value='';$('fileError').textContent='';$('fileLocation').textContent='Location: '+pathKey();$('fileDialog').showModal();$('fileName').focus();};
+$('newFile').onclick=()=>{$('fileName').value='';$('fileError').textContent='';$('fileLocation').textContent='Location: '+pathKey();$('fileDialog').showModal();$('fileName').focus();};
 $('cancelFile').onclick=()=>$('fileDialog').close();
 
-$('fileForm').onsubmit=e=>{e.preventDefault();if(busy||!ready||!canCreateFile())return;const name=$('fileName').value.trim().normalize('NFC'),folder=pathKey();
+$('fileForm').onsubmit=e=>{e.preventDefault();if(busy||!ready)return;const name=$('fileName').value.trim().normalize('NFC'),folder=pathKey();
 if(!validName(name)){$('fileError').textContent='Enter 1–255 characters, without slashes or control characters.';return;}
-const hasFolderWithName = path.length < MAX_DEPTH && !isResult(path.at(-1)) &&
+const hasFolderWithName = hasSubfolders(path) &&
   explorerFolderSet.has(normalizeFolderName(name));
 if (hasFolderWithName || currentFiles.some(file => file.name.toLocaleLowerCase('en-US') === name.toLocaleLowerCase('en-US'))) {
   $('fileError').textContent = 'A file or folder with this name already exists here.';
@@ -262,7 +332,7 @@ if(!actionFiles.length){actionParagraph('There are no files in this folder.');$(
 else{const list=document.createElement('div');list.className='delete-list';const allLabel=document.createElement('label');allLabel.className='delete-choice delete-all';const all=document.createElement('input');all.type='checkbox';all.id='selectAllFiles';const allText=document.createElement('span');allText.textContent='Select all';allLabel.append(all,allText);list.append(allLabel);
 actionFiles.forEach((file,index)=>{const label=document.createElement('label');label.className='delete-choice';const box=document.createElement('input');box.type='checkbox';box.value=String(index);box.className='delete-check';const text=document.createElement('span');text.textContent=file.name;label.append(box,text);list.append(label);});$('actionContent').append(list);
 all.onchange=()=>{for(const box of list.querySelectorAll('.delete-check'))box.checked=all.checked;updateDeleteButton();};list.onchange=()=>{const boxes=Array.from(list.querySelectorAll('.delete-check')),selected=boxes.filter(b=>b.checked).length;all.checked=selected===boxes.length;all.indeterminate=selected>0&&selected<boxes.length;updateDeleteButton();};$('confirmAction').classList.add('danger');updateDeleteButton();}}
-if(mode==='about'){$('actionTitle').textContent='About';actionParagraph('Prime Explorer');actionParagraph('Every branching level offers 1 and the first 255 primes. Empty folder skips the number choice, consumes one level and holds no files. The path uses _ for Empty folder.');actionParagraph('Player0–Player3 are available alongside R0–R3. A result ends the branch and can contain virtual files. Dragging a folder changes the order at all branching levels.');actionParagraph('Your position and files are saved in this browser on this device. Files contain names only; they do not run programs.');actionParagraph('Program ID: '+$('programId').textContent,'about-details');$('confirmAction').hidden=true;$('cancelAction').textContent='Close';}
+if(mode==='about'){$('actionTitle').textContent='About';actionParagraph('Prime Explorer');actionParagraph('Every branching level offers 1 and the first 255 primes.');actionParagraph('Player0–Player3 are available alongside R0–R3. A result ends the branch and can contain virtual files. Dragging a folder changes the order at all branching levels.');actionParagraph('Your position and files are saved in this browser on this device. Files contain names only; they do not run programs.');actionParagraph('Program ID: '+$('programId').textContent,'about-details');$('confirmAction').hidden=true;$('cancelAction').textContent='Close';}
 if(mode==='share'){$('actionTitle').textContent='Share website';actionParagraph('Copy this link to share the program website. Your files and saved game are not included.');const label=document.createElement('label');label.htmlFor='shareWebsiteUrl';label.textContent='Website';const input=document.createElement('input');input.id='shareWebsiteUrl';input.className='share-url';input.type='url';input.readOnly=true;input.value=WEBSITE_URL;$('actionContent').append(label,input);$('confirmAction').textContent='Copy link';}
 $('actionDialog').showModal();if(mode==='new')$('actionPassword').focus();else if(mode==='share'){$('shareWebsiteUrl').focus();$('shareWebsiteUrl').select();}else $('cancelAction').focus();
 }
