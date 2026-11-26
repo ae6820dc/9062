@@ -322,6 +322,35 @@ $('menuButton').onkeydown=e=>{if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preve
 $('appMenu').onkeydown=e=>{const current=menuItems.indexOf(document.activeElement);if(e.key==='Escape'){e.preventDefault();closeMenu(true);}else if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?menuItems.length-1:(current+(e.key==='ArrowDown'?1:-1)+menuItems.length)%menuItems.length;menuItems[next].focus();}};
 document.addEventListener('click',e=>{if(!e.target.closest('.menu-wrap'))closeMenu();});
 document.addEventListener('focusin',e=>{if(!e.target.closest('.menu-wrap'))closeMenu();});
+let installPrompt;
+window.addEventListener('beforeinstallprompt', event => {
+  event.preventDefault();
+  installPrompt = event;
+});
+window.addEventListener('appinstalled', () => { installPrompt = undefined; });
+
+async function installApp() {
+  if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
+    closeMenu(true);
+    toast('Prime Explorer is already open as an installed app.');
+    return;
+  }
+
+  if (installPrompt) {
+    const prompt = installPrompt;
+    installPrompt = undefined;
+    closeMenu(true);
+    try {
+      await prompt.prompt();
+      return;
+    } catch {
+      // The browser menu remains available if the prompt expires.
+    }
+  }
+
+  showAction('install');
+}
+
 function actionParagraph(text,cls){const p=document.createElement('p');p.textContent=text;if(cls)p.className=cls;$('actionContent').append(p);return p;}
 function showAction(mode){
 closeMenu();actionMode=mode;actionKey=pathKey();actionFiles=[...currentFiles];
@@ -334,6 +363,14 @@ actionFiles.forEach((file,index)=>{const label=document.createElement('label');l
 all.onchange=()=>{for(const box of list.querySelectorAll('.delete-check'))box.checked=all.checked;updateDeleteButton();};list.onchange=()=>{const boxes=Array.from(list.querySelectorAll('.delete-check')),selected=boxes.filter(b=>b.checked).length;all.checked=selected===boxes.length;all.indeterminate=selected>0&&selected<boxes.length;updateDeleteButton();};$('confirmAction').classList.add('danger');updateDeleteButton();}}
 if(mode==='about'){$('actionTitle').textContent='About';actionParagraph('Prime Explorer');actionParagraph('Every branching level offers 1 and the first 255 primes.');actionParagraph('Player0–Player3 are available alongside R0–R3. A result ends the branch and can contain virtual files. Dragging a folder changes the order at all branching levels.');actionParagraph('Your position and files are saved in this browser on this device. Files contain names only; they do not run programs.');actionParagraph('Program ID: '+$('programId').textContent,'about-details');$('confirmAction').hidden=true;$('cancelAction').textContent='Close';}
 if(mode==='share'){$('actionTitle').textContent='Share website';actionParagraph('Copy this link to share the program website. Your files and saved game are not included.');const label=document.createElement('label');label.htmlFor='shareWebsiteUrl';label.textContent='Website';const input=document.createElement('input');input.id='shareWebsiteUrl';input.className='share-url';input.type='url';input.readOnly=true;input.value=WEBSITE_URL;$('actionContent').append(label,input);$('confirmAction').textContent='Copy link';}
+if (mode === 'install') {
+  $('actionTitle').textContent = 'Install Prime Explorer';
+  actionParagraph('Android Chrome: open the ⋮ menu and choose Install app or Add to Home screen.');
+  actionParagraph('iPhone and iPad: open Share and choose Add to Home Screen.');
+  actionParagraph('Desktop Chrome or Edge: use the install icon in the address bar or the browser menu.');
+  $('confirmAction').hidden = true;
+  $('cancelAction').textContent = 'Close';
+}
 $('actionDialog').showModal();if(mode==='new')$('actionPassword').focus();else if(mode==='share'){$('shareWebsiteUrl').focus();$('shareWebsiteUrl').select();}else $('cancelAction').focus();
 }
 function updateDeleteButton(){const count=$('actionContent').querySelectorAll('.delete-check:checked').length;$('confirmAction').textContent=count?'Delete '+count+' '+(count===1?'file':'files'):'Delete files';$('confirmAction').disabled=count===0;}
@@ -403,7 +440,17 @@ ${savedFiles}
     toast('Could not export saved files. Please try again.');
   }
 }
-for(const item of menuItems)item.onclick=()=>{const mode=item.dataset.action;if(mode==='share')shareWebsite();else if(mode==='export')exportHtml();else showAction(mode);};
+for (const item of menuItems) {
+  item.onclick = () => {
+    switch (item.dataset.action) {
+      case 'share': return shareWebsite();
+      case 'export': return exportHtml();
+      case 'install': return installApp();
+      case 'samples': return location.assign('readme.html');
+      default: return showAction(item.dataset.action);
+    }
+  };
+}
 $('cancelAction').onclick=()=>$('actionDialog').close();
 $('actionDialog').addEventListener('close',()=>{$('actionPassword').value='';$('menuButton').focus();});
 $('actionForm').onsubmit=async e=>{e.preventDefault();if(busy||!ready)return;
@@ -418,3 +465,9 @@ else{const selected=Array.from($('actionContent').querySelectorAll('.delete-chec
 
 $('retryStorage').onclick=()=>location.reload();
 initialize();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(error => {
+    console.warn('Prime Explorer offline setup failed.', error);
+  });
+}
