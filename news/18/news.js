@@ -144,7 +144,7 @@ async function loadDictionary() {
       throw new Error('Dicionário de português brasileiro inválido');
     }
     words = entries;
-    status.textContent = 'Formas no dicionário: ' + words.length.toLocaleString('pt-BR') + '.';
+    status.hidden = true;
     newButton.disabled = false;
     oneButton.disabled = false;
     if (!stories.length) generateBatch();
