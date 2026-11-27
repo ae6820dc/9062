@@ -178,8 +178,8 @@ function render(){
 clearFolderDrag();
 const depth=path.length,atResult=isResult(path.at(-1)),atEnd=atResult||depth===MAX_DEPTH,folderNames=atEnd?[]:depth===0?['Game']:depth<=18?GAME_DIGITS:explorerFolders,folderCount=folderNames.length;
 $('depth').textContent=Math.min(depth,1);$('idDepth').textContent=Math.min(18,Math.max(0,depth-1));$('gameDepth').textContent=Math.max(0,depth-19);$('heading').textContent=depth?'Folder: '+path.at(-1):'Alphabet drive';
-$('subtitle').textContent=atResult?'Result selected. You can create files here.':atEnd?'128 letters, 128 choices. Create a file or explore another branch.':'';
-$('subtitle').hidden=!atEnd;
+$('subtitle').textContent=atEnd&&!atResult?'128 letters, 128 choices. Create a file or explore another branch.':'';
+$('subtitle').hidden=!atEnd||atResult;
 $('address').value=pathKey();$('back').disabled=cursor===0;$('forward').disabled=cursor===history.length-1;$('up').disabled=depth===0;$('home').disabled=depth===0;
 $('progress').style.width=(Math.max(0,depth-19)/GAME_MAX_DEPTH*100)+'%';document.querySelector('[role=progressbar]').setAttribute('aria-valuenow',Math.max(0,depth-19));
 $('count').textContent=folderCount+' folders · '+currentFiles.length+' '+(currentFiles.length===1?'file':'files');$('levelLabel').textContent=atResult?'Result':atEnd?'Maximum depth':'Next: level '+(depth+1);
