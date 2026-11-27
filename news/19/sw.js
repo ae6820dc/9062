@@ -16,4 +16,4 @@ configureNewsWorker([
   "nepali-dictionary-06.txt",
   "nepali-dictionary-07.txt",
   "nepali-dictionary-08.txt"
-]);
+], undefined, '4');
