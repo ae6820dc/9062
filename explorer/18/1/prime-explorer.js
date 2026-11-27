@@ -1,5 +1,11 @@
 'use strict';
-const MAX_DEPTH = 65536;
+const GAME_FOLDER = 'Game';
+const GAME_ID_LENGTH = 18;
+const GAME_PREFIX_LENGTH = 1 + GAME_ID_LENGTH;
+const GAME_DIGITS = '0123456789'.split('');
+const PRIME_MAX_DEPTH = 65536;
+const MAX_DEPTH = GAME_PREFIX_LENGTH + PRIME_MAX_DEPTH;
+const DEFAULT_GAME_PATH = [GAME_FOLDER, ...Array(GAME_ID_LENGTH).fill('0')];
 const NUMBER_FOLDER_COUNT = 256;
 
 function buildNumberFolders() {
@@ -22,24 +28,35 @@ function normalizePlayerFolder(name){return name.replace(/^player ?([0-3])$/i,'P
 const explorerFolderSet=new Set(explorerFolders);
 function validPath(parts) {
   return Array.isArray(parts) && parts.length <= MAX_DEPTH &&
-    parts.every((name, index) => explorerFolderSet.has(name) &&
-      (!isResult(name) || index === parts.length - 1));
+    parts.every((name, index) => {
+      if (index === 0) return name === GAME_FOLDER;
+      if (index < GAME_PREFIX_LENGTH) return GAME_DIGITS.includes(name);
+      return explorerFolderSet.has(name) && (!isResult(name) || index === parts.length - 1);
+    });
 }
 function normalizeFolderName(name) {
+  if (name.toLowerCase() === 'game') return GAME_FOLDER;
   if (/^r[0-3]$/i.test(name)) return name.toUpperCase();
   return normalizePlayerFolder(name);
 }
 function hasSubfolders(parts) {
   return parts.length < MAX_DEPTH && !isResult(parts.at(-1));
 }
+function foldersAt(parts) {
+  if (!hasSubfolders(parts)) return [];
+  if (parts.length === 0) return [GAME_FOLDER];
+  return parts.length < GAME_PREFIX_LENGTH ? GAME_DIGITS : explorerFolders;
+}
 function pathKey(p=path){return '/'+p.join('/');}
-const FOLDER_ORDER_KEY = 'folderOrder:explorer';
+function orderKey(depth) {
+  return depth < GAME_PREFIX_LENGTH ? 'folderOrder:digits' : 'folderOrder:explorer';
+}
 function readFolderOrder(settings, parts, onOrder) {
-  if (!hasSubfolders(parts)) {
+  if (parts.length === 0 || !hasSubfolders(parts)) {
     onOrder([]);
     return;
   }
-  const request = settings.get(FOLDER_ORDER_KEY);
+  const request = settings.get(orderKey(parts.length));
   request.onsuccess = () => onOrder(request.result?.names);
 }
 function validName(name){return typeof name==='string'&&name.trim().length>0&&Array.from(name).length<=255&&!name.includes('/')&&!name.includes(String.fromCharCode(92))&&!Array.from(name).some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127)&&name!=='.'&&name!=='..';}
@@ -67,13 +84,14 @@ function setBusy(value){busy=value;document.querySelector('.window').inert=!read
 function storageProblem(error){if(error&&error.name==='ConstraintError')return 'A file with this name already exists here.';if(error&&error.name==='QuotaExceededError')return 'Device storage is full. No changes were saved.';return 'Could not access saved data. No changes were saved. Please try again.';}
 async function runTask(operation,errorElement){if(!ready||busy)return;setBusy(true);try{await operation();}catch(error){const message=storageProblem(error);if(errorElement)errorElement.textContent=message;else toast(message);}finally{setBusy(false);}}
 function notice(message,retry=false){$('storageNotice').hidden=false;$('storageMessage').textContent=message;$('retryStorage').hidden=!retry;document.querySelector('.window').inert=true;}
-function migratePassages(transaction) {
+function migrateToGames(transaction) {
+  const gamePath = parts => [...DEFAULT_GAME_PATH, ...parts.filter(name => name !== '_')];
   const settings = transaction.objectStore('settings');
   const savedState = settings.get('state');
   savedState.onsuccess = () => {
     const state = savedState.result;
-    if (state?.path?.includes('_')) {
-      settings.put({ ...state, path: state.path.filter(name => name !== '_') });
+    if (state?.path?.length) {
+      settings.put({ ...state, path: gamePath(state.path) });
     }
   };
 
@@ -84,19 +102,20 @@ function migratePassages(transaction) {
     const cursor = request.result;
     if (!cursor) return;
     const original = cursor.value;
-    const parts = original.folder.slice(1).split('/');
-    if (!parts.includes('_')) {
+    const parts = original.folder === '/' ? [] : original.folder.slice(1).split('/');
+    // The cursor can encounter the new key after the file has moved.
+    if (parts[0] === GAME_FOLDER) {
       cursor.continue();
       return;
     }
 
-    const destination = parts.filter(name => name !== '_');
+    const destination = gamePath(parts);
     const folder = pathKey(destination);
     const originalCharacters = Array.from(original.name);
     function moveFile(number) {
       const suffix = number === 1 ? '' : ' (' + number + ')';
       const name = originalCharacters.slice(0, 255 - suffix.length).join('') + suffix;
-      if (hasSubfolders(destination) && explorerFolderSet.has(normalizeFolderName(name))) {
+      if (foldersAt(destination).includes(normalizeFolderName(name))) {
         moveFile(number + 1);
         return;
       }
@@ -122,10 +141,10 @@ function openDatabase() {
       reject(new Error('Saved games are unavailable in this browser.'));
       return;
     }
-    const request = indexedDB.open(DATABASE_NAME, 2);
+    const request = indexedDB.open(DATABASE_NAME, 3);
     request.onupgradeneeded = event => {
-      if (event.oldVersion === 1) {
-        migratePassages(request.transaction);
+      if (event.oldVersion > 0) {
+        migrateToGames(request.transaction);
         return;
       }
       const db = request.result;
@@ -152,7 +171,7 @@ let toastTimer;
 function toast(s){$('toast').textContent=s;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').textContent='',3500);}
 
 function navigate(next){if(!validPath(next)||!ready||busy)return;if(next.join('/')===path.join('/')){$('address').value=pathKey();return;}return runTask(async()=>{const {files,order}=await locationTask(next,listMode);path=[...next];setLocationEntries(files,order);history=history.slice(0,cursor+1);history.push([...path]);cursor=history.length-1;render();});}
-function enter(symbol){if(isResult(path.at(-1)))return;if(path.length===MAX_DEPTH){toast('You reached the 65536-level limit.');return;}return navigate([...path,symbol]);}
+function enter(symbol){if(isResult(path.at(-1)))return;if(path.length===MAX_DEPTH){toast('You reached the 65536-level limit after the game ID.');return;}return navigate([...path,symbol]);}
 function goBack(){if(cursor>0)return runTask(async()=>{const next=history[cursor-1],{files,order}=await locationTask(next,listMode);cursor--;path=[...next];setLocationEntries(files,order);render();});}
 function goForward(){if(cursor<history.length-1)return runTask(async()=>{const next=history[cursor+1],{files,order}=await locationTask(next,listMode);cursor++;path=[...next];setLocationEntries(files,order);render();});}
 function up(){if(path.length)return navigate(path.slice(0,-1));}
@@ -229,14 +248,14 @@ folderGrid.addEventListener('drop',event=>{
   reordered.splice(reordered.indexOf(target)+Number(after),0,source);
   if(reordered.every((folder,index)=>folder===folders[index]))return;
 
-  const names=reordered.map(folder=>folder.dataset.symbol),key=FOLDER_ORDER_KEY;
+  const names=reordered.map(folder=>folder.dataset.symbol),key=orderKey(path.length);
   return runTask(async()=>{
     await databaseTask(['settings'],'readwrite',tx=>{
       tx.objectStore('settings').put({key,names});
     });
     folderOrder=names;
     applyFolderOrder(folderOrder);
-    $('announcement').textContent=source.dataset.symbol+' moved. Order updated at all levels.';
+    $('announcement').textContent=source.dataset.symbol+' moved. Order updated at matching levels.';
   });
 });
 
@@ -249,34 +268,39 @@ const depth = path.length;
 const current = path.at(-1);
 const atResult = isResult(current);
 const atEnd = !hasSubfolders(path);
-const folderNames = atEnd ? [] : explorerFolders;
+const folderNames = foldersAt(path);
+const primeDepth = Math.max(0, depth - GAME_PREFIX_LENGTH);
+const nextFolderCount = depth + 1 < GAME_PREFIX_LENGTH ? GAME_DIGITS.length : explorerFolders.length;
 const folderCount = folderNames.length;
-$('depth').textContent = depth;
+$('depth').textContent = primeDepth;
 $('heading').textContent = depth ? current : 'Prime Drive';
 $('address').value = pathKey();
 $('back').disabled = cursor === 0;
 $('forward').disabled = cursor === history.length - 1;
 $('up').disabled = depth === 0;
 $('home').disabled = depth === 0;
-$('progress').style.width = (depth / MAX_DEPTH * 100) + '%';
-document.querySelector('[role=progressbar]').setAttribute('aria-valuenow', depth);
+$('progress').style.width = (primeDepth / PRIME_MAX_DEPTH * 100) + '%';
+document.querySelector('[role=progressbar]').setAttribute('aria-valuenow', primeDepth);
 $('count').textContent = folderCount+' folders · '+currentFiles.length+' '+(currentFiles.length===1?'file':'files');
-$('levelLabel').textContent = atResult ? 'Result' : atEnd ? 'Maximum depth' : 'Next: level '+(depth+1);
+$('levelLabel').textContent = atResult ? 'Result' : atEnd ? 'Maximum depth' :
+  depth === 0 ? 'Open Game' :
+  depth < GAME_PREFIX_LENGTH ? 'Game ID digit ' + depth + ' of ' + GAME_ID_LENGTH :
+  'Next: prime level ' + (primeDepth + 1);
 $('status').textContent = (folderCount+currentFiles.length)+' items · Level '+depth;
 $('announcement').textContent = 'Level '+depth+'. '+$('count').textContent+'.';
 const folders=$('folders');folders.replaceChildren();folders.hidden=atEnd&&!currentFiles.length;$('terminal').hidden=!atEnd;
-$('terminalHeading').textContent=atResult?'Result '+path.at(-1):'You reached level 65536!';
+$('terminalHeading').textContent=atResult?'Result '+path.at(-1):'You reached prime level 65536!';
 for (const symbol of folderNames) {
   const button = document.createElement('button');
   button.className = 'folder';
   button.dataset.symbol = symbol;
-  button.draggable = true;
+  button.draggable = depth > 0;
   button.setAttribute('aria-label', 'Open ' + symbol + ', level ' + (depth + 1));
   button.innerHTML = '<svg aria-hidden="true"><use href="#folder-icon"/></svg><span class="folder-name"></span><span class="folder-info"></span>';
   button.querySelector('.folder-name').textContent = symbol;
   button.querySelector('.folder-info').textContent = isResult(symbol) ? 'Result · no subfolders' :
-    depth === MAX_DEPTH - 1 ? 'Level 65536 · final level' :
-    explorerFolders.length + ' subfolders';
+    depth === MAX_DEPTH - 1 ? 'Prime level 65536 · final level' :
+    nextFolderCount + ' subfolders';
   button.onclick = () => enter(symbol);
   folders.append(button);
 }
@@ -292,7 +316,7 @@ $('addressForm').onsubmit = event => {
   const value = $('address').value.trim().replace(/^\/+|\/+$/g, '');
   const next = value ? value.split('/').map(normalizeFolderName) : [];
   if (!validPath(next)) {
-    toast('Use 1, one of the first 255 primes, or Player0–Player3. R0–R3 end the path.');
+    toast('Start with /Game and 18 digits (0–9), then use prime folders, 1, or Player0–Player3. R0–R3 end the path.');
     return;
   }
   navigate(next);
@@ -304,14 +328,22 @@ $('cancelFile').onclick=()=>$('fileDialog').close();
 
 $('fileForm').onsubmit=e=>{e.preventDefault();if(busy||!ready)return;const name=$('fileName').value.trim().normalize('NFC'),folder=pathKey();
 if(!validName(name)){$('fileError').textContent='Enter 1–255 characters, without slashes or control characters.';return;}
-const hasFolderWithName = hasSubfolders(path) &&
-  explorerFolderSet.has(normalizeFolderName(name));
+const hasFolderWithName = foldersAt(path).includes(normalizeFolderName(name));
 if (hasFolderWithName || currentFiles.some(file => file.name.toLocaleLowerCase('en-US') === name.toLocaleLowerCase('en-US'))) {
   $('fileError').textContent = 'A file or folder with this name already exists here.';
   return;
 }
 return runTask(async()=>{const entries=await databaseTask(['files'],'readwrite',(tx,result)=>{const store=tx.objectStore('files');store.add(storedFile(folder,{name,created:Date.now()}));const r=store.index('folder').getAll(folder);r.onsuccess=()=>result(r.result);});currentFiles=entries;$('fileDialog').close();render();toast('Created '+name);},$('fileError'));};
-document.addEventListener('keydown',e=>{if(!ready||busy||$('fileDialog').open||$('actionDialog').open||!$('appMenu').hidden||e.target.closest('input,textarea,select,[contenteditable=true]'))return;if(e.altKey){if(e.key==='ArrowLeft'){e.preventDefault();goBack();}if(e.key==='ArrowRight'){e.preventDefault();goForward();}if(e.key==='ArrowUp'){e.preventDefault();up();}return;}if(e.ctrlKey||e.metaKey)return;if(e.key==='Backspace'){e.preventDefault();up();}});
+document.addEventListener('keydown',e=>{if(!ready||busy||$('fileDialog').open||$('actionDialog').open||!$('appMenu').hidden||e.target.closest('input,textarea,select,[contenteditable=true]'))return;if(e.altKey){if(e.key==='ArrowLeft'){e.preventDefault();goBack();}if(e.key==='ArrowRight'){e.preventDefault();goForward();}if(e.key==='ArrowUp'){e.preventDefault();up();}return;}if(e.ctrlKey||e.metaKey)return;if(e.key==='Backspace'){e.preventDefault();up();return;}
+if (e.repeat) return;
+if (path.length === 0 && e.key.toLowerCase() === 'g') {
+  e.preventDefault();
+  enter(GAME_FOLDER);
+} else if (path.length > 0 && path.length < GAME_PREFIX_LENGTH && GAME_DIGITS.includes(e.key)) {
+  e.preventDefault();
+  enter(e.key);
+}
+});
 const WEBSITE_URL = new URL(location.pathname, 'https://ae6820dc.github.io').href;
 let actionMode='',actionKey='',actionFiles=[];
 const menuItems=Array.from($('appMenu').querySelectorAll('[role=menuitem]'));
@@ -361,7 +393,7 @@ if(!actionFiles.length){actionParagraph('There are no files in this folder.');$(
 else{const list=document.createElement('div');list.className='delete-list';const allLabel=document.createElement('label');allLabel.className='delete-choice delete-all';const all=document.createElement('input');all.type='checkbox';all.id='selectAllFiles';const allText=document.createElement('span');allText.textContent='Select all';allLabel.append(all,allText);list.append(allLabel);
 actionFiles.forEach((file,index)=>{const label=document.createElement('label');label.className='delete-choice';const box=document.createElement('input');box.type='checkbox';box.value=String(index);box.className='delete-check';const text=document.createElement('span');text.textContent=file.name;label.append(box,text);list.append(label);});$('actionContent').append(list);
 all.onchange=()=>{for(const box of list.querySelectorAll('.delete-check'))box.checked=all.checked;updateDeleteButton();};list.onchange=()=>{const boxes=Array.from(list.querySelectorAll('.delete-check')),selected=boxes.filter(b=>b.checked).length;all.checked=selected===boxes.length;all.indeterminate=selected>0&&selected<boxes.length;updateDeleteButton();};$('confirmAction').classList.add('danger');updateDeleteButton();}}
-if(mode==='about'){$('actionTitle').textContent='About';actionParagraph('Prime Explorer');actionParagraph('Every branching level offers 1 and the first 255 primes.');actionParagraph('Player0–Player3 are available alongside R0–R3. A result ends the branch and can contain virtual files. Dragging a folder changes the order at all branching levels.');actionParagraph('Your position and files are saved in this browser on this device. Files contain names only; they do not run programs.');actionParagraph('Program ID: '+$('programId').textContent,'about-details');$('confirmAction').hidden=true;$('cancelAction').textContent='Close';}
+if(mode==='about'){$('actionTitle').textContent='About';actionParagraph('Prime Explorer');actionParagraph('Open Game, then choose 18 digits (0–9) for the game ID. Each branching level after the ID offers 1 and the first 255 primes.');actionParagraph('Player0–Player3 are available alongside R0–R3. A result ends the branch and can contain virtual files. Dragging a folder changes the order at matching levels.');actionParagraph('Your position and files are saved in this browser on this device. Files contain names only; they do not run programs.');actionParagraph('Program ID: '+$('programId').textContent,'about-details');$('confirmAction').hidden=true;$('cancelAction').textContent='Close';}
 if(mode==='share'){$('actionTitle').textContent='Share website';actionParagraph('Copy this link to share the program website. Your files and saved game are not included.');const label=document.createElement('label');label.htmlFor='shareWebsiteUrl';label.textContent='Website';const input=document.createElement('input');input.id='shareWebsiteUrl';input.className='share-url';input.type='url';input.readOnly=true;input.value=WEBSITE_URL;$('actionContent').append(label,input);$('confirmAction').textContent='Copy link';}
 if (mode === 'install') {
   $('actionTitle').textContent = 'Install Prime Explorer';
@@ -423,7 +455,8 @@ td{white-space:pre-wrap}th{background:#edf2fb}
 <dt>Unix time (ms)</dt><dd><code>${timestamp}</code></dd>
 <dt>Exported at (UTC)</dt><dd>${new Date(timestamp).toISOString()}</dd>
 <dt>Current path</dt><dd><code>${formatPath(currentPath)}</code></dd>
-<dt>Depth</dt><dd>${depth} / ${MAX_DEPTH}</dd>
+<dt>Game ID digits</dt><dd>${Math.max(0, Math.min(depth - 1, GAME_ID_LENGTH))} / ${GAME_ID_LENGTH}</dd>
+<dt>Prime depth</dt><dd>${Math.max(0, depth - GAME_PREFIX_LENGTH)} / ${PRIME_MAX_DEPTH}</dd>
 </dl>
 ${savedFiles}
 </body>

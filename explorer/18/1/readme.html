@@ -11,8 +11,9 @@ body { font: 1rem/1.6 system-ui, sans-serif; max-width: 42rem; margin: 2rem auto
 ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: .3rem 1.6rem; }
 </style>
 <h1>Prime Explorer</h1>
-<p>A gyökértől minden elágazó szinten 256 számozott mappa nyílik. A sor az 1-essel indul, majd az első 255 prímszámmal folytatódik, egészen 1613-ig.</p>
-<p>A mélységhatár 65 536. Minden elágazó szinten ott vannak a Player0–Player3 és az ágat lezáró R0–R3 mappák. A minták külön mentik a pozíciót, a virtuális fájlokat és a mappasorrendet.</p>
+<p>A gyökérben a <strong>Game</strong> mappa nyílik. Utána 18 szinten választasz egy-egy számjegyet (0–9) a játékazonosítóhoz. Az azonosító után minden elágazó prímes szinten 256 számozott mappa nyílik. A sor az 1-essel indul, majd az első 255 prímszámmal folytatódik, egészen 1613-ig.</p>
+<p>A játékazonosító után a mélységhatár 65 536 prímes szint. Minden elágazó prímes szinten ott vannak a Player0–Player3 és az ágat lezáró R0–R3 mappák. A minták külön mentik a pozíciót, a virtuális fájlokat és a mappasorrendet.</p>
+<p>A korábban mentett prímes útvonalak és fájlok a 18 nullából álló játékazonosító alá kerülnek.</p>
 <h2>Telepítés</h2>
 <ul>
 <li>Androidon nyiss meg egy mintát Chrome-ban, majd válaszd a ⋮ menüben az alkalmazás telepítését vagy a hozzáadást a kezdőképernyőhöz.</li>

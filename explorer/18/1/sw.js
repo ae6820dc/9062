@@ -1,12 +1,12 @@
 'use strict';
 
 const cachePrefix = `prime-explorer:${self.registration.scope}:`;
-const cacheName = `${cachePrefix}v1`;
+const cacheName = `${cachePrefix}v2`;
 const appFiles = [
   'readme.html',
   'manifest.webmanifest',
   'prime-explorer.css?v=2',
-  'prime-explorer.js?v=3',
+  'prime-explorer.js?v=4',
   'icon-180.png',
   'icon-192.png',
   'icon-512.png',
