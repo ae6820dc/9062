@@ -287,9 +287,9 @@ $('depth').textContent = gameDepth;
 $('idDepth').textContent = idDepth;
 $('gameDepth').textContent = primeDepth;
 $('heading').textContent = depth ? 'Folder: ' + current : 'Prime Drive';
-$('subtitle').textContent = atResult ? 'Result selected. You can create files here.' :
-  atEnd ? 'You reached the maximum depth. Create a file or explore another branch.' : '';
-$('subtitle').hidden = !atEnd;
+const atMaximumDepth = depth === MAX_DEPTH && !atResult;
+$('subtitle').textContent = atMaximumDepth ? 'You reached the maximum depth. Create a file or explore another branch.' : '';
+$('subtitle').hidden = !atMaximumDepth;
 $('address').value = pathKey();
 $('back').disabled = cursor === 0;
 $('forward').disabled = cursor === history.length - 1;
