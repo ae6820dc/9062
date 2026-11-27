@@ -1,0 +1,12 @@
+विश्व हल्लाउने समाचार — नेपाली शब्दकोश
+
+स्रोत: Madan Puraskar Pustakalaya ले तयार गरेको Nepali SpellChecking Dictionary।
+इजाजतपत्र: GNU Lesser General Public License, संस्करण २.१।
+https://github.com/LibreOffice/dictionaries/tree/79195b017e6d70151337856c59e7d13d311d6630/ne_NP
+
+यो शब्दसूची ne_NP.dic र ne_NP.aff बाट तयार गरिएको हो। यसमा हिज्जे
+परीक्षकले स्वीकार गरेका मूल रूपहरू र एक पटक उपसर्ग वा प्रत्यय
+लगाएर बनेका शब्दरूपहरूको नमुना समावेश छ। देवनागरी शब्दहरूलाई
+NFC मा सामान्यीकरण गरी दोहोरिएका रूप हटाइएका छन्।
+
+मूल विवरणका लागि README_ne_NP.txt र इजाजतपत्रका लागि LGPL-2.1.txt हेर्नुहोस्।
