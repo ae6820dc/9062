@@ -174,7 +174,10 @@ function navigate(next){if(!validPath(next)||!ready||busy)return;if(next.join('/
 function enter(symbol){if(isResult(path.at(-1)))return;if(path.length===MAX_DEPTH){toast('You reached the 65536-level limit after the game ID.');return;}return navigate([...path,symbol]);}
 function goBack(){if(cursor>0)return runTask(async()=>{const next=history[cursor-1],{files,order}=await locationTask(next,listMode);cursor--;path=[...next];setLocationEntries(files,order);render();});}
 function goForward(){if(cursor<history.length-1)return runTask(async()=>{const next=history[cursor+1],{files,order}=await locationTask(next,listMode);cursor++;path=[...next];setLocationEntries(files,order);render();});}
-function up(){if(path.length)return navigate(path.slice(0,-1));}
+function up() {
+  if (path.length === 0) return;
+  return navigate(path.length > GAME_PREFIX_LENGTH ? path.slice(0, GAME_PREFIX_LENGTH) : []);
+}
 const folderGrid=$('folders');
 function applyFolderOrder(names) {
   const elements = Array.from(folderGrid.querySelectorAll('.folder[draggable="true"]'));
@@ -262,6 +265,14 @@ folderGrid.addEventListener('drop',event=>{
 
 
 
+function depthCounters(depth) {
+  return [
+    Math.min(depth, 1),
+    Math.min(GAME_ID_LENGTH, Math.max(0, depth - 1)),
+    Math.max(0, depth - GAME_PREFIX_LENGTH)
+  ];
+}
+
 function render(){
 clearFolderDrag();
 const depth = path.length;
@@ -269,11 +280,16 @@ const current = path.at(-1);
 const atResult = isResult(current);
 const atEnd = !hasSubfolders(path);
 const folderNames = foldersAt(path);
-const primeDepth = Math.max(0, depth - GAME_PREFIX_LENGTH);
+const [gameDepth, idDepth, primeDepth] = depthCounters(depth);
 const nextFolderCount = depth + 1 < GAME_PREFIX_LENGTH ? GAME_DIGITS.length : explorerFolders.length;
 const folderCount = folderNames.length;
-$('depth').textContent = primeDepth;
-$('heading').textContent = depth ? current : 'Prime Drive';
+$('depth').textContent = gameDepth;
+$('idDepth').textContent = idDepth;
+$('gameDepth').textContent = primeDepth;
+$('heading').textContent = depth ? 'Folder: ' + current : 'Prime Drive';
+$('subtitle').textContent = atResult ? 'Result selected. You can create files here.' :
+  atEnd ? 'You reached the maximum depth. Create a file or explore another branch.' : '';
+$('subtitle').hidden = !atEnd;
 $('address').value = pathKey();
 $('back').disabled = cursor === 0;
 $('forward').disabled = cursor === history.length - 1;
@@ -282,24 +298,21 @@ $('home').disabled = depth === 0;
 $('progress').style.width = (primeDepth / PRIME_MAX_DEPTH * 100) + '%';
 document.querySelector('[role=progressbar]').setAttribute('aria-valuenow', primeDepth);
 $('count').textContent = folderCount+' folders · '+currentFiles.length+' '+(currentFiles.length===1?'file':'files');
-$('levelLabel').textContent = atResult ? 'Result' : atEnd ? 'Maximum depth' :
-  depth === 0 ? 'Open Game' :
-  depth < GAME_PREFIX_LENGTH ? 'Game ID digit ' + depth + ' of ' + GAME_ID_LENGTH :
-  'Next: prime level ' + (primeDepth + 1);
+$('levelLabel').textContent = atResult ? 'Result' : atEnd ? 'Maximum depth' : 'Next: level ' + (depth + 1);
 $('status').textContent = (folderCount+currentFiles.length)+' items · Level '+depth;
 $('announcement').textContent = 'Level '+depth+'. '+$('count').textContent+'.';
 const folders=$('folders');folders.replaceChildren();folders.hidden=atEnd&&!currentFiles.length;$('terminal').hidden=!atEnd;
-$('terminalHeading').textContent=atResult?'Result '+path.at(-1):'You reached prime level 65536!';
+$('terminalHeading').textContent=atResult?'Result '+path.at(-1):'You reached level 65536!';
 for (const symbol of folderNames) {
   const button = document.createElement('button');
   button.className = 'folder';
   button.dataset.symbol = symbol;
   button.draggable = depth > 0;
-  button.setAttribute('aria-label', 'Open ' + symbol + ', level ' + (depth + 1));
+  button.setAttribute('aria-label', 'Open ' + symbol + ' folder, level ' + (depth + 1));
   button.innerHTML = '<svg aria-hidden="true"><use href="#folder-icon"/></svg><span class="folder-name"></span><span class="folder-info"></span>';
   button.querySelector('.folder-name').textContent = symbol;
   button.querySelector('.folder-info').textContent = isResult(symbol) ? 'Result · no subfolders' :
-    depth === MAX_DEPTH - 1 ? 'Prime level 65536 · final level' :
+    depth === MAX_DEPTH - 1 ? 'Level 65536 · final level' :
     nextFolderCount + ' subfolders';
   button.onclick = () => enter(symbol);
   folders.append(button);
@@ -308,7 +321,7 @@ currentFiles.forEach(file=>{const b=document.createElement('button');b.className
 
 applyFolderOrder(folderOrder);folders.classList.toggle('list',listMode);$('gridView').setAttribute('aria-pressed',String(!listMode));$('listView').setAttribute('aria-pressed',String(listMode));
 }
-$('back').onclick=goBack;$('forward').onclick=goForward;$('up').onclick=up;$('terminalUp').onclick=$('home').onclick=$('root').onclick=()=>navigate([]);
+$('back').onclick=goBack;$('forward').onclick=goForward;$('up').onclick=$('terminalUp').onclick=up;$('home').onclick=$('root').onclick=()=>navigate([]);
 function changeView(mode){return runTask(async()=>{const {files,order}=await locationTask(path,mode);setLocationEntries(files,order);listMode=mode;render();});}
 $('gridView').onclick=()=>changeView(false);$('listView').onclick=()=>changeView(true);
 $('addressForm').onsubmit = event => {
@@ -339,12 +352,12 @@ if (e.repeat) return;
 if (path.length === 0 && e.key.toLowerCase() === 'g') {
   e.preventDefault();
   enter(GAME_FOLDER);
-} else if (path.length > 0 && path.length < GAME_PREFIX_LENGTH && GAME_DIGITS.includes(e.key)) {
+} else if (GAME_DIGITS.includes(e.key) && foldersAt(path).includes(e.key)) {
   e.preventDefault();
   enter(e.key);
 }
 });
-const WEBSITE_URL = new URL(location.pathname, 'https://ae6820dc.github.io').href;
+const WEBSITE_URL = 'https://ae6820dc.github.io/9062/explorer/18/1/sample1.html';
 let actionMode='',actionKey='',actionFiles=[];
 const menuItems=Array.from($('appMenu').querySelectorAll('[role=menuitem]'));
 function closeMenu(focus=false){$('appMenu').hidden=true;$('menuButton').setAttribute('aria-expanded','false');if(focus)$('menuButton').focus();}
@@ -455,8 +468,7 @@ td{white-space:pre-wrap}th{background:#edf2fb}
 <dt>Unix time (ms)</dt><dd><code>${timestamp}</code></dd>
 <dt>Exported at (UTC)</dt><dd>${new Date(timestamp).toISOString()}</dd>
 <dt>Current path</dt><dd><code>${formatPath(currentPath)}</code></dd>
-<dt>Game ID digits</dt><dd>${Math.max(0, Math.min(depth - 1, GAME_ID_LENGTH))} / ${GAME_ID_LENGTH}</dd>
-<dt>Prime depth</dt><dd>${Math.max(0, depth - GAME_PREFIX_LENGTH)} / ${PRIME_MAX_DEPTH}</dd>
+<dt>Depth</dt><dd>${[...depthCounters(depth), PRIME_MAX_DEPTH].join(' / ')}</dd>
 </dl>
 ${savedFiles}
 </body>
