@@ -23,7 +23,6 @@
     button { background: #152f58; color: white; cursor: pointer; }
     button:disabled { opacity: .6; cursor: wait; }
     input { flex: 1; min-inline-size: min(180px, 100%); }
-    #status { font-size: 16px; margin-bottom: 12px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 315px), 1fr)); gap: 17px; }
     article { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 5px 22px #15253d15; }
     .art { display: grid; place-items: center; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #132646, #426fb6); font-size: 68px; }
@@ -41,15 +40,12 @@
     footer a { color: #224e9a; }
   </style>
   <script defer src="../reading-state.js"></script>
-  <script defer src="./news.js"></script>
+  <script defer src="./news.js?v=4"></script>
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
   <script defer src="../pwa-install.js"></script>
 </head>
 <body>
-  <header>
-    <h1>🌪️ Notícias que Abalam o Mundo</h1>
-    <small>Program ID <bdi dir="ltr">9062000000000012</bdi></small>
-  </header>
+  <header><h1>🌪️ Notícias que Abalam o Mundo</h1></header>
   <div class="ticker">🔴 Plantão: a realidade voltou a se recusar a assumir a responsabilidade pelas manchetes!</div>
   <main>
     <div class="notice">🤣 Todos os artigos são sátiras fictícias feitas com palavras sorteadas.</div>
@@ -59,7 +55,7 @@
       <button id="install" type="button" hidden data-ios-help="No Safari, toque em Compartilhar e em “Adicionar à Tela de Início”. Se aparecer a opção “Abrir como App da Web”, ative-a. Toque em “Adicionar”.">📲 Instalar aplicativo</button>
       <input id="search" type="search" placeholder="Buscar nas notícias…" aria-label="Buscar nas notícias">
     </div>
-    <div id="status" role="status">Carregando o dicionário…</div>
+    <div id="status" role="status" hidden>Carregando o dicionário…</div>
     <section id="grid" class="grid" aria-label="Notícias"></section>
   </main>
   <dialog id="detail" aria-labelledby="detail-title">
@@ -68,6 +64,7 @@
     <p id="detail-body"></p>
   </dialog>
   <footer>
+    <div><bdi dir="ltr">Program ID: 9062000000000012</bdi></div>
     <a href="./dictionary-source.txt">Fonte e licença do dicionário</a>
   </footer>
 </body>

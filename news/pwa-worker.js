@@ -1,9 +1,9 @@
 'use strict';
 
-function configureNewsWorker(files, legacyCache) {
+function configureNewsWorker(files, legacyCache, revision = '3') {
   const scope = new URL(self.registration.scope);
   const prefix = '9062-news-pwa:' + scope.pathname + ':';
-  const cacheName = prefix + '3';
+  const cacheName = prefix + revision;
   const index = new URL('index.html', scope).href;
   const assets = new Set(files.map(file => new URL(file, scope).href));
 

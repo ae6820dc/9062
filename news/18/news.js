@@ -130,6 +130,7 @@ function render() {
 }
 
 async function loadDictionary() {
+  status.hidden = false;
   try {
     const files = await Promise.all(Array.from({ length: 8 }, async (_, index) => {
       const suffix = String(index + 1).padStart(2, '0');
@@ -144,6 +145,7 @@ async function loadDictionary() {
       throw new Error('Dicionário de português brasileiro inválido');
     }
     words = entries;
+    status.textContent = '';
     status.hidden = true;
     newButton.disabled = false;
     oneButton.disabled = false;

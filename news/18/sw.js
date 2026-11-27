@@ -16,4 +16,4 @@ configureNewsWorker([
   "portuguese-br-dictionary-06.txt",
   "portuguese-br-dictionary-07.txt",
   "portuguese-br-dictionary-08.txt"
-]);
+], undefined, '4');
